@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="bn" data-theme="classic">
+<html lang="bn" data-theme="emerald">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Digital Talikhata & ERP - ডিজিটাল টালি খাতা ও ইনভেন্টরি</title>
-  <meta name="description" content="পেশাদার ডিজিটাল খাতা, ইনভেন্টরি স্টক ও পিওএস বিলিং সফটওয়্যার। Enterprise-grade bilingual ledger, inventory & POS." />
+  <title>Digital Talikhata SaaS - ডিজিটাল টালি খাতা ক্লাউড</title>
+  <meta name="description" content="Multi-Tenant Cloud ERP & Digital Talikhata platform with Real-time Firestore sync, bilingual POS, and inventory management." />
 
-  <!-- Google Fonts: Hind Siliguri, Inter & JetBrains Mono -->
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -21,32 +21,26 @@
           fontFamily: {
             sans: ['"Hind Siliguri"', 'Inter', 'sans-serif'],
             mono: ['"JetBrains Mono"', 'monospace'],
-          },
-          colors: {
-            brand: {
-              50: '#ecfdf5',
-              100: '#d1fae5',
-              500: '#10b981',
-              600: '#059669',
-              700: '#047857',
-              800: '#065f46',
-              900: '#064e3b',
-            }
           }
         }
       }
     };
   </script>
 
-  <!-- External Libraries (CDN) -->
+  <!-- External Libraries: Lucide, Chart.js, SheetJS, html2pdf -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
+  <!-- Firebase Web SDK (Compat CDN v10.8.0) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
   <style>
-    /* Theme color variables */
-    :root, [data-theme="classic"] {
+    /* Multi-Tenant Themes */
+    :root, [data-theme="emerald"] {
       --bg-canvas: #f8fafc;
       --bg-surface: #ffffff;
       --bg-subtle: #f1f5f9;
@@ -59,7 +53,7 @@
     }
 
     [data-theme="dark"] {
-      --bg-canvas: #0b0f19;
+      --bg-canvas: #090d16;
       --bg-surface: #111827;
       --bg-subtle: #1f2937;
       --text-main: #f9fafb;
@@ -70,24 +64,24 @@
       --primary-text: #042f2e;
     }
 
-    [data-theme="heritage"] {
-      --bg-canvas: #fbf7ee;
-      --bg-surface: #ffffff;
-      --bg-subtle: #f4ecdc;
-      --text-main: #231b14;
-      --text-muted: #786958;
-      --border-color: #e5d7c3;
-      --primary-color: #065f46;
-      --primary-hover: #044e39;
+    [data-theme="light"] {
+      --bg-canvas: #ffffff;
+      --bg-surface: #f8fafc;
+      --bg-subtle: #edf2f7;
+      --text-main: #1a202c;
+      --text-muted: #718096;
+      --border-color: #e2e8f0;
+      --primary-color: #2563eb;
+      --primary-hover: #1d4ed8;
       --primary-text: #ffffff;
     }
 
-    [data-theme="pastel"] {
-      --bg-canvas: #fcf9f2;
+    [data-theme="sand"] {
+      --bg-canvas: #faf6f0;
       --bg-surface: #ffffff;
-      --bg-subtle: #f5eedb;
-      --text-main: #2d261e;
-      --text-muted: #7c6f5e;
+      --bg-subtle: #f3ece0;
+      --text-main: #2b2319;
+      --text-muted: #7d6f5f;
       --border-color: #e8ded0;
       --primary-color: #d97706;
       --primary-hover: #b45309;
@@ -109,7 +103,6 @@
       border-radius: 3px;
     }
 
-    /* Thermal receipt printer preview */
     .thermal-receipt {
       width: 80mm;
       max-width: 100%;
@@ -130,102 +123,164 @@
 </head>
 <body class="min-h-screen flex flex-col antialiased select-none">
 
-  <!-- ================= PIN LOCK SCREEN ================= -->
-  <div id="pin-lock-screen" class="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-center p-4 hidden">
-    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl">
-      <div class="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
-        <i data-lucide="lock" class="w-8 h-8"></i>
-      </div>
-      <h2 id="pin-title" class="text-xl font-bold text-white mb-1">ডিজিটাল টালি খাতা লক</h2>
-      <p id="pin-subtitle" class="text-xs text-slate-400 mb-6">আপনার ৪-সংখ্যার সিকিউরিটি পিন দিন</p>
-      
-      <div class="flex justify-center gap-3 mb-8">
-        <div id="pin-dot-1" class="w-4 h-4 rounded-full border-2 border-slate-700"></div>
-        <div id="pin-dot-2" class="w-4 h-4 rounded-full border-2 border-slate-700"></div>
-        <div id="pin-dot-3" class="w-4 h-4 rounded-full border-2 border-slate-700"></div>
-        <div id="pin-dot-4" class="w-4 h-4 rounded-full border-2 border-slate-700"></div>
+  <!-- ================= AUTH GATE OVERLAY ================= -->
+  <div id="auth-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-6">
+      <div class="text-center space-y-2">
+        <div class="w-14 h-14 bg-emerald-600 text-white rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-emerald-600/30">
+          <i data-lucide="cloud" class="w-7 h-7"></i>
+        </div>
+        <h2 class="text-xl font-bold tracking-tight text-[var(--text-main)]" data-i18n="authTitle">ডিজিটাল টালি খাতা ক্লাউড</h2>
+        <p class="text-xs text-[var(--text-muted)]" data-i18n="authSubtitle">নিরাপদ মাল্টি-টেন্যান্ট ক্লাউড লেজার ও ইনভেন্টরি প্ল্যাটফর্ম</p>
       </div>
 
-      <div class="grid grid-cols-3 gap-3 max-w-[260px] mx-auto mb-4">
-        <button onclick="inputPin('1')" class="h-14 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-mono text-xl font-bold transition">1</button>
-        <button onclick="inputPin('2')" class="h-14 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-mono text-xl font-bold transition">2</button>
-        <button onclick="inputPin('3')" class="h-14 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-mono text-xl font-bold transition">3</button>
-        <button onclick="inputPin('4')" class="h-14 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-mono text-xl font-bold transition">4</button>
-        <button onclick="inputPin('5')" class="h-14 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-mono text-xl font-bold transition">5</button>
-        <button onclick="inputPin('6')" class="h-14 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-mono text-xl font-bold transition">6</button>
-        <button onclick="inputPin('7')" class="h-14 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-mono text-xl font-bold transition">7</button>
-        <button onclick="inputPin('8')" class="h-14 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-mono text-xl font-bold transition">8</button>
-        <button onclick="inputPin('9')" class="h-14 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-mono text-xl font-bold transition">9</button>
-        <button onclick="clearPin()" class="h-14 rounded-2xl bg-red-950/40 text-red-400 hover:bg-red-900/60 font-semibold text-sm transition">C</button>
-        <button onclick="inputPin('0')" class="h-14 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white font-mono text-xl font-bold transition">0</button>
-        <button onclick="backspacePin()" class="h-14 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition flex items-center justify-center">
-          <i data-lucide="delete" class="w-5 h-5"></i>
+      <!-- Auth Tabs: Login vs Register -->
+      <div class="flex p-1 bg-[var(--bg-subtle)] rounded-xl text-xs font-bold">
+        <button onclick="setAuthMode('login')" id="auth-tab-login" class="flex-1 py-2 rounded-lg bg-[var(--bg-surface)] text-emerald-600 shadow-xs transition" data-i18n="authLoginTab">লগইন</button>
+        <button onclick="setAuthMode('register')" id="auth-tab-register" class="flex-1 py-2 rounded-lg text-[var(--text-muted)] transition" data-i18n="authRegisterTab">নতুন দোকান রেজিস্ট্রেশন</button>
+      </div>
+
+      <!-- Google Sign In Quick Action -->
+      <button onclick="signInWithGoogle()" class="w-full py-2.5 px-4 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-surface)] hover:border-emerald-500 text-xs font-bold flex items-center justify-center gap-2 transition shadow-xs">
+        <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+        <span data-i18n="signInWithGoogle">Google দিয়ে সরাসরি প্রবেশ করুন</span>
+      </button>
+
+      <div class="flex items-center gap-3 text-xs text-[var(--text-muted)]">
+        <div class="h-px bg-[var(--border-color)] flex-1"></div>
+        <span data-i18n="orWithEmail">অথবা ইমেইল দিয়ে</span>
+        <div class="h-px bg-[var(--border-color)] flex-1"></div>
+      </div>
+
+      <!-- Email / Password Form -->
+      <form id="auth-form" onsubmit="handleEmailAuth(event)" class="space-y-3 text-xs">
+        <div id="auth-register-fields" class="space-y-3 hidden">
+          <div>
+            <label class="block font-semibold mb-1" data-i18n="shopNameLabel">দোকানের নাম *</label>
+            <input type="text" id="reg-shop-name" placeholder="যেমন: মা মনি জেনারেল স্টোর" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2.5 outline-none focus:border-emerald-500">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold mb-1" data-i18n="proprietorLabel">মালিকের নাম</label>
+              <input type="text" id="reg-proprietor" placeholder="যেমন: মো: করিম" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2.5 outline-none">
+            </div>
+            <div>
+              <label class="block font-semibold mb-1" data-i18n="categoryLabel">ব্যবসার ক্যাটাগরি</label>
+              <select id="reg-category" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-2.5 py-2.5 outline-none">
+                <option value="Grocery">মুদি ও জেনারেল</option>
+                <option value="Pharmacy">ফার্মেসি / ওষুধ</option>
+                <option value="Electronics">ইলেকট্রনিক্স</option>
+                <option value="Clothing">গার্মেন্টস / বস্ত্র</option>
+                <option value="Hardware">হার্ডওয়্যার</option>
+                <option value="Other">অন্যান্য</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1" data-i18n="emailLabel">ইমেইল ঠিকানা *</label>
+          <input type="email" id="auth-email" required placeholder="owner@store.com" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2.5 outline-none focus:border-emerald-500">
+        </div>
+        <div>
+          <label class="block font-semibold mb-1" data-i18n="passwordLabel">পাসওয়ার্ড *</label>
+          <input type="password" id="auth-password" required minlength="6" placeholder="কমপক্ষে ৬ সংখ্যা" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2.5 outline-none focus:border-emerald-500">
+        </div>
+
+        <button type="submit" id="auth-submit-btn" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition shadow-md shadow-emerald-600/20">
+          লগইন করুন
+        </button>
+      </form>
+
+      <!-- Instant Demo Store Button -->
+      <div class="pt-2 border-t border-[var(--border-color)] text-center">
+        <button onclick="loginAsDemoUser()" class="text-xs text-emerald-600 font-semibold hover:underline flex items-center justify-center gap-1 mx-auto">
+          <i data-lucide="zap" class="w-3.5 h-3.5"></i>
+          <span data-i18n="instantDemoLogin">১-ক্লিক ডেমো দোকান দিয়ে পরখ করুন (Demo Store)</span>
         </button>
       </div>
-      <p id="pin-error-msg" class="text-xs text-rose-500 font-medium h-4"></p>
     </div>
   </div>
 
   <!-- ================= TOP NAVIGATION HEADER ================= -->
-  <header class="sticky top-0 z-40 bg-[var(--bg-surface)] border-b border-[var(--border-color)] shadow-sm px-4 lg:px-6 py-2.5 flex items-center justify-between">
+  <header class="sticky top-0 z-40 bg-[var(--bg-surface)] border-b border-[var(--border-color)] shadow-xs px-4 lg:px-6 py-2.5 flex items-center justify-between">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-600/20">
-        <i data-lucide="book-open-check" class="w-6 h-6"></i>
+        <i data-lucide="cloud-check" class="w-5 h-5"></i>
       </div>
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="text-lg font-bold leading-tight tracking-tight" data-i18n="appTitle">ডিজিটাল টালি খাতা</h1>
-          <span class="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">ERP Pro</span>
+          <h1 id="header-shop-name" class="text-base sm:text-lg font-bold leading-tight tracking-tight">ডিজিটাল টালি খাতা</h1>
+          <span id="cloud-sync-status" class="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Cloud Live
+          </span>
         </div>
-        <p class="text-[11px] text-[var(--text-muted)]" data-i18n="appSubtitle">ব্যবসায়িক লেজার, ইনভেন্টরি ও সেলস ক্যাশ মেমো</p>
+        <p id="header-shop-owner" class="text-[11px] text-[var(--text-muted)] font-medium">ক্লাউড মাল্টি-টেন্যান্ট স্টোর</p>
       </div>
     </div>
 
-    <!-- Right Controls: Lang toggle, Theme switcher, Download history, PIN Lock -->
+    <!-- Right Controls: Language, Theme, Download Log, Store Profile -->
     <div class="flex items-center gap-2 sm:gap-3">
-      <!-- Language Switcher (বাংলা / English) -->
-      <button onclick="toggleLanguage()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] text-xs font-semibold hover:border-emerald-500 transition shadow-xs" title="Switch Language">
-        <i data-lucide="languages" class="w-4 h-4 text-emerald-600"></i>
+      <!-- Language Switcher -->
+      <button onclick="toggleLanguage()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] text-xs font-semibold hover:border-emerald-500 transition" title="Language">
+        <i data-lucide="globe" class="w-4 h-4 text-emerald-600"></i>
         <span id="lang-indicator">EN</span>
       </button>
 
       <!-- Theme Switcher -->
       <div class="relative">
-        <button onclick="toggleThemeDropdown()" class="p-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] hover:border-emerald-500 transition" title="Themes">
+        <button onclick="toggleThemeDropdown()" class="p-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] hover:border-emerald-500 transition" title="Theme">
           <i data-lucide="palette" class="w-4 h-4 text-emerald-600"></i>
         </button>
         <div id="theme-dropdown" class="hidden absolute right-0 mt-2 w-44 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl shadow-xl p-2 z-50 text-xs">
-          <div class="px-2 py-1 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider" data-i18n="selectTheme">থিম পরিবর্তন</div>
-          <button onclick="setTheme('classic')" class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-[var(--bg-subtle)] flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-emerald-500"></span> Classic Light
+          <button onclick="setTheme('emerald')" class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-[var(--bg-subtle)] flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-emerald-600"></span> Emerald Green
           </button>
           <button onclick="setTheme('dark')" class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-[var(--bg-subtle)] flex items-center gap-2">
             <span class="w-3 h-3 rounded-full bg-slate-900 border border-slate-700"></span> Dark Slate
           </button>
-          <button onclick="setTheme('heritage')" class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-[var(--bg-subtle)] flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-[#065f46]"></span> Heritage Green
+          <button onclick="setTheme('light')" class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-[var(--bg-subtle)] flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-blue-600"></span> Clean Light
           </button>
-          <button onclick="setTheme('pastel')" class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-[var(--bg-subtle)] flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-amber-500"></span> Vintage Cream
+          <button onclick="setTheme('sand')" class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-[var(--bg-subtle)] flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-amber-500"></span> Warm Sand
           </button>
         </div>
       </div>
 
-      <!-- Download History Button -->
+      <!-- Download History Log Modal -->
       <button onclick="openDownloadHistoryModal()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] text-xs font-semibold hover:border-emerald-500 transition" title="Download History">
-        <i data-lucide="history" class="w-4 h-4 text-emerald-600"></i>
+        <i data-lucide="download" class="w-4 h-4 text-emerald-600"></i>
         <span class="hidden md:inline" data-i18n="downloads">ডাউনলোড হিস্টরি</span>
         <span id="download-count-badge" class="px-1.5 py-0.2 rounded-full bg-emerald-600 text-white text-[10px] font-mono">0</span>
       </button>
 
-      <!-- PIN Security Lock Button -->
-      <button onclick="triggerPinLock()" class="p-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] hover:border-emerald-500 transition" title="Lock Ledger">
-        <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
-      </button>
+      <!-- Store Profile & Logout Menu -->
+      <div class="relative">
+        <button onclick="toggleUserMenu()" class="flex items-center gap-2 p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] hover:border-emerald-500 transition">
+          <div class="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-bold font-mono" id="user-avatar-initial">S</div>
+          <span id="user-display-email" class="text-xs font-semibold max-w-[100px] truncate hidden sm:inline">Store</span>
+          <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
+        </button>
+        <div id="user-menu-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl shadow-xl p-2 z-50 text-xs space-y-1">
+          <div class="px-2 py-1.5 border-b border-[var(--border-color)]">
+            <div id="menu-shop-title" class="font-bold truncate">মেসার্স ডিজিটাল স্টোর</div>
+            <div id="menu-user-email" class="text-[10px] text-[var(--text-muted)] truncate">owner@store.com</div>
+          </div>
+          <button onclick="switchTab('settings'); toggleUserMenu();" class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-[var(--bg-subtle)] flex items-center gap-2">
+            <i data-lucide="settings" class="w-3.5 h-3.5 text-slate-500"></i>
+            <span data-i18n="navSettings">দোকান সেটিংস</span>
+          </button>
+          <button onclick="signOutUser()" class="w-full text-left px-2 py-1.5 rounded-lg text-rose-600 hover:bg-rose-50 flex items-center gap-2 font-bold">
+            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+            <span data-i18n="signOut">লগআউট (Sign Out)</span>
+          </button>
+        </div>
+      </div>
     </div>
   </header>
 
-  <!-- ================= TAB NAVIGATION ================= -->
+  <!-- ================= MAIN TAB NAVIGATION ================= -->
   <nav class="bg-[var(--bg-surface)] border-b border-[var(--border-color)] px-4 lg:px-6 overflow-x-auto no-scrollbar">
     <div class="flex space-x-1 sm:space-x-2 py-2 min-w-max text-xs sm:text-sm font-semibold">
       <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="tab-button flex items-center gap-2 px-3.5 py-2 rounded-xl transition bg-emerald-600 text-white shadow-xs">
@@ -235,23 +290,23 @@
 
       <button onclick="switchTab('pos')" id="tab-btn-pos" class="tab-button flex items-center gap-2 px-3.5 py-2 rounded-xl transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]">
         <i data-lucide="shopping-cart" class="w-4 h-4"></i>
-        <span data-i18n="navPOS">সেলস ও ক্যাশ মেমো (POS)</span>
+        <span data-i18n="navPOS">পিওএস ও মেমো (POS)</span>
       </button>
 
       <button onclick="switchTab('inventory')" id="tab-btn-inventory" class="tab-button flex items-center gap-2 px-3.5 py-2 rounded-xl transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]">
         <i data-lucide="boxes" class="w-4 h-4"></i>
-        <span data-i18n="navInventory">ইনভেন্টরি ও স্টক</span>
+        <span data-i18n="navInventory">ক্লাউড ইনভেন্টরি</span>
         <span id="low-stock-count-badge" class="hidden px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-mono">0</span>
       </button>
 
       <button onclick="switchTab('ledger')" id="tab-btn-ledger" class="tab-button flex items-center gap-2 px-3.5 py-2 rounded-xl transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]">
         <i data-lucide="receipt" class="w-4 h-4"></i>
-        <span data-i18n="navLedger">দৈনিক খাতা (আয়-ব্যয়)</span>
+        <span data-i18n="navLedger">দৈনিক আয়-ব্যয় খাতা</span>
       </button>
 
       <button onclick="switchTab('parties')" id="tab-btn-parties" class="tab-button flex items-center gap-2 px-3.5 py-2 rounded-xl transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]">
         <i data-lucide="users" class="w-4 h-4"></i>
-        <span data-i18n="navParties">দেনা-পাওনা (পার্টি খাতা)</span>
+        <span data-i18n="navParties">দেনা-পাওনা (পার্টি)</span>
       </button>
 
       <button onclick="switchTab('reports')" id="tab-btn-reports" class="tab-button flex items-center gap-2 px-3.5 py-2 rounded-xl transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]">
@@ -261,21 +316,20 @@
 
       <button onclick="switchTab('settings')" id="tab-btn-settings" class="tab-button flex items-center gap-2 px-3.5 py-2 rounded-xl transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]">
         <i data-lucide="settings" class="w-4 h-4"></i>
-        <span data-i18n="navSettings">সেটিংস ও ব্যাকআপ</span>
+        <span data-i18n="navSettings">দোকান প্রোফাইল</span>
       </button>
     </div>
   </nav>
 
-  <!-- ================= MAIN CONTENT CONTAINER ================= -->
+  <!-- ================= MAIN CONTENT VIEWPORT ================= -->
   <main class="flex-1 p-4 lg:p-6 max-w-7xl w-full mx-auto space-y-6">
 
-    <!-- ================= 1. DASHBOARD VIEW ================= -->
+    <!-- 1. DASHBOARD VIEW -->
     <div id="view-dashboard" class="space-y-6">
-      <!-- Dashboard Top Summary & Timeframe -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--bg-surface)] p-4 rounded-2xl border border-[var(--border-color)]">
         <div>
           <h2 class="text-base font-bold" data-i18n="dashboardOverview">সার্বিক ব্যবসায়িক সামারি</h2>
-          <p class="text-xs text-[var(--text-muted)]" data-i18n="dashboardSubtitle">রিয়েল-টাইম ক্যাশফ্লো, সেলস, লাভ-ক্ষতি ও বকেয়া হিসাব</p>
+          <p class="text-xs text-[var(--text-muted)]" data-i18n="dashboardSubtitle">ক্লাউড রিয়েল-টাইম ক্যাশফ্লো, সেলস, লাভ-ক্ষতি ও বকেয়া</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
           <select id="dash-timeframe" onchange="renderDashboard()" class="text-xs font-semibold rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2">
@@ -291,9 +345,8 @@
         </div>
       </div>
 
-      <!-- KPI Summary Cards Grid -->
+      <!-- KPI Summary Cards -->
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <!-- 1. Total Sales -->
         <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl">
           <div class="flex items-center justify-between text-emerald-600 mb-2">
             <span class="text-xs font-bold text-[var(--text-muted)]" data-i18n="kpiTotalSales">মোট সেলস</span>
@@ -303,17 +356,15 @@
           <div id="kpi-sales-count" class="text-[11px] text-[var(--text-muted)] mt-1 font-mono">0 টি ইনভয়েস</div>
         </div>
 
-        <!-- 2. Gross Profit -->
         <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl">
           <div class="flex items-center justify-between text-teal-600 mb-2">
             <span class="text-xs font-bold text-[var(--text-muted)]" data-i18n="kpiGrossProfit">মোট লাভ (GP)</span>
             <i data-lucide="trending-up" class="w-4 h-4"></i>
           </div>
           <div id="kpi-gross-profit" class="text-lg lg:text-xl font-bold font-mono text-teal-600">৳ 0</div>
-          <div class="text-[11px] text-[var(--text-muted)] mt-1" data-i18n="salesMinusCOGS">বিক্রয় - কেনা খরচ</div>
+          <div class="text-[11px] text-[var(--text-muted)] mt-1" data-i18n="salesMinusCOGS">বিক্রয় - ক্রয় খরচ</div>
         </div>
 
-        <!-- 3. Net Balance -->
         <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl">
           <div class="flex items-center justify-between text-blue-600 mb-2">
             <span class="text-xs font-bold text-[var(--text-muted)]" data-i18n="kpiNetBalance">বর্তমান ক্যাশ</span>
@@ -323,17 +374,15 @@
           <div class="text-[11px] text-[var(--text-muted)] mt-1" data-i18n="cashInHand">হাতে নগদ স্থিতি</div>
         </div>
 
-        <!-- 4. Operational Expenses -->
         <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl">
           <div class="flex items-center justify-between text-rose-600 mb-2">
             <span class="text-xs font-bold text-[var(--text-muted)]" data-i18n="kpiExpenses">দোকান খরচ</span>
             <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
           </div>
           <div id="kpi-total-expense" class="text-lg lg:text-xl font-bold font-mono text-rose-600">৳ 0</div>
-          <div class="text-[11px] text-[var(--text-muted)] mt-1" data-i18n="operatingCost">ভাড়া, বিল ও বেতন</div>
+          <div class="text-[11px] text-[var(--text-muted)] mt-1" data-i18n="operatingCost">ভাড়া, বিল ও স্টাফ</div>
         </div>
 
-        <!-- 5. Total Receivables (Due) -->
         <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl">
           <div class="flex items-center justify-between text-amber-600 mb-2">
             <span class="text-xs font-bold text-[var(--text-muted)]" data-i18n="kpiReceivables">মোট পাওনা</span>
@@ -343,10 +392,9 @@
           <div class="text-[11px] text-[var(--text-muted)] mt-1" data-i18n="customerDue">কাস্টমারের কাছে বাকি</div>
         </div>
 
-        <!-- 6. Stock Valuation -->
         <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl">
           <div class="flex items-center justify-between text-indigo-600 mb-2">
-            <span class="text-xs font-bold text-[var(--text-muted)]" data-i18n="kpiStockValue">স্টক মূল্য</span>
+            <span class="text-xs font-bold text-[var(--text-muted)]" data-i18n="kpiStockValue">স্টক মূল্যায়ন</span>
             <i data-lucide="package-search" class="w-4 h-4"></i>
           </div>
           <div id="kpi-stock-value" class="text-lg lg:text-xl font-bold font-mono text-indigo-600">৳ 0</div>
@@ -354,14 +402,13 @@
         </div>
       </div>
 
-      <!-- Charts Section: Cashflow & Sales Trend + Top Items -->
+      <!-- Charts Section -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Sales & Cashflow Bar/Line Chart -->
         <div class="lg:col-span-2 bg-[var(--bg-surface)] border border-[var(--border-color)] p-5 rounded-2xl">
           <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div>
               <h3 class="text-sm font-bold" data-i18n="chartCashflowTitle">দৈনিক সেলস ও ক্যাশফ্লো গ্রাফ</h3>
-              <p class="text-xs text-[var(--text-muted)]" data-i18n="chartCashflowDesc">বিক্রয়, খরচ ও নীট লাভের ট্রেন্ড বিশ্লেষণ</p>
+              <p class="text-xs text-[var(--text-muted)]" data-i18n="chartCashflowDesc">বিক্রয় ও খরচের তুলনামূলক ট্রেন্ড</p>
             </div>
             <div class="flex items-center gap-1.5 bg-[var(--bg-subtle)] p-1 rounded-xl text-xs font-medium">
               <button onclick="setChartType('bar')" id="chart-btn-bar" class="px-2.5 py-1 rounded-lg bg-[var(--bg-surface)] font-bold shadow-xs">Bar</button>
@@ -373,19 +420,17 @@
           </div>
         </div>
 
-        <!-- Category & Expense Distribution Doughnut Chart -->
         <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-5 rounded-2xl flex flex-col">
-          <h3 class="text-sm font-bold mb-1" data-i18n="chartExpenseTitle">ব্যয় ও বিক্রয় বন্টন</h3>
-          <p class="text-xs text-[var(--text-muted)] mb-4" data-i18n="chartExpenseDesc">ক্যাটাগরি ভিত্তিক খরচের শতকরা হার</p>
+          <h3 class="text-sm font-bold mb-1" data-i18n="chartExpenseTitle">ব্যয় বন্টন বিশ্লেষণ</h3>
+          <p class="text-xs text-[var(--text-muted)] mb-4" data-i18n="chartExpenseDesc">ক্যাটাগরি ভিত্তিক খরচের অনুপাত</p>
           <div class="flex-1 flex items-center justify-center min-h-[220px]">
             <canvas id="dashboardCategoryChart"></canvas>
           </div>
         </div>
       </div>
 
-      <!-- Recent Activities & Low Stock Alert Banners -->
+      <!-- Recent Orders & Low Stock -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Recent Invoices / Sales -->
         <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-5 rounded-2xl">
           <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-bold flex items-center gap-2">
@@ -394,12 +439,9 @@
             </h3>
             <button onclick="switchTab('pos')" class="text-xs text-emerald-600 hover:underline font-semibold" data-i18n="newSale">নতুন সেলস ➔</button>
           </div>
-          <div id="dash-recent-sales-list" class="space-y-2 text-xs">
-            <!-- populated by JS -->
-          </div>
+          <div id="dash-recent-sales-list" class="space-y-2 text-xs"></div>
         </div>
 
-        <!-- Low Stock Alerts -->
         <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-5 rounded-2xl">
           <div class="flex items-center justify-between mb-3">
             <h3 class="text-sm font-bold flex items-center gap-2">
@@ -408,19 +450,16 @@
             </h3>
             <button onclick="switchTab('inventory')" class="text-xs text-emerald-600 hover:underline font-semibold" data-i18n="manageStock">স্টক ম্যানেজ ➔</button>
           </div>
-          <div id="dash-low-stock-list" class="space-y-2 text-xs">
-            <!-- populated by JS -->
-          </div>
+          <div id="dash-low-stock-list" class="space-y-2 text-xs"></div>
         </div>
       </div>
     </div>
 
-    <!-- ================= 2. POINT OF SALE (POS) VIEW ================= -->
+    <!-- 2. POINT OF SALE (POS) VIEW -->
     <div id="view-pos" class="hidden space-y-6">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- Left: Product Catalog & Search (7 Cols) -->
+        <!-- Catalog (7 Cols) -->
         <div class="lg:col-span-7 space-y-4">
-          <!-- POS Search and Category Filter -->
           <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl space-y-3">
             <div class="flex items-center justify-between">
               <h2 class="text-base font-bold flex items-center gap-2">
@@ -435,22 +474,19 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div class="relative">
                 <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
-                <input type="text" id="pos-search" oninput="renderPosCatalog()" placeholder="নাম বা বারকোড দিয়ে খুঁজুন..." data-i18n-ph="phSearchProduct" class="w-full text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] pl-9 pr-8 py-2.5 outline-none focus:border-emerald-500">
+                <input type="text" id="pos-search" oninput="renderPosCatalog()" placeholder="নাম বা বারকোড দিয়ে খুঁজুন..." class="w-full text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] pl-9 pr-8 py-2.5 outline-none focus:border-emerald-500">
                 <button onclick="clearPosSearch()" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 text-xs hidden" id="pos-search-clear">✕</button>
               </div>
               <select id="pos-cat-filter" onchange="renderPosCatalog()" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2.5 outline-none focus:border-emerald-500">
-                <option value="all" data-i18n="allCategories">সকল ক্যাটাগরি</option>
+                <option value="all">সকল ক্যাটাগরি</option>
               </select>
             </div>
           </div>
 
-          <!-- Product Grid Cards -->
-          <div id="pos-product-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[600px] overflow-y-auto pr-1">
-            <!-- populated by JS -->
-          </div>
+          <div id="pos-product-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-[600px] overflow-y-auto pr-1"></div>
         </div>
 
-        <!-- Right: Current Cart & Checkout (5 Cols) -->
+        <!-- Cart & Checkout (5 Cols) -->
         <div class="lg:col-span-5 bg-[var(--bg-surface)] border border-[var(--border-color)] p-5 rounded-2xl flex flex-col justify-between shadow-xs">
           <div>
             <div class="flex items-center justify-between pb-3 border-b border-[var(--border-color)] mb-3">
@@ -461,24 +497,19 @@
               <button onclick="clearCart()" class="text-xs text-rose-500 hover:underline font-semibold" data-i18n="clearCart">কার্ট খালি করুন</button>
             </div>
 
-            <!-- Customer Selection / Quick Add -->
             <div class="mb-3 space-y-2">
               <label class="text-xs font-semibold text-[var(--text-muted)]" data-i18n="selectCustomer">কাস্টমার / ক্রেতার নাম</label>
               <div class="flex gap-2">
                 <select id="pos-customer-select" class="flex-1 text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2 outline-none focus:border-emerald-500">
-                  <option value="" data-i18n="cashCustomer">নগদ ক্রেতা (Walk-in Customer)</option>
+                  <option value="">নগদ ক্রেতা (Walk-in Customer)</option>
                 </select>
                 <button onclick="openPartyModal('customer')" class="px-2.5 py-2 rounded-xl bg-emerald-100 text-emerald-800 text-xs font-bold" title="Add Customer">+</button>
               </div>
             </div>
 
-            <!-- Cart Items Table List -->
-            <div id="pos-cart-items" class="space-y-2 max-h-60 overflow-y-auto pr-1 my-3">
-              <!-- populated by JS -->
-            </div>
+            <div id="pos-cart-items" class="space-y-2 max-h-60 overflow-y-auto pr-1 my-3"></div>
           </div>
 
-          <!-- Billing Totals & Payment Method -->
           <div class="pt-4 border-t border-[var(--border-color)] space-y-3">
             <div class="space-y-1.5 text-xs">
               <div class="flex justify-between">
@@ -487,9 +518,7 @@
               </div>
               <div class="flex items-center justify-between">
                 <span class="text-[var(--text-muted)]" data-i18n="discount">ছাড় / ডিসকাউন্ট:</span>
-                <div class="flex items-center gap-1">
-                  <input type="number" id="pos-discount" oninput="calculatePosTotals()" value="0" min="0" class="w-20 text-right font-mono text-xs rounded-lg border border-[var(--border-color)] bg-[var(--bg-subtle)] px-2 py-1 outline-none">
-                </div>
+                <input type="number" id="pos-discount" oninput="calculatePosTotals()" value="0" min="0" class="w-20 text-right font-mono text-xs rounded-lg border border-[var(--border-color)] bg-[var(--bg-subtle)] px-2 py-1 outline-none">
               </div>
               <div class="flex justify-between text-sm font-bold pt-1 border-t border-[var(--border-color)] text-emerald-700 dark:text-emerald-400">
                 <span data-i18n="grandTotal">সর্বমোট প্রদেয়:</span>
@@ -497,16 +526,15 @@
               </div>
             </div>
 
-            <!-- Payment Method & Paid Amount -->
             <div class="grid grid-cols-2 gap-2 text-xs">
               <div>
                 <label class="block text-[11px] font-semibold text-[var(--text-muted)] mb-1" data-i18n="paymentMethod">পেমেন্ট মাধ্যম</label>
                 <select id="pos-pay-method" onchange="calculatePosTotals()" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-2.5 py-2 font-medium">
-                  <option value="Cash" data-i18n="methodCash">নগদ (Cash)</option>
+                  <option value="Cash">নগদ (Cash)</option>
                   <option value="bKash">বিকাশ (bKash)</option>
                   <option value="Nagad">নগদ (Nagad)</option>
-                  <option value="Bank" data-i18n="methodBank">ব্যাংক (Bank)</option>
-                  <option value="Due" data-i18n="methodDue">সম্পূর্ণ বাকি (Due)</option>
+                  <option value="Bank">ব্যাংক (Bank)</option>
+                  <option value="Due">সম্পূর্ণ বাকি (Due)</option>
                 </select>
               </div>
               <div>
@@ -515,14 +543,12 @@
               </div>
             </div>
 
-            <!-- Due Warning if any -->
             <div id="pos-due-warning" class="hidden p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-400 text-xs font-semibold flex items-center justify-between">
               <span data-i18n="dueToCustomerLedger">বাকি টাকা কাস্টমার খাতায় যোগ হবে:</span>
               <span id="pos-due-balance" class="font-mono font-bold">৳ 0</span>
             </div>
 
-            <!-- Checkout / Complete Sale Button -->
-            <button onclick="completeSale()" id="btn-complete-sale" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition">
+            <button onclick="completeSale()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition">
               <i data-lucide="printer" class="w-4 h-4"></i>
               <span data-i18n="btnCompleteSale">সেলস সম্পন্ন ও রসিদ প্রিন্ট</span>
             </button>
@@ -531,11 +557,11 @@
       </div>
     </div>
 
-    <!-- ================= 3. INVENTORY VIEW ================= -->
+    <!-- 3. INVENTORY VIEW -->
     <div id="view-inventory" class="hidden space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--bg-surface)] p-4 rounded-2xl border border-[var(--border-color)]">
         <div>
-          <h2 class="text-base font-bold" data-i18n="inventoryTitle">ইনভেন্টরি ও স্টক ব্যবস্থাপনা</h2>
+          <h2 class="text-base font-bold" data-i18n="inventoryTitle">ক্লাউড ইনভেন্টরি ও স্টক ব্যবস্থাপনা</h2>
           <p class="text-xs text-[var(--text-muted)]" data-i18n="inventorySubtitle">ক্রয় মূল্য, বিক্রয় মূল্য, মজুদ ট্র্যাক ও স্টক সতর্কতা</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
@@ -550,14 +576,13 @@
         </div>
       </div>
 
-      <!-- Inventory Metrics Bar -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl">
           <span class="text-xs text-[var(--text-muted)]" data-i18n="totalItems">মোট পণ্য আইটেম</span>
           <div id="inv-total-items" class="text-lg font-bold font-mono text-emerald-600 mt-1">0</div>
         </div>
         <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl">
-          <span class="text-xs text-[var(--text-muted)]" data-i18n="stockValuationCost">মজুদ কেনা মূল্য</span>
+          <span class="text-xs text-[var(--text-muted)]" data-i18n="stockValuationCost">মজুদ ক্রয় মূল্য</span>
           <div id="inv-total-cost" class="text-lg font-bold font-mono text-teal-600 mt-1">৳ 0</div>
         </div>
         <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl">
@@ -570,23 +595,19 @@
         </div>
       </div>
 
-      <!-- Inventory Search & Filter Bar -->
       <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl flex flex-col sm:flex-row gap-3 justify-between items-center">
         <div class="relative w-full sm:w-80">
           <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
-          <input type="text" id="inv-search" oninput="renderInventoryTable()" placeholder="পণ্যের নাম বা বারকোড দিয়ে সার্চ..." data-i18n-ph="phSearchInv" class="w-full text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] pl-9 pr-8 py-2.5 outline-none focus:border-emerald-500">
+          <input type="text" id="inv-search" oninput="renderInventoryTable()" placeholder="পণ্যের নাম বা বারকোড দিয়ে সার্চ..." class="w-full text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] pl-9 pr-8 py-2.5 outline-none focus:border-emerald-500">
           <button onclick="clearInvSearch()" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 text-xs hidden" id="inv-search-clear">✕</button>
         </div>
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-          <select id="inv-stock-filter" onchange="renderInventoryTable()" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2.5">
-            <option value="all" data-i18n="filterAllStock">সব পণ্য</option>
-            <option value="low" data-i18n="filterLowStock">কম স্টক / ফুরিয়ে যাচ্ছে</option>
-            <option value="out" data-i18n="filterOutStock">স্টক শেষ (Out of Stock)</option>
-          </select>
-        </div>
+        <select id="inv-stock-filter" onchange="renderInventoryTable()" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2.5">
+          <option value="all">সব পণ্য</option>
+          <option value="low">কম স্টক / ফুরিয়ে যাচ্ছে</option>
+          <option value="out">স্টক শেষ (Out of Stock)</option>
+        </select>
       </div>
 
-      <!-- Inventory Table -->
       <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
@@ -601,29 +622,23 @@
                 <th class="p-3.5 text-center" data-i18n="thAction">অ্যাকশন</th>
               </tr>
             </thead>
-            <tbody id="inventory-table-body" class="divide-y divide-[var(--border-color)]">
-              <!-- populated by JS -->
-            </tbody>
+            <tbody id="inventory-table-body" class="divide-y divide-[var(--border-color)]"></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ================= 4. DAILY LEDGER VIEW ================= -->
+    <!-- 4. DAILY LEDGER VIEW -->
     <div id="view-ledger" class="hidden space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--bg-surface)] p-4 rounded-2xl border border-[var(--border-color)]">
         <div>
           <h2 class="text-base font-bold" data-i18n="ledgerTitle">দৈনিক খাতা (আয় ও ব্যয় লেজার)</h2>
-          <p class="text-xs text-[var(--text-muted)]" data-i18n="ledgerSubtitle">প্রতিদিনের সাধারণ আয়, দোকান ভাড়া, বিদ্যুৎ বিল ও স্টাফ খরচ</p>
+          <p class="text-xs text-[var(--text-muted)]" data-i18n="ledgerSubtitle">দোকান ভাড়া, বিদ্যুৎ বিল, স্টাফ বেতন ও অন্যান্য আয়-ব্যয়</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
           <button onclick="exportLedgerExcel()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-emerald-500 text-emerald-600 hover:bg-emerald-50 text-xs font-bold">
             <i data-lucide="sheet" class="w-3.5 h-3.5"></i>
             <span data-i18n="exportExcel">এক্সেল</span>
-          </button>
-          <button onclick="exportLedgerPDF()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-rose-500 text-rose-600 hover:bg-rose-50 text-xs font-bold">
-            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
-            <span data-i18n="exportPDF">পিডিএফ</span>
           </button>
           <button onclick="openTxModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs">
             <i data-lucide="plus-circle" class="w-3.5 h-3.5"></i>
@@ -632,24 +647,20 @@
         </div>
       </div>
 
-      <!-- Ledger Filter Bar & Highlight Search -->
       <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl flex flex-col sm:flex-row gap-3 justify-between items-center">
         <div class="relative w-full sm:w-80">
           <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
-          <input type="text" id="ledger-search" oninput="renderLedgerTable()" placeholder="বিবরণ, ক্যাটাগরি বা নাম খুঁজুন..." data-i18n-ph="phSearchLedger" class="w-full text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] pl-9 pr-8 py-2.5 outline-none focus:border-emerald-500">
+          <input type="text" id="ledger-search" oninput="renderLedgerTable()" placeholder="বিবরণ, ক্যাটাগরি বা নাম খুঁজুন..." class="w-full text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] pl-9 pr-8 py-2.5 outline-none focus:border-emerald-500">
           <button onclick="clearLedgerSearch()" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 text-xs hidden" id="ledger-search-clear">✕</button>
         </div>
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-          <select id="ledger-type-filter" onchange="renderLedgerTable()" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2.5">
-            <option value="all" data-i18n="filterAllTypes">সব লেনদেন</option>
-            <option value="sale" data-i18n="filterSalesOnly">বিক্রয় আয় (Sales)</option>
-            <option value="income" data-i18n="filterIncomeOnly">সাধারণ আয় (Income)</option>
-            <option value="expense" data-i18n="filterExpenseOnly">দোকান খরচ (Expense)</option>
-          </select>
-        </div>
+        <select id="ledger-type-filter" onchange="renderLedgerTable()" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2.5">
+          <option value="all">সব লেনদেন</option>
+          <option value="sale">বিক্রয় আয় (Sales)</option>
+          <option value="income">সাধারণ আয় (Income)</option>
+          <option value="expense">দোকান খরচ (Expense)</option>
+        </select>
       </div>
 
-      <!-- Ledger Table -->
       <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
@@ -665,20 +676,18 @@
                 <th class="p-3.5 text-center" data-i18n="thAction">অ্যাকশন</th>
               </tr>
             </thead>
-            <tbody id="ledger-table-body" class="divide-y divide-[var(--border-color)]">
-              <!-- populated by JS -->
-            </tbody>
+            <tbody id="ledger-table-body" class="divide-y divide-[var(--border-color)]"></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ================= 5. PARTIES & DUE LEDGER VIEW ================= -->
+    <!-- 5. PARTIES & CREDIT/DUE VIEW -->
     <div id="view-parties" class="hidden space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--bg-surface)] p-4 rounded-2xl border border-[var(--border-color)]">
         <div>
           <h2 class="text-base font-bold" data-i18n="partiesTitle">দেনা-পাওনা খাতা (পার্টি ম্যানেজমেন্ট)</h2>
-          <p class="text-xs text-[var(--text-muted)]" data-i18n="partiesSubtitle">কাস্টমার ও সাপ্লায়ারদের বকেয়া হিসাব এবং আদায়ের হিস্টরি</p>
+          <p class="text-xs text-[var(--text-muted)]" data-i18n="partiesSubtitle">কাস্টমার ও সাপ্লায়ারদের বকেয়া হিসাব এবং লাইভ সমন্বয়</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
           <button onclick="exportPartiesExcel()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-emerald-500 text-emerald-600 hover:bg-emerald-50 text-xs font-bold">
@@ -692,7 +701,6 @@
         </div>
       </div>
 
-      <!-- Parties Summary Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl">
           <span class="text-xs text-[var(--text-muted)]" data-i18n="totalCustomers">মোট কাস্টমার ও সাপ্লায়ার</span>
@@ -708,24 +716,20 @@
         </div>
       </div>
 
-      <!-- Party Search & Filter -->
       <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl flex flex-col sm:flex-row gap-3 justify-between items-center">
         <div class="relative w-full sm:w-80">
           <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
-          <input type="text" id="party-search" oninput="renderPartiesTable()" placeholder="নাম বা মোবাইল নম্বর খুঁজুন..." data-i18n-ph="phSearchParty" class="w-full text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] pl-9 pr-8 py-2.5 outline-none focus:border-emerald-500">
+          <input type="text" id="party-search" oninput="renderPartiesTable()" placeholder="নাম বা মোবাইল নম্বর খুঁজুন..." class="w-full text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] pl-9 pr-8 py-2.5 outline-none focus:border-emerald-500">
           <button onclick="clearPartySearch()" class="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 text-xs hidden" id="party-search-clear">✕</button>
         </div>
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-          <select id="party-type-filter" onchange="renderPartiesTable()" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2.5">
-            <option value="all" data-i18n="allParties">সকল পার্টি</option>
-            <option value="customer" data-i18n="customersOnly">শুধু কাস্টমার (ক্রেতা)</option>
-            <option value="supplier" data-i18n="suppliersOnly">শুধু সাপ্লায়ার (মহাজন)</option>
-            <option value="due_only" data-i18n="duePartiesOnly">শুধু বাকি আছে যাদের</option>
-          </select>
-        </div>
+        <select id="party-type-filter" onchange="renderPartiesTable()" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2.5">
+          <option value="all">সকল পার্টি</option>
+          <option value="customer">শুধু কাস্টমার (ক্রেতা)</option>
+          <option value="supplier">শুধু সাপ্লায়ার (মহাজন)</option>
+          <option value="due_only">শুধু বাকি আছে যাদের</option>
+        </select>
       </div>
 
-      <!-- Parties Table -->
       <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
@@ -739,30 +743,25 @@
                 <th class="p-3.5 text-center" data-i18n="thAction">অ্যাকশন</th>
               </tr>
             </thead>
-            <tbody id="parties-table-body" class="divide-y divide-[var(--border-color)]">
-              <!-- populated by JS -->
-            </tbody>
+            <tbody id="parties-table-body" class="divide-y divide-[var(--border-color)]"></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- ================= 6. REPORTS & PROFIT/LOSS VIEW ================= -->
+    <!-- 6. REPORTS & PROFIT/LOSS VIEW -->
     <div id="view-reports" class="hidden space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--bg-surface)] p-4 rounded-2xl border border-[var(--border-color)]">
         <div>
           <h2 class="text-base font-bold" data-i18n="reportsTitle">ব্যবসায়িক রিপোর্ট ও লাভ-ক্ষতি (Profit / Loss)</h2>
-          <p class="text-xs text-[var(--text-muted)]" data-i18n="reportsSubtitle">কাস্টম তারিখ রেঞ্জের বিস্তারিত লাভ-ক্ষতি ও আর্থিক বিবরণী</p>
+          <p class="text-xs text-[var(--text-muted)]" data-i18n="reportsSubtitle">কাস্টম তারিখ রেঞ্জের বিস্তারিত আর্থিক বিবরণী ও নিরীক্ষা</p>
         </div>
-        <div class="flex items-center gap-2">
-          <button onclick="exportComprehensiveReportPDF()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs">
-            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
-            <span data-i18n="printStatement">স্টেটমেন্ট প্রিন্ট / PDF</span>
-          </button>
-        </div>
+        <button onclick="exportComprehensiveReportPDF()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs">
+          <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+          <span data-i18n="printStatement">স্টেটমেন্ট প্রিন্ট / PDF</span>
+        </button>
       </div>
 
-      <!-- Report Date Filter Controls -->
       <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl flex flex-wrap gap-3 items-center">
         <div>
           <label class="block text-[11px] text-[var(--text-muted)] mb-1" data-i18n="fromDate">শুরুর তারিখ</label>
@@ -779,7 +778,6 @@
         </div>
       </div>
 
-      <!-- Financial Statement Card (Profit & Loss Table) -->
       <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-6 rounded-2xl space-y-4">
         <h3 class="text-sm font-bold border-b border-[var(--border-color)] pb-3" data-i18n="pnlStatement">লাভ-ক্ষতি বিবরণী (Income & Expense Statement)</h3>
         
@@ -797,7 +795,7 @@
             <span id="rep-val-gp" class="font-mono text-emerald-700 dark:text-emerald-400">৳ 0</span>
           </div>
           <div class="flex justify-between py-1.5 border-b border-[var(--border-color)]">
-            <span class="font-medium text-slate-500" data-i18n="repOperatingExp">৩. অন্যান্য ব্যবসায়িক পরিচালনা খরচ (Operating Expenses)</span>
+            <span class="font-medium text-slate-500" data-i18n="repOperatingExp">৩. অন্যান্য পরিচালনা খরচ (Operating Expenses)</span>
             <span id="rep-val-opex" class="font-mono font-bold text-rose-500">(-) ৳ 0</span>
           </div>
           <div class="flex justify-between py-1.5 border-b border-[var(--border-color)]">
@@ -812,15 +810,14 @@
       </div>
     </div>
 
-    <!-- ================= 7. SETTINGS & BACKUP VIEW ================= -->
+    <!-- 7. STORE SETTINGS & SAAS PROFILE -->
     <div id="view-settings" class="hidden space-y-6">
       <div class="bg-[var(--bg-surface)] p-4 rounded-2xl border border-[var(--border-color)]">
-        <h2 class="text-base font-bold" data-i18n="settingsTitle">সেটিংস, সিকিউরিটি ও ব্যাকআপ</h2>
-        <p class="text-xs text-[var(--text-muted)]" data-i18n="settingsSubtitle">দোকানের নাম, পিন লক ও ডাটা ব্যাকআপ ব্যবস্থাপনা</p>
+        <h2 class="text-base font-bold" data-i18n="settingsTitle">দোকান প্রোফাইল ও ক্লাউড কনফিগারেশন</h2>
+        <p class="text-xs text-[var(--text-muted)]" data-i18n="settingsSubtitle">দোকানের রসিদের তথ্য, ঠিকানা ও ক্লাউড সিঙ্ক স্থিতি</p>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Shop Details & Info -->
         <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-5 rounded-2xl space-y-3">
           <h3 class="text-sm font-bold flex items-center gap-2">
             <i data-lucide="store" class="w-4 h-4 text-emerald-600"></i>
@@ -828,62 +825,64 @@
           </h3>
           <div class="space-y-2 text-xs">
             <div>
-              <label class="block font-semibold text-[var(--text-muted)] mb-1" data-i18n="shopNameLabel">দোকান / প্রতিষ্ঠানের নাম</label>
-              <input type="text" id="setting-shop-name" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2" value="মেসার্স ডিজিটাল স্টোর">
+              <label class="block font-semibold text-[var(--text-muted)] mb-1" data-i18n="shopNameLabel">দোকানের নাম *</label>
+              <input type="text" id="setting-shop-name" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2">
+            </div>
+            <div>
+              <label class="block font-semibold text-[var(--text-muted)] mb-1" data-i18n="proprietorLabel">মালিকের নাম</label>
+              <input type="text" id="setting-proprietor" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2">
             </div>
             <div>
               <label class="block font-semibold text-[var(--text-muted)] mb-1" data-i18n="shopPhoneLabel">মোবাইল নম্বর</label>
-              <input type="text" id="setting-shop-phone" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2" value="০১৭০০-০০০০০০">
+              <input type="text" id="setting-shop-phone" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2">
             </div>
             <div>
               <label class="block font-semibold text-[var(--text-muted)] mb-1" data-i18n="shopAddressLabel">ঠিকানা</label>
-              <input type="text" id="setting-shop-address" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2" value="ঢাকা, বাংলাদেশ">
+              <input type="text" id="setting-shop-address" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2">
             </div>
-            <button onclick="saveShopSettings()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition" data-i18n="saveSettingsBtn">
-              তথ্য সংরক্ষণ করুন
-            </button>
-          </div>
-        </div>
-
-        <!-- PIN Security Setup -->
-        <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-5 rounded-2xl space-y-3">
-          <h3 class="text-sm font-bold flex items-center gap-2">
-            <i data-lucide="lock" class="w-4 h-4 text-emerald-600"></i>
-            <span data-i18n="pinSecurityTitle">৪-সংখ্যার সিকিউরিটি পিন</span>
-          </h3>
-          <p class="text-xs text-[var(--text-muted)]" data-i18n="pinSecurityDesc">টালি খাতার ডাটা সুরক্ষিত রাখতে পিন সেট করুন বা পরিবর্তন করুন</p>
-          <div class="space-y-2 text-xs">
             <div>
-              <label class="block font-semibold text-[var(--text-muted)] mb-1" data-i18n="newPinLabel">নতুন ৪-সংখ্যার পিন (খালি রাখলে পিন বন্ধ হবে)</label>
-              <input type="password" id="setting-new-pin" maxlength="4" placeholder="যেমন: 1234" class="w-full font-mono text-sm tracking-widest text-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2">
+              <label class="block font-semibold text-[var(--text-muted)] mb-1">রসিদের ফুটনোট (Footer Note)</label>
+              <input type="text" id="setting-shop-footer" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2" value="ধন্যবাদ, আবার আসবেন!">
             </div>
-            <button onclick="updateSecurityPin()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition" data-i18n="updatePinBtn">
-              পিন আপডেট করুন
+            <button onclick="saveStoreSettings()" class="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition" data-i18n="saveSettingsBtn">
+              ক্লাউডে সংরক্ষণ করুন
             </button>
           </div>
         </div>
 
-        <!-- Data Backup & Restore -->
-        <div class="md:col-span-2 bg-[var(--bg-surface)] border border-[var(--border-color)] p-5 rounded-2xl space-y-4">
+        <!-- Tenant Cloud Info & Backup -->
+        <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-5 rounded-2xl space-y-4">
           <h3 class="text-sm font-bold flex items-center gap-2">
-            <i data-lucide="database" class="w-4 h-4 text-emerald-600"></i>
-            <span data-i18n="backupTitle">ডাটা ব্যাকআপ ও রিস্টোর (JSON Backup)</span>
+            <i data-lucide="cloud" class="w-4 h-4 text-emerald-600"></i>
+            <span>ক্লাউড টেন্যান্ট তথ্য (SaaS Info)</span>
           </h3>
-          <p class="text-xs text-[var(--text-muted)]" data-i18n="backupDesc">সম্পূর্ণ খাতা, ইনভেন্টরি, সেলস ও পার্টির ডাটা একটি ব্যাকআপ ফাইল হিসেবে ডাউনলোড করে নিরাপদে সংরক্ষণ করুন।</p>
-          <div class="flex flex-wrap gap-3">
-            <button onclick="exportFullJSONBackup()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs">
-              <i data-lucide="download-cloud" class="w-4 h-4"></i>
-              <span data-i18n="btnExportBackup">ব্যাকআপ ফাইল ডাউনলোড করুন (.json)</span>
-            </button>
-            <label class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] text-xs font-bold hover:border-emerald-500 cursor-pointer">
-              <i data-lucide="upload-cloud" class="w-4 h-4 text-emerald-600"></i>
-              <span data-i18n="btnImportBackup">ফাইল থেকে রিস্টোর করুন</span>
-              <input type="file" id="import-json-input" onchange="importFullJSONBackup(event)" accept=".json" class="hidden">
-            </label>
-            <button onclick="resetAllDataWithConfirm()" class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-rose-300 text-rose-600 hover:bg-rose-50 text-xs font-bold ml-auto">
-              <i data-lucide="trash-2" class="w-4 h-4"></i>
-              <span data-i18n="btnClearAllData">সব ডাটা রিসেট</span>
-            </button>
+          <div class="p-3 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] space-y-1.5 text-xs">
+            <div class="flex justify-between">
+              <span class="text-[var(--text-muted)]">Store Tenant ID:</span>
+              <span id="tenant-id-display" class="font-mono font-bold text-emerald-600 truncate max-w-[160px]">--</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[var(--text-muted)]">Owner Email:</span>
+              <span id="tenant-email-display" class="font-mono truncate max-w-[160px]">--</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-[var(--text-muted)]">Database Engine:</span>
+              <span class="font-mono text-emerald-600 font-bold">Google Firestore</span>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-[var(--border-color)] space-y-2">
+            <h4 class="font-bold text-xs" data-i18n="backupTitle">ডাটা ব্যাকআপ ও এক্সপোর্ট</h4>
+            <div class="flex flex-col gap-2">
+              <button onclick="exportFullJSONBackup()" class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] hover:border-emerald-500 text-xs font-bold transition">
+                <i data-lucide="download-cloud" class="w-4 h-4 text-emerald-600"></i>
+                <span data-i18n="btnExportBackup">ব্যাকআপ ফাইল ডাউনলোড করুন (.json)</span>
+              </button>
+              <button onclick="signOutUser()" class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-rose-300 text-rose-600 hover:bg-rose-50 text-xs font-bold transition">
+                <i data-lucide="log-out" class="w-4 h-4"></i>
+                <span data-i18n="signOut">লগআউট করুন</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -893,7 +892,7 @@
 
   <!-- ================= MODALS ================= -->
 
-  <!-- 1. Product Add/Edit Modal -->
+  <!-- 1. Product Modal -->
   <div id="modal-product" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
     <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
@@ -954,7 +953,7 @@
     </div>
   </div>
 
-  <!-- 2. Daily Transaction Modal -->
+  <!-- 2. Transaction Modal -->
   <div id="modal-tx" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
     <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
@@ -970,9 +969,9 @@
           </div>
           <div>
             <label class="block font-semibold mb-1" data-i18n="txTypeLabel">লেনদেনের ধরন *</label>
-            <select id="tx-type" required onchange="onTxTypeChange()" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-2.5 py-2 font-bold">
-              <option value="income" class="text-emerald-600" data-i18n="typeIncome">সাধারণ আয় (Income)</option>
-              <option value="expense" class="text-rose-600" data-i18n="typeExpense">দোকান খরচ (Expense)</option>
+            <select id="tx-type" required class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-2.5 py-2 font-bold">
+              <option value="expense" class="text-rose-600">দোকান খরচ (Expense)</option>
+              <option value="income" class="text-emerald-600">সাধারণ আয় (Income)</option>
             </select>
           </div>
         </div>
@@ -1011,7 +1010,7 @@
     </div>
   </div>
 
-  <!-- 3. Party Add/Edit Modal -->
+  <!-- 3. Party Modal -->
   <div id="modal-party" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
     <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
@@ -1028,8 +1027,8 @@
           <div>
             <label class="block font-semibold mb-1" data-i18n="partyTypeLabel">টাইপ *</label>
             <select id="party-type" required class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-2.5 py-2 font-medium">
-              <option value="customer" data-i18n="partyCustomer">কাস্টমার (ক্রেতা)</option>
-              <option value="supplier" data-i18n="partySupplier">সাপ্লায়ার (মহাজন)</option>
+              <option value="customer">কাস্টমার (ক্রেতা)</option>
+              <option value="supplier">সাপ্লায়ার (মহাজন)</option>
             </select>
           </div>
           <div>
@@ -1044,7 +1043,7 @@
         <div>
           <label class="block font-semibold mb-1" data-i18n="partyBalanceLabel">প্রারম্ভিক বাকি স্থিতি (৳)</label>
           <input type="number" id="party-balance" step="any" value="0" placeholder="0" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2 font-mono">
-          <p class="text-[10px] text-[var(--text-muted)] mt-1" data-i18n="partyBalanceHint">পজিটিভ (+) হলে আপনি পাবেন, নেগেটিভ (-) হলে আপনি দেনাদার।</p>
+          <p class="text-[10px] text-[var(--text-muted)] mt-1">পজিটিভ (+) হলে আপনি পাবেন, নেগেটিভ (-) হলে আপনি দেনাদার।</p>
         </div>
         <div class="flex justify-end gap-2 pt-3 border-t border-[var(--border-color)]">
           <button type="button" onclick="closePartyModal()" class="px-4 py-2 rounded-xl border border-[var(--border-color)] text-xs font-semibold" data-i18n="cancelBtn">বাতিল</button>
@@ -1054,7 +1053,7 @@
     </div>
   </div>
 
-  <!-- 4. Thermal & Invoice Printable Modal -->
+  <!-- 4. Invoice & Thermal Print Modal -->
   <div id="modal-invoice-preview" class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 hidden">
     <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl">
       <div class="flex items-center justify-between p-4 border-b border-[var(--border-color)]">
@@ -1066,10 +1065,7 @@
       </div>
 
       <div class="flex-1 overflow-y-auto p-4 bg-slate-100 dark:bg-slate-900/60 flex justify-center">
-        <!-- The Printable Container -->
-        <div id="printable-area" class="thermal-receipt shadow-sm">
-          <!-- Populated by JS -->
-        </div>
+        <div id="printable-area" class="thermal-receipt shadow-sm"></div>
       </div>
 
       <div class="p-4 border-t border-[var(--border-color)] flex items-center justify-between gap-2">
@@ -1096,9 +1092,7 @@
         <button onclick="closeDownloadHistoryModal()" class="text-slate-400 hover:text-slate-600">✕</button>
       </div>
       <div class="flex-1 overflow-y-auto p-5">
-        <div id="download-history-list" class="space-y-2.5">
-          <!-- Populated by JS -->
-        </div>
+        <div id="download-history-list" class="space-y-2.5"></div>
       </div>
       <div class="p-4 border-t border-[var(--border-color)] flex justify-between items-center">
         <button onclick="clearDownloadHistory()" class="text-xs text-rose-500 hover:underline font-semibold" data-i18n="clearHistoryBtn">হিস্টরি খালি করুন</button>
@@ -1145,29 +1139,66 @@
     </div>
   </div>
 
-  <!-- Toast Container -->
+  <!-- Toast Notification Container -->
   <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
-  <!-- ================= JAVASCRIPT LOGIC ================= -->
+  <!-- ================= FIREBASE & APP APPLICATION LOGIC ================= -->
   <script>
     /* -------------------------------------------------------------
-       1. I18N DICTIONARY & BILINGUAL ENGINE
+       1. FIREBASE CONFIGURATION & INITIALIZATION
+       ------------------------------------------------------------- */
+    const firebaseConfig = {
+      apiKey: "AIzaSyDRIZvJYarptpfyPC5hAtVW0C4525ZpiOk",
+      authDomain: "digital-talikhata-51d28.firebaseapp.com",
+      projectId: "digital-talikhata-51d28",
+      storageBucket: "digital-talikhata-51d28.firebasestorage.app",
+      messagingSenderId: "437431740973",
+      appId: "1:437431740973:web:f31c8e91811a39b056a6a4",
+      measurementId: "G-XYJ7PYE9WS"
+    };
+
+    let app = null;
+    let auth = null;
+    let db = null;
+    let isFirebaseReady = false;
+
+    try {
+      if (typeof firebase !== 'undefined') {
+        app = firebase.initializeApp(firebaseConfig);
+        auth = firebase.auth();
+        db = firebase.firestore();
+        isFirebaseReady = true;
+      }
+    } catch (e) {
+      console.warn("Firebase initialization note:", e);
+    }
+
+    /* -------------------------------------------------------------
+       2. BILINGUAL I18N DICTIONARY
        ------------------------------------------------------------- */
     const I18N = {
       bn: {
+        authTitle: "ডিজিটাল টালি খাতা ক্লাউড",
+        authSubtitle: "নিরাপদ মাল্টি-টেন্যান্ট ক্লাউড লেজার ও ইনভেন্টরি প্ল্যাটফর্ম",
+        authLoginTab: "লগইন",
+        authRegisterTab: "নতুন দোকান রেজিস্ট্রেশন",
+        signInWithGoogle: "Google দিয়ে সরাসরি প্রবেশ করুন",
+        orWithEmail: "অথবা ইমেইল দিয়ে",
+        emailLabel: "ইমেইল ঠিকানা *",
+        passwordLabel: "পাসওয়ার্ড *",
+        instantDemoLogin: "১-ক্লিক ডেমো দোকান দিয়ে পরখ করুন (Demo Store)",
         appTitle: "ডিজিটাল টালি খাতা",
-        appSubtitle: "ব্যবসায়িক লেজার, ইনভেন্টরি ও সেলস ক্যাশ মেমো",
-        selectTheme: "থিম পরিবর্তন",
         downloads: "ডাউনলোড হিস্টরি",
+        signOut: "লগআউট (Sign Out)",
         navDashboard: "ড্যাশবোর্ড",
-        navPOS: "সেলস ও ক্যাশ মেমো (POS)",
-        navInventory: "ইনভেন্টরি ও স্টক",
-        navLedger: "দৈনিক খাতা (আয়-ব্যয়)",
-        navParties: "দেনা-পাওনা (পার্টি খাতা)",
+        navPOS: "পিওএস ও মেমো (POS)",
+        navInventory: "ক্লাউড ইনভেন্টরি",
+        navLedger: "দৈনিক আয়-ব্যয় খাতা",
+        navParties: "দেনা-পাওনা (পার্টি)",
         navReports: "রিপোর্ট ও প্রফিট/লস",
-        navSettings: "সেটিংস ও ব্যাকআপ",
+        navSettings: "দোকান প্রোফাইল",
         dashboardOverview: "সার্বিক ব্যবসায়িক সামারি",
-        dashboardSubtitle: "রিয়েল-টাইম ক্যাশফ্লো, সেলস, লাভ-ক্ষতি ও বকেয়া হিসাব",
+        dashboardSubtitle: "ক্লাউড রিয়েল-টাইম ক্যাশফ্লো, সেলস, লাভ-ক্ষতি ও বকেয়া",
         optToday: "আজকের দিন",
         optThisWeek: "চলতি সপ্তাহ",
         optThisMonth: "চলতি মাস",
@@ -1178,26 +1209,24 @@
         kpiNetBalance: "বর্তমান ক্যাশ",
         kpiExpenses: "দোকান খরচ",
         kpiReceivables: "মোট পাওনা",
-        kpiStockValue: "স্টক মূল্য",
-        salesMinusCOGS: "বিক্রয় - কেনা খরচ",
+        kpiStockValue: "স্টক মূল্যায়ন",
+        salesMinusCOGS: "বিক্রয় - ক্রয় খরচ",
         cashInHand: "হাতে নগদ স্থিতি",
-        operatingCost: "ভাড়া, বিল ও বেতন",
+        operatingCost: "ভাড়া, বিল ও স্টাফ",
         customerDue: "কাস্টমারের কাছে বাকি",
         chartCashflowTitle: "দৈনিক সেলস ও ক্যাশফ্লো গ্রাফ",
-        chartCashflowDesc: "বিক্রয়, খরচ ও নীট লাভের ট্রেন্ড বিশ্লেষণ",
-        chartExpenseTitle: "ব্যয় ও বিক্রয় বন্টন",
-        chartExpenseDesc: "ক্যাটাগরি ভিত্তিক খরচের শতকরা হার",
+        chartCashflowDesc: "বিক্রয় ও খরচের তুলনামূলক ট্রেন্ড",
+        chartExpenseTitle: "ব্যয় বন্টন বিশ্লেষণ",
+        chartExpenseDesc: "ক্যাটাগরি ভিত্তিক খরচের অনুপাত",
         recentSales: "সর্বশেষ বিক্রয় রশিদ",
         newSale: "নতুন সেলস ➔",
         lowStockAlerts: "কম স্টকের মালামাল সতর্কতা",
         manageStock: "স্টক ম্যানেজ ➔",
         posCatalogTitle: "প্রোডাক্ট নির্বাচন ও সেলস",
         addNewProduct: "নতুন প্রোডাক্ট",
-        allCategories: "সকল ক্যাটাগরি",
         currentCart: "বর্তমান কার্ট / ক্যাশ মেমো",
         clearCart: "কার্ট খালি করুন",
         selectCustomer: "কাস্টমার / ক্রেতার নাম",
-        cashCustomer: "নগদ ক্রেতা (Walk-in Customer)",
         subtotal: "মোট মূল্য:",
         discount: "ছাড় / ডিসকাউন্ট:",
         grandTotal: "সর্বমোট প্রদেয়:",
@@ -1205,17 +1234,14 @@
         paidAmount: "পরিশোধিত টাকা",
         dueToCustomerLedger: "বাকি টাকা কাস্টমার খাতায় যোগ হবে:",
         btnCompleteSale: "সেলস সম্পন্ন ও রসিদ প্রিন্ট",
-        inventoryTitle: "ইনভেন্টরি ও স্টক ব্যবস্থাপনা",
+        inventoryTitle: "ক্লাউড ইনভেন্টরি ও স্টক ব্যবস্থাপনা",
         inventorySubtitle: "ক্রয় মূল্য, বিক্রয় মূল্য, মজুদ ট্র্যাক ও স্টক সতর্কতা",
         exportExcel: "এক্সেল ডাউনলোড",
         addProduct: "পণ্য যোগ করুন",
         totalItems: "মোট পণ্য আইটেম",
-        stockValuationCost: "মজুদ কেনা মূল্য",
+        stockValuationCost: "মজুদ ক্রয় মূল্য",
         stockValuationSell: "সম্ভাব্য বিক্রয় মূল্য",
         lowStockItems: "কম স্টকের পণ্য",
-        filterAllStock: "সব পণ্য",
-        filterLowStock: "কম স্টক / ফুরিয়ে যাচ্ছে",
-        filterOutStock: "স্টক শেষ (Out of Stock)",
         thProduct: "পণ্যের বিবরণ",
         thCategory: "ক্যাটাগরি",
         thBuyPrice: "ক্রয় মূল্য",
@@ -1224,13 +1250,8 @@
         thTotalVal: "মোট মূল্য",
         thAction: "অ্যাকশন",
         ledgerTitle: "দৈনিক খাতা (আয় ও ব্যয় লেজার)",
-        ledgerSubtitle: "প্রতিদিনের সাধারণ আয়, দোকান ভাড়া, বিদ্যুৎ বিল ও স্টাফ খরচ",
-        exportPDF: "পিডিএফ",
+        ledgerSubtitle: "দোকান ভাড়া, বিদ্যুৎ বিল, স্টাফ বেতন ও অন্যান্য আয়-ব্যয়",
         addTxBtn: "হিসাব এন্ট্রি",
-        filterAllTypes: "সব লেনদেন",
-        filterSalesOnly: "বিক্রয় আয় (Sales)",
-        filterIncomeOnly: "সাধারণ আয় (Income)",
-        filterExpenseOnly: "দোকান খরচ (Expense)",
         thDate: "তারিখ ও সময়",
         thType: "ধরন",
         thParty: "সংশ্লিষ্ট ব্যক্তি",
@@ -1238,21 +1259,17 @@
         thNote: "নোট / বিবরণ",
         thAmount: "পরিমাণ (৳)",
         partiesTitle: "দেনা-পাওনা খাতা (পার্টি ম্যানেজমেন্ট)",
-        partiesSubtitle: "কাস্টমার ও সাপ্লায়ারদের বকেয়া হিসাব এবং আদায়ের হিস্টরি",
+        partiesSubtitle: "কাস্টমার ও সাপ্লায়ারদের বকেয়া হিসাব এবং লাইভ সমন্বয়",
         addPartyBtn: "নতুন পার্টি / কাস্টমার",
         totalCustomers: "মোট কাস্টমার ও সাপ্লায়ার",
         totalReceivableDue: "মোট বাকি পাওনা (পাবেন)",
         totalPayableDue: "মোট দেনা (দিতে হবে)",
-        allParties: "সকল পার্টি",
-        customersOnly: "শুধু কাস্টমার (ক্রেতা)",
-        suppliersOnly: "শুধু সাপ্লায়ার (মহাজন)",
-        duePartiesOnly: "শুধু বাকি আছে যাদের",
         thPartyName: "পার্টির নাম",
         thMobile: "মোবাইল",
         thAddress: "ঠিকানা",
         thDueBalance: "বর্তমান স্থিতি / বাকি",
         reportsTitle: "ব্যবসায়িক রিপোর্ট ও লাভ-ক্ষতি (Profit / Loss)",
-        reportsSubtitle: "কাস্টম তারিখ রেঞ্জের বিস্তারিত লাভ-ক্ষতি ও আর্থিক বিবরণী",
+        reportsSubtitle: "কাস্টম তারিখ রেঞ্জের বিস্তারিত আর্থিক বিবরণী ও নিরীক্ষা",
         printStatement: "স্টেটমেন্ট প্রিন্ট / PDF",
         fromDate: "শুরুর তারিখ",
         toDate: "শেষের তারিখ",
@@ -1261,25 +1278,20 @@
         repTotalSales: "১. মোট বিক্রয় আয় (Total Sales Inflow)",
         repCOGS: "২. বিক্রিত পণ্যের ক্রয়মূল্য (Cost of Goods Sold - COGS)",
         repGrossProfit: "মোট লাভ / গ্রস প্রফিট (Gross Profit = ১ - ২)",
-        repOperatingExp: "৩. অন্যান্য ব্যবসায়িক পরিচালনা খরচ (Operating Expenses)",
+        repOperatingExp: "৩. অন্যান্য পরিচালনা খরচ (Operating Expenses)",
         repOtherIncome: "৪. অন্যান্য সাধারণ আয় (Other Non-Sales Income)",
         repNetProfit: "সর্বমোট নীট লাভ / লোকসান (Net Profit / Loss)",
-        settingsTitle: "সেটিংস, সিকিউরিটি ও ব্যাকআপ",
-        settingsSubtitle: "দোকানের নাম, পিন লক ও ডাটা ব্যাকআপ ব্যবস্থাপনা",
+        settingsTitle: "দোকান প্রোফাইল ও ক্লাউড কনফিগারেশন",
+        settingsSubtitle: "দোকানের রসিদের তথ্য, ঠিকানা ও ক্লাউড সিঙ্ক স্থিতি",
         shopDetailsTitle: "দোকান ও রসিদের তথ্য",
-        shopNameLabel: "দোকান / প্রতিষ্ঠানের নাম",
+        shopNameLabel: "দোকানের নাম *",
+        proprietorLabel: "মালিকের নাম",
+        categoryLabel: "ব্যবসার ক্যাটাগরি",
         shopPhoneLabel: "মোবাইল নম্বর",
         shopAddressLabel: "ঠিকানা",
-        saveSettingsBtn: "তথ্য সংরক্ষণ করুন",
-        pinSecurityTitle: "৪-সংখ্যার সিকিউরিটি পিন",
-        pinSecurityDesc: "টালি খাতার ডাটা সুরক্ষিত রাখতে পিন সেট করুন বা পরিবর্তন করুন",
-        newPinLabel: "নতুন ৪-সংখ্যার পিন (খালি রাখলে পিন বন্ধ হবে)",
-        updatePinBtn: "পিন আপডেট করুন",
-        backupTitle: "ডাটা ব্যাকআপ ও রিস্টোর (JSON Backup)",
-        backupDesc: "সম্পূর্ণ খাতা, ইনভেন্টরি, সেলস ও পার্টির ডাটা একটি ব্যাকআপ ফাইল হিসেবে ডাউনলোড করে নিরাপদে সংরক্ষণ করুন।",
+        saveSettingsBtn: "ক্লাউডে সংরক্ষণ করুন",
+        backupTitle: "ডাটা ব্যাকআপ ও এক্সপোর্ট",
         btnExportBackup: "ব্যাকআপ ফাইল ডাউনলোড করুন (.json)",
-        btnImportBackup: "ফাইল থেকে রিস্টোর করুন",
-        btnClearAllData: "সব ডাটা রিসেট",
         modalNewProduct: "নতুন প্রোডাক্ট এন্ট্রি",
         prodNameLabel: "পণ্যের নাম *",
         prodSkuLabel: "বারকোড / SKU",
@@ -1294,8 +1306,6 @@
         modalNewTx: "নতুন হিসাব এন্ট্রি",
         txDateLabel: "তারিখ *",
         txTypeLabel: "লেনদেনের ধরন *",
-        typeIncome: "সাধারণ আয় (Income)",
-        typeExpense: "দোকান খরচ (Expense)",
         txAmountLabel: "টাকার পরিমাণ (৳) *",
         txMethodLabel: "পেমেন্ট মাধ্যম",
         txCatLabel: "ক্যাটাগরি",
@@ -1304,12 +1314,9 @@
         modalNewParty: "নতুন কাস্টমার / পার্টি এন্ট্রি",
         partyNameLabel: "পার্টি / ব্যক্তির নাম *",
         partyTypeLabel: "টাইপ *",
-        partyCustomer: "কাস্টমার (ক্রেতা)",
-        partySupplier: "সাপ্লায়ার (মহাজন)",
         partyMobileLabel: "মোবাইল নম্বর",
         partyAddressLabel: "ঠিকানা",
         partyBalanceLabel: "প্রারম্ভিক বাকি স্থিতি (৳)",
-        partyBalanceHint: "পজিটিভ (+) হলে আপনি পাবেন, নেগেটিভ (-) হলে আপনি দেনাদার।",
         invoicePreviewTitle: "ক্যাশ মেমো ও রসিদ প্রিভিউ",
         downloadReceiptPDF: "PDF সেভ করুন",
         printThermalBtn: "প্রিন্ট রসিদ",
@@ -1320,27 +1327,28 @@
         repayPartyName: "পার্টির নাম",
         repayAmountLabel: "পরিশোধের পরিমাণ (৳) *",
         repayMethodLabel: "পেমেন্ট মাধ্যম",
-        repayNoteLabel: "নোট",
-        methodCash: "নগদ (Cash)",
-        methodBank: "ব্যাংক (Bank)",
-        methodDue: "সম্পূর্ণ বাকি (Due)",
-        phSearchProduct: "নাম বা বারকোড দিয়ে খুঁজুন...",
-        phSearchInv: "পণ্যের নাম বা বারকোড দিয়ে সার্চ...",
-        phSearchLedger: "বিবরণ, ক্যাটাগরি বা নাম খুঁজুন...",
-        phSearchParty: "নাম বা মোবাইল নম্বর খুঁজুন..."
+        repayNoteLabel: "নোট"
       },
       en: {
+        authTitle: "Digital Talikhata Cloud",
+        authSubtitle: "Secure Multi-Tenant Cloud Ledger & Inventory Platform",
+        authLoginTab: "Sign In",
+        authRegisterTab: "Register New Store",
+        signInWithGoogle: "Continue with Google",
+        orWithEmail: "Or with email",
+        emailLabel: "Email Address *",
+        passwordLabel: "Password *",
+        instantDemoLogin: "Try 1-Click Instant Demo Store",
         appTitle: "Digital Talikhata",
-        appSubtitle: "Business Ledger, Inventory & POS Cash Memo",
-        selectTheme: "Change Theme",
         downloads: "Download History",
+        signOut: "Sign Out",
         navDashboard: "Dashboard",
-        navPOS: "POS & Cash Memo",
-        navInventory: "Inventory & Stock",
+        navPOS: "POS & Invoice",
+        navInventory: "Cloud Inventory",
         navLedger: "Daily Ledger",
         navParties: "Parties & Due",
         navReports: "Reports & P/L",
-        navSettings: "Settings & Backup",
+        navSettings: "Store Profile",
         dashboardOverview: "Overall Business Summary",
         dashboardSubtitle: "Real-time Cashflow, Sales, Profit/Loss & Due Tracking",
         optToday: "Today",
@@ -1356,23 +1364,21 @@
         kpiStockValue: "Stock Valuation",
         salesMinusCOGS: "Sales - Purchase Cost",
         cashInHand: "Cash-in-hand position",
-        operatingCost: "Rent, bills & salaries",
+        operatingCost: "Rent, bills & staff",
         customerDue: "Receivable from customers",
-        chartCashflowTitle: "Daily Sales & Cashflow Graph",
-        chartCashflowDesc: "Trend analysis of sales, expense & profits",
-        chartExpenseTitle: "Expense & Sales Distribution",
-        chartExpenseDesc: "Category-wise expense percentages",
-        recentSales: "Recent Sales Invoices",
+        chartCashflowTitle: "Daily Sales & Cashflow Trend",
+        chartCashflowDesc: "Comparison of revenue, expenses & profit",
+        chartExpenseTitle: "Expense Distribution",
+        chartExpenseDesc: "Category-wise expense breakdown",
+        recentSales: "Recent Invoices",
         newSale: "New Sale ➔",
         lowStockAlerts: "Low Stock Inventory Alerts",
         manageStock: "Manage Stock ➔",
         posCatalogTitle: "Product Catalog & Sales",
         addNewProduct: "New Product",
-        allCategories: "All Categories",
         currentCart: "Current Cart / Invoice",
         clearCart: "Clear Cart",
         selectCustomer: "Customer Name",
-        cashCustomer: "Walk-in Cash Customer",
         subtotal: "Subtotal:",
         discount: "Discount:",
         grandTotal: "Grand Total:",
@@ -1380,17 +1386,14 @@
         paidAmount: "Paid Amount",
         dueToCustomerLedger: "Due will link to Customer Ledger:",
         btnCompleteSale: "Complete Sale & Print",
-        inventoryTitle: "Inventory & Stock Management",
-        inventorySubtitle: "Track buy/sell prices, current stock & low alerts",
+        inventoryTitle: "Cloud Inventory Management",
+        inventorySubtitle: "Track buy/sell prices, stock quantities & low alerts",
         exportExcel: "Export Excel",
         addProduct: "Add Product",
         totalItems: "Total Products",
         stockValuationCost: "Stock Value (Cost)",
         stockValuationSell: "Potential Market Value",
         lowStockItems: "Low Stock Count",
-        filterAllStock: "All Items",
-        filterLowStock: "Low / Depleting Stock",
-        filterOutStock: "Out of Stock",
         thProduct: "Product Details",
         thCategory: "Category",
         thBuyPrice: "Buy Price",
@@ -1400,12 +1403,7 @@
         thAction: "Action",
         ledgerTitle: "Daily Ledger (Income & Expense)",
         ledgerSubtitle: "Daily non-sales income, rent, utilities & staff payroll",
-        exportPDF: "Export PDF",
         addTxBtn: "Add Entry",
-        filterAllTypes: "All Types",
-        filterSalesOnly: "Sales Inflow",
-        filterIncomeOnly: "General Income",
-        filterExpenseOnly: "Shop Expense",
         thDate: "Date & Time",
         thType: "Type",
         thParty: "Party",
@@ -1413,15 +1411,11 @@
         thNote: "Note / Description",
         thAmount: "Amount (৳)",
         partiesTitle: "Contact & Credit Ledger",
-        partiesSubtitle: "Track customer & supplier dues and settlement logs",
+        partiesSubtitle: "Track customer & supplier dues and live balance logs",
         addPartyBtn: "New Party / Customer",
         totalCustomers: "Total Contacts",
         totalReceivableDue: "Total Receivable Due",
         totalPayableDue: "Total Payable Due",
-        allParties: "All Parties",
-        customersOnly: "Customers Only",
-        suppliersOnly: "Suppliers Only",
-        duePartiesOnly: "Parties with Due Only",
         thPartyName: "Party Name",
         thMobile: "Phone",
         thAddress: "Address",
@@ -1439,29 +1433,24 @@
         repOperatingExp: "3. Operating Expenses",
         repOtherIncome: "4. Other Non-Sales Income",
         repNetProfit: "Net Profit / Loss",
-        settingsTitle: "Settings, Security & Backup",
-        settingsSubtitle: "Shop identity, 4-digit PIN lock & JSON backups",
-        shopDetailsTitle: "Shop & Receipt Information",
-        shopNameLabel: "Shop / Business Name",
+        settingsTitle: "Store Profile & Cloud Config",
+        settingsSubtitle: "Shop receipt details, address & sync status",
+        shopDetailsTitle: "Store & Receipt Information",
+        shopNameLabel: "Store Name *",
+        proprietorLabel: "Proprietor Name",
+        categoryLabel: "Business Category",
         shopPhoneLabel: "Phone Number",
         shopAddressLabel: "Address",
-        saveSettingsBtn: "Save Settings",
-        pinSecurityTitle: "4-Digit Security PIN",
-        pinSecurityDesc: "Secure your financial ledger with an idle lock",
-        newPinLabel: "New 4-Digit PIN (leave blank to disable)",
-        updatePinBtn: "Update PIN",
-        backupTitle: "Data Backup & Restore (JSON)",
-        backupDesc: "Download complete offline ledger and restore anytime across devices.",
+        saveSettingsBtn: "Save to Cloud",
+        backupTitle: "Data Backup & Export",
         btnExportBackup: "Download Backup (.json)",
-        btnImportBackup: "Restore from File",
-        btnClearAllData: "Reset All Data",
         modalNewProduct: "New Product Entry",
         prodNameLabel: "Product Name *",
         prodSkuLabel: "Barcode / SKU",
         prodCatLabel: "Category",
         prodBuyPriceLabel: "Purchase Price (৳) *",
         prodSellPriceLabel: "Selling Price (৳) *",
-        prodStockLabel: "Initial Stock *",
+        prodStockLabel: "Current Stock *",
         prodUnitLabel: "Unit",
         prodMinStockLabel: "Low Stock Alert At",
         cancelBtn: "Cancel",
@@ -1469,22 +1458,17 @@
         modalNewTx: "New Ledger Entry",
         txDateLabel: "Date *",
         txTypeLabel: "Transaction Type *",
-        typeIncome: "General Income",
-        typeExpense: "Shop Expense",
         txAmountLabel: "Amount (৳) *",
         txMethodLabel: "Payment Method",
         txCatLabel: "Category",
         txPartyLabel: "Party / Person",
         txNoteLabel: "Note / Description",
-        modalNewParty: "New Party / Contact Entry",
+        modalNewParty: "New Contact Entry",
         partyNameLabel: "Contact Name *",
         partyTypeLabel: "Contact Type *",
-        partyCustomer: "Customer (Buyer)",
-        partySupplier: "Supplier (Vendor)",
         partyMobileLabel: "Mobile Phone",
         partyAddressLabel: "Address",
         partyBalanceLabel: "Opening Due Balance (৳)",
-        partyBalanceHint: "Positive (+) means receivable, negative (-) means payable.",
         invoicePreviewTitle: "Cash Memo & Receipt Preview",
         downloadReceiptPDF: "Save as PDF",
         printThermalBtn: "Print Receipt",
@@ -1495,32 +1479,26 @@
         repayPartyName: "Party Name",
         repayAmountLabel: "Repayment Amount (৳) *",
         repayMethodLabel: "Payment Channel",
-        repayNoteLabel: "Note",
-        methodCash: "Cash",
-        methodBank: "Bank",
-        methodDue: "Full Due",
-        phSearchProduct: "Search by product name or barcode...",
-        phSearchInv: "Search inventory by name/barcode...",
-        phSearchLedger: "Search ledger notes or party...",
-        phSearchParty: "Search party name or phone..."
+        repayNoteLabel: "Note"
       }
     };
 
     /* -------------------------------------------------------------
-       2. APP STATE & PERSISTENCE
+       3. APPLICATION STATE & MULTI-TENANT ISOLATION
        ------------------------------------------------------------- */
-    const STORAGE_KEY = 'talikhata_enterprise_erp_v3';
-
     let state = {
       lang: 'bn',
-      theme: 'classic',
+      theme: 'emerald',
       activeTab: 'dashboard',
-      pin: '',
-      isLocked: false,
-      shop: {
+      user: null,          // Firebase Auth User
+      storeId: null,       // Tenant Store ID
+      store: {
         name: 'মেসার্স ডিজিটাল স্টোর',
+        proprietor: 'মালিক',
+        category: 'Grocery',
         phone: '০১৭০০-০০০০০০',
-        address: 'ঢাকা, বাংলাদেশ'
+        address: 'ঢাকা, বাংলাদেশ',
+        invoiceFooter: 'ধন্যবাদ, আবার আসবেন!'
       },
       products: [],
       transactions: [],
@@ -1530,36 +1508,12 @@
       downloadHistory: []
     };
 
-    // Load from local storage
-    function loadState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          state = { ...state, ...parsed, cart: [] };
-        }
-      } catch (e) {
-        console.error("Failed to load local storage state:", e);
-      }
-      if (state.pin && state.pin.length === 4) {
-        state.isLocked = true;
-      }
-    }
+    // Unsubscribe handles for real-time Firestore listeners
+    let unsubs = [];
 
-    function saveState() {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch (e) {
-        console.error("Failed to save state:", e);
-      }
-    }
-
-    /* -------------------------------------------------------------
-       3. TRANSLATION & NUMBER FORMATTING HELPERS
-       ------------------------------------------------------------- */
     function t(key) {
-      const lang = state.lang || 'bn';
-      return (I18N[lang] && I18N[lang][key]) || key;
+      const l = state.lang || 'bn';
+      return (I18N[l] && I18N[l][key]) || key;
     }
 
     function n(num) {
@@ -1580,116 +1534,285 @@
       state.lang = state.lang === 'bn' ? 'en' : 'bn';
       document.getElementById('lang-indicator').textContent = state.lang === 'bn' ? 'EN' : 'বাং';
       document.documentElement.lang = state.lang;
-      saveState();
       applyLanguage();
       renderAllViews();
-      showToast(state.lang === 'bn' ? 'ভাষা বাংলায় পরিবর্তিত হয়েছে' : 'Language switched to English', 'info');
+      showToast(state.lang === 'bn' ? 'ভাষা বাংলায় পরিবর্তিত হয়েছে' : 'Switched to English', 'info');
     }
 
     function applyLanguage() {
-      document.getElementById('lang-indicator').textContent = state.lang === 'bn' ? 'EN' : 'বাং';
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         el.textContent = t(key);
       });
-      document.querySelectorAll('[data-i18n-ph]').forEach(el => {
-        const key = el.getAttribute('data-i18n-ph');
-        el.placeholder = t(key);
-      });
     }
 
-    /* -------------------------------------------------------------
-       4. THEME & PIN SECURITY LOGIC
-       ------------------------------------------------------------- */
     function setTheme(themeName) {
       state.theme = themeName;
       document.documentElement.setAttribute('data-theme', themeName);
       document.getElementById('theme-dropdown').classList.add('hidden');
-      saveState();
     }
 
     function toggleThemeDropdown() {
       document.getElementById('theme-dropdown').classList.toggle('hidden');
     }
 
-    let pinBuffer = '';
-    function triggerPinLock() {
-      if (!state.pin) {
-        showToast(state.lang === 'bn' ? 'প্রথমে সেটিংস থেকে ৪-সংখ্যার পিন সেট করুন' : 'Please configure a 4-digit PIN in settings first', 'warning');
-        switchTab('settings');
-        return;
-      }
-      state.isLocked = true;
-      pinBuffer = '';
-      updatePinUI();
-      document.getElementById('pin-lock-screen').classList.remove('hidden');
-    }
-
-    function inputPin(digit) {
-      if (pinBuffer.length < 4) {
-        pinBuffer += digit;
-        updatePinUI();
-        if (pinBuffer.length === 4) {
-          setTimeout(verifyPin, 100);
-        }
-      }
-    }
-
-    function backspacePin() {
-      pinBuffer = pinBuffer.slice(0, -1);
-      updatePinUI();
-    }
-
-    function clearPin() {
-      pinBuffer = '';
-      updatePinUI();
-    }
-
-    function updatePinUI() {
-      for (let i = 1; i <= 4; i++) {
-        const dot = document.getElementById(`pin-dot-${i}`);
-        if (i <= pinBuffer.length) {
-          dot.className = "w-4 h-4 rounded-full bg-emerald-500 border-2 border-emerald-400";
-        } else {
-          dot.className = "w-4 h-4 rounded-full border-2 border-slate-700";
-        }
-      }
-      document.getElementById('pin-error-msg').textContent = '';
-    }
-
-    function verifyPin() {
-      if (pinBuffer === state.pin) {
-        state.isLocked = false;
-        document.getElementById('pin-lock-screen').classList.add('hidden');
-        pinBuffer = '';
-        updatePinUI();
-      } else {
-        document.getElementById('pin-error-msg').textContent = state.lang === 'bn' ? 'ভুল পিন! আবার চেষ্টা করুন' : 'Incorrect PIN! Try again';
-        pinBuffer = '';
-        setTimeout(updatePinUI, 600);
-      }
-    }
-
-    function updateSecurityPin() {
-      const val = document.getElementById('setting-new-pin').value.trim();
-      if (!val) {
-        state.pin = '';
-        saveState();
-        showToast(state.lang === 'bn' ? 'সিকিউরিটি পিন নিষ্ক্রিয় করা হয়েছে' : 'PIN Security disabled', 'info');
-        return;
-      }
-      if (!/^\d{4}$/.test(val)) {
-        showToast(state.lang === 'bn' ? 'অনুগ্রহ করে সঠিক ৪-সংখ্যার সংখ্যা দিন' : 'Please provide exactly 4 numeric digits', 'error');
-        return;
-      }
-      state.pin = val;
-      saveState();
-      document.getElementById('setting-new-pin').value = '';
-      showToast(state.lang === 'bn' ? 'পিন সফলভাবে আপডেট হয়েছে' : 'PIN updated successfully', 'success');
+    function toggleUserMenu() {
+      document.getElementById('user-menu-dropdown').classList.toggle('hidden');
     }
 
     /* -------------------------------------------------------------
-       5. TAB NAVIGATION CONTROLLER
+       4. AUTHENTICATION & MULTI-TENANT ONBOARDING
+       ------------------------------------------------------------- */
+    let authMode = 'login'; // 'login' or 'register'
+
+    function setAuthMode(mode) {
+      authMode = mode;
+      const loginTab = document.getElementById('auth-tab-login');
+      const regTab = document.getElementById('auth-tab-register');
+      const regFields = document.getElementById('auth-register-fields');
+      const submitBtn = document.getElementById('auth-submit-btn');
+
+      if (mode === 'register') {
+        loginTab.className = "flex-1 py-2 rounded-lg text-[var(--text-muted)] transition";
+        regTab.className = "flex-1 py-2 rounded-lg bg-[var(--bg-surface)] text-emerald-600 shadow-xs transition";
+        regFields.classList.remove('hidden');
+        submitBtn.textContent = state.lang === 'bn' ? 'দোকান তৈরি ও রেজিস্ট্রেশন' : 'Create Store & Register';
+      } else {
+        loginTab.className = "flex-1 py-2 rounded-lg bg-[var(--bg-surface)] text-emerald-600 shadow-xs transition";
+        regTab.className = "flex-1 py-2 rounded-lg text-[var(--text-muted)] transition";
+        regFields.classList.add('hidden');
+        submitBtn.textContent = state.lang === 'bn' ? 'লগইন করুন' : 'Sign In';
+      }
+    }
+
+    async function handleEmailAuth(e) {
+      e.preventDefault();
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+
+      try {
+        if (!isFirebaseReady) {
+          setupTenantOffline('demo-store-offline', email, 'মেসার্স স্টোর');
+          return;
+        }
+
+        if (authMode === 'register') {
+          const shopName = document.getElementById('reg-shop-name').value.trim() || 'আমার দোকান';
+          const proprietor = document.getElementById('reg-proprietor').value.trim() || 'মালিক';
+          const category = document.getElementById('reg-category').value;
+
+          const cred = await auth.createUserWithEmailAndPassword(email, password);
+          const uid = cred.user.uid;
+
+          // Initialize Tenant Store document in Firestore
+          await db.collection('stores').doc(uid).set({
+            ownerId: uid,
+            ownerEmail: email,
+            shopName: shopName,
+            proprietor: proprietor,
+            category: category,
+            phone: '০১xxxxxxxxx',
+            address: 'বাংলাদেশ',
+            invoiceFooter: 'ধন্যবাদ, আবার আসবেন!',
+            createdAt: new Date().toISOString()
+          });
+
+          showToast(state.lang === 'bn' ? 'দোকান রেজিস্ট্রেশন সফল হয়েছে!' : 'Store registered successfully!', 'success');
+        } else {
+          await auth.signInWithEmailAndPassword(email, password);
+          showToast(state.lang === 'bn' ? 'সফলভাবে লগইন হয়েছে' : 'Signed in successfully', 'success');
+        }
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    async function signInWithGoogle() {
+      try {
+        if (!isFirebaseReady) {
+          loginAsDemoUser();
+          return;
+        }
+        const provider = new firebase.auth.GoogleAuthProvider();
+        await auth.signInWithPopup(provider);
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function loginAsDemoUser() {
+      setupTenantOffline('demo-store-001', 'demo.owner@talikhata.com', 'মেসার্স ডেমো স্টোর');
+    }
+
+    function setupTenantOffline(uid, email, defaultShopName) {
+      state.user = { uid: uid, email: email };
+      state.storeId = uid;
+      state.store = {
+        name: defaultShopName,
+        proprietor: 'করিম সাহেব',
+        category: 'Grocery',
+        phone: '০১৭০০-০০০০০০',
+        address: 'ঢাকা, বাংলাদেশ',
+        invoiceFooter: 'ধন্যবাদ, আবার আসবেন!'
+      };
+
+      document.getElementById('auth-modal').classList.add('hidden');
+      updateTenantUI();
+      renderAllViews();
+      showToast(state.lang === 'bn' ? 'ডেমো স্টোরে সংযুক্ত হয়েছে' : 'Connected to Demo Store', 'success');
+    }
+
+    async function signOutUser() {
+      if (isFirebaseReady && auth) {
+        await auth.signOut();
+      }
+      unsubs.forEach(u => typeof u === 'function' && u());
+      unsubs = [];
+      state.user = null;
+      state.storeId = null;
+      state.products = [];
+      state.transactions = [];
+      state.sales = [];
+      state.parties = [];
+      state.cart = [];
+      document.getElementById('auth-modal').classList.remove('hidden');
+      document.getElementById('user-menu-dropdown').classList.add('hidden');
+      showToast(state.lang === 'bn' ? 'লগআউট করা হয়েছে' : 'Signed out', 'info');
+    }
+
+    /* -------------------------------------------------------------
+       5. FIRESTORE REALTIME SYNC ENGINE (TENANT ISOLATION)
+       ------------------------------------------------------------- */
+    if (isFirebaseReady && auth) {
+      auth.onAuthStateChanged(async (user) => {
+        if (user) {
+          state.user = user;
+          state.storeId = user.uid;
+          document.getElementById('auth-modal').classList.add('hidden');
+
+          // Fetch or Create Tenant Store Doc
+          const storeDocRef = db.collection('stores').doc(user.uid);
+          const storeDoc = await storeDocRef.get();
+          if (storeDoc.exists) {
+            state.store = { ...state.store, ...storeDoc.data() };
+          } else {
+            const initialStore = {
+              ownerId: user.uid,
+              ownerEmail: user.email || 'store@owner.com',
+              shopName: user.displayName ? `${user.displayName}-এর দোকান` : 'মেসার্স ডিজিটাল স্টোর',
+              proprietor: user.displayName || 'মালিক',
+              category: 'Grocery',
+              phone: '০১৭০০-০০০০০০',
+              address: 'ঢাকা, বাংলাদেশ',
+              invoiceFooter: 'ধন্যবাদ, আবার আসবেন!',
+              createdAt: new Date().toISOString()
+            };
+            await storeDocRef.set(initialStore);
+            state.store = initialStore;
+          }
+
+          updateTenantUI();
+          attachRealtimeListeners(user.uid);
+        } else {
+          document.getElementById('auth-modal').classList.remove('hidden');
+        }
+      });
+    }
+
+    function attachRealtimeListeners(storeId) {
+      unsubs.forEach(u => typeof u === 'function' && u());
+      unsubs = [];
+
+      const syncEl = document.getElementById('cloud-sync-status');
+      if (syncEl) syncEl.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Cloud Live`;
+
+      // 1. Products Listener
+      const unsubProducts = db.collection('stores').doc(storeId).collection('products')
+        .onSnapshot((snapshot) => {
+          const list = [];
+          snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+          state.products = list;
+          renderInventoryTable();
+          renderPosCatalog();
+          renderDashboard();
+        }, (err) => console.error("Products sync err:", err));
+      unsubs.push(unsubProducts);
+
+      // 2. Sales Orders Listener
+      const unsubSales = db.collection('stores').doc(storeId).collection('sales')
+        .onSnapshot((snapshot) => {
+          const list = [];
+          snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+          state.sales = list;
+          renderDashboard();
+        }, (err) => console.error("Sales sync err:", err));
+      unsubs.push(unsubSales);
+
+      // 3. Transactions Listener
+      const unsubTx = db.collection('stores').doc(storeId).collection('transactions')
+        .onSnapshot((snapshot) => {
+          const list = [];
+          snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+          state.transactions = list;
+          renderLedgerTable();
+          renderDashboard();
+        }, (err) => console.error("Transactions sync err:", err));
+      unsubs.push(unsubTx);
+
+      // 4. Parties Listener
+      const unsubParties = db.collection('stores').doc(storeId).collection('parties')
+        .onSnapshot((snapshot) => {
+          const list = [];
+          snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+          state.parties = list;
+          renderPartiesTable();
+          renderPosCatalog();
+          renderDashboard();
+        }, (err) => console.error("Parties sync err:", err));
+      unsubs.push(unsubParties);
+    }
+
+    function updateTenantUI() {
+      document.getElementById('header-shop-name').textContent = state.store.shopName || state.store.name;
+      document.getElementById('header-shop-owner').textContent = `${state.store.proprietor || 'মালিক'} • ${state.store.category || 'Retail'}`;
+      document.getElementById('user-display-email').textContent = (state.user && state.user.email) ? state.user.email.split('@')[0] : 'Owner';
+      document.getElementById('user-avatar-initial').textContent = (state.store.shopName || 'S').charAt(0).toUpperCase();
+
+      document.getElementById('menu-shop-title').textContent = state.store.shopName || state.store.name;
+      document.getElementById('menu-user-email').textContent = (state.user && state.user.email) || 'owner@store.com';
+
+      document.getElementById('tenant-id-display').textContent = state.storeId || 'LOCAL-TENANT';
+      document.getElementById('tenant-email-display').textContent = (state.user && state.user.email) || 'demo@store.com';
+
+      if (document.getElementById('setting-shop-name')) {
+        document.getElementById('setting-shop-name').value = state.store.shopName || state.store.name;
+        document.getElementById('setting-proprietor').value = state.store.proprietor || '';
+        document.getElementById('setting-shop-phone').value = state.store.phone || '';
+        document.getElementById('setting-shop-address').value = state.store.address || '';
+        document.getElementById('setting-shop-footer').value = state.store.invoiceFooter || 'ধন্যবাদ, আবার আসবেন!';
+      }
+    }
+
+    async function saveStoreSettings() {
+      const updated = {
+        shopName: document.getElementById('setting-shop-name').value.trim() || 'আমার দোকান',
+        proprietor: document.getElementById('setting-proprietor').value.trim(),
+        phone: document.getElementById('setting-shop-phone').value.trim(),
+        address: document.getElementById('setting-shop-address').value.trim(),
+        invoiceFooter: document.getElementById('setting-shop-footer').value.trim()
+      };
+
+      state.store = { ...state.store, ...updated };
+      updateTenantUI();
+
+      if (isFirebaseReady && state.storeId && state.storeId !== 'demo-store-001') {
+        await db.collection('stores').doc(state.storeId).update(updated);
+      }
+      showToast(state.lang === 'bn' ? 'দোকানের তথ্য ক্লাউডে সংরক্ষিত হয়েছে' : 'Store settings saved to cloud', 'success');
+    }
+
+    /* -------------------------------------------------------------
+       6. TAB NAVIGATION CONTROLLER
        ------------------------------------------------------------- */
     function switchTab(tabId) {
       state.activeTab = tabId;
@@ -1717,7 +1840,7 @@
     }
 
     /* -------------------------------------------------------------
-       6. SEARCH HIGHLIGHTING UTILITY
+       7. SEARCH HIGHLIGHTING UTILITY
        ------------------------------------------------------------- */
     function highlightMatch(text, query) {
       if (!text) return '';
@@ -1729,7 +1852,7 @@
     }
 
     function escapeHTML(str) {
-      return String(str)
+      return String(str || '')
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
@@ -1738,7 +1861,7 @@
     }
 
     /* -------------------------------------------------------------
-       7. DASHBOARD & INTERACTIVE CHARTS
+       8. DASHBOARD & CHARTS
        ------------------------------------------------------------- */
     let cashflowChartInstance = null;
     let categoryChartInstance = null;
@@ -1765,30 +1888,24 @@
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
       }
 
-      // Filter Sales
       const filteredSales = state.sales.filter(s => new Date(s.date) >= startDate);
       const totalSalesAmt = filteredSales.reduce((acc, s) => acc + (Number(s.total) || 0), 0);
       const totalCOGS = filteredSales.reduce((acc, s) => {
-        const cost = (s.items || []).reduce((itemAcc, item) => itemAcc + (Number(item.buyPrice || 0) * Number(item.qty || 1)), 0);
+        const cost = (s.items || []).reduce((itemAcc, item) => itemAcc + (Number(item.buyPrice || item.costPrice || 0) * Number(item.qty || 1)), 0);
         return acc + cost;
       }, 0);
       const grossProfit = totalSalesAmt - totalCOGS;
 
-      // Filter Ledger Transactions
       const filteredTx = state.transactions.filter(tx => new Date(tx.date) >= startDate);
       const totalExpenses = filteredTx.filter(t => t.type === 'expense').reduce((a, b) => a + (Number(b.amount) || 0), 0);
       const totalGeneralIncome = filteredTx.filter(t => t.type === 'income').reduce((a, b) => a + (Number(b.amount) || 0), 0);
       const salesCashInflow = filteredSales.reduce((acc, s) => acc + (Number(s.paidAmount) || 0), 0);
       const netCashBalance = (salesCashInflow + totalGeneralIncome) - totalExpenses;
 
-      // Total Receivables & Payables
       const totalDue = state.parties.reduce((acc, p) => p.balance > 0 ? acc + p.balance : acc, 0);
-      
-      // Stock Valuation & Low Stock
-      const stockValCost = state.products.reduce((acc, p) => acc + (Number(p.buyPrice || 0) * Number(p.stock || 0)), 0);
+      const stockValCost = state.products.reduce((acc, p) => acc + (Number(p.costPrice || p.buyPrice || 0) * Number(p.stock || 0)), 0);
       const lowStockCount = state.products.filter(p => Number(p.stock) <= Number(p.minStock || 5)).length;
 
-      // Update KPI DOM
       document.getElementById('kpi-sales-amount').textContent = c(totalSalesAmt);
       document.getElementById('kpi-sales-count').textContent = `${n(filteredSales.length)} ${state.lang === 'bn' ? 'টি ইনভয়েস' : 'invoices'}`;
       document.getElementById('kpi-gross-profit').textContent = c(grossProfit);
@@ -1798,7 +1915,6 @@
       document.getElementById('kpi-stock-value').textContent = c(stockValCost);
       document.getElementById('kpi-low-stock-count').textContent = `${n(lowStockCount)} ${state.lang === 'bn' ? 'টি কম স্টক' : 'items low'}`;
 
-      // Update Header Badges
       const badge = document.getElementById('low-stock-count-badge');
       if (lowStockCount > 0) {
         badge.textContent = n(lowStockCount);
@@ -1816,7 +1932,7 @@
           <div class="flex items-center justify-between p-2.5 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)]">
             <div>
               <div class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
-                <span>${escapeHTML(sale.customerName || t('cashCustomer'))}</span>
+                <span>${escapeHTML(sale.customerName || 'নগদ ক্রেতা')}</span>
                 <span class="text-[10px] font-mono text-emerald-600 font-normal">#${sale.invoiceNo}</span>
               </div>
               <div class="text-[10px] text-[var(--text-muted)]">${new Date(sale.date).toLocaleDateString()} | ${sale.paymentMethod}</div>
@@ -1855,7 +1971,6 @@
     }
 
     function renderDashboardCharts() {
-      // Prepare 7-day trend
       const labels = [];
       const salesData = [];
       const expenseData = [];
@@ -1865,8 +1980,8 @@
         const dateStr = d.toISOString().split('T')[0];
         labels.push(dateStr.slice(5));
 
-        const daySales = state.sales.filter(s => s.date.startsWith(dateStr)).reduce((a, b) => a + (Number(b.total) || 0), 0);
-        const dayExpense = state.transactions.filter(t => t.date.startsWith(dateStr) && t.type === 'expense').reduce((a, b) => a + (Number(b.amount) || 0), 0);
+        const daySales = state.sales.filter(s => s.date && s.date.startsWith(dateStr)).reduce((a, b) => a + (Number(b.total) || 0), 0);
+        const dayExpense = state.transactions.filter(t => t.date && t.date.startsWith(dateStr) && t.type === 'expense').reduce((a, b) => a + (Number(b.amount) || 0), 0);
         salesData.push(daySales);
         expenseData.push(dayExpense);
       }
@@ -1911,7 +2026,6 @@
         });
       }
 
-      // Category breakdown
       const catMap = {};
       state.transactions.filter(t => t.type === 'expense').forEach(t => {
         const cat = t.category || (state.lang === 'bn' ? 'সাধারণ' : 'General');
@@ -1942,7 +2056,7 @@
     }
 
     /* -------------------------------------------------------------
-       8. POINT OF SALE (POS) MODULE
+       9. POINT OF SALE (POS) BILLING
        ------------------------------------------------------------- */
     function renderPosCatalog() {
       const search = (document.getElementById('pos-search').value || '').toLowerCase().trim();
@@ -1950,19 +2064,16 @@
       const clearBtn = document.getElementById('pos-search-clear');
       if (clearBtn) clearBtn.classList.toggle('hidden', !search);
 
-      // Populate Category Filter dropdown
       const cats = Array.from(new Set(state.products.map(p => p.category).filter(Boolean)));
       const catSelect = document.getElementById('pos-cat-filter');
-      catSelect.innerHTML = `<option value="all">${t('allCategories')}</option>` + cats.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('');
+      catSelect.innerHTML = `<option value="all">${t('allCategories') || 'সকল ক্যাটাগরি'}</option>` + cats.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('');
       catSelect.value = catFilter;
 
-      // Populate Customer Select dropdown
       const custSelect = document.getElementById('pos-customer-select');
-      custSelect.innerHTML = `<option value="">${t('cashCustomer')}</option>` + state.parties.filter(p => p.type === 'customer').map(c => `
+      custSelect.innerHTML = `<option value="">${state.lang === 'bn' ? 'নগদ ক্রেতা (Walk-in Customer)' : 'Walk-in Cash Customer'}</option>` + state.parties.filter(p => p.type === 'customer').map(c => `
         <option value="${c.id}">${escapeHTML(c.name)} (${c.phone || 'বকেয়া: ' + c.balance})</option>
       `).join('');
 
-      // Filter products
       const filtered = state.products.filter(p => {
         const matchSearch = !search || p.name.toLowerCase().includes(search) || (p.sku && p.sku.toLowerCase().includes(search));
         const matchCat = catFilter === 'all' || p.category === catFilter;
@@ -1985,13 +2096,13 @@
               <div class="flex items-start justify-between gap-1 mb-1">
                 <h4 class="font-bold text-xs line-clamp-1">${highlightMatch(prod.name, search)}</h4>
                 <span class="text-[10px] font-mono px-1.5 py-0.2 rounded-md ${isOutOfStock ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}">
-                  ${isOutOfStock ? 'Out' : n(prod.stock) + ' ' + prod.unit}
+                  ${isOutOfStock ? 'Out' : n(prod.stock) + ' ' + (prod.unit || 'Pcs')}
                 </span>
               </div>
               <div class="text-[10px] text-[var(--text-muted)]">${prod.category || 'General'}</div>
             </div>
             <div class="flex items-center justify-between pt-2 mt-2 border-t border-[var(--border-color)]">
-              <span class="font-mono font-bold text-emerald-600 text-xs">${c(prod.sellPrice)}</span>
+              <span class="font-mono font-bold text-emerald-600 text-xs">${c(prod.sellingPrice || prod.sellPrice)}</span>
               <button class="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-bold ${isOutOfStock ? 'hidden' : ''}">+</button>
             </div>
           </div>
@@ -2025,8 +2136,8 @@
         state.cart.push({
           product: prod,
           qty: 1,
-          price: Number(prod.sellPrice) || 0,
-          buyPrice: Number(prod.buyPrice) || 0
+          price: Number(prod.sellingPrice || prod.sellPrice) || 0,
+          buyPrice: Number(prod.costPrice || prod.buyPrice) || 0
         });
       }
       renderCartItems();
@@ -2114,7 +2225,7 @@
       }
     }
 
-    function completeSale() {
+    async function completeSale() {
       if (state.cart.length === 0) {
         showToast(state.lang === 'bn' ? 'কার্টে কোনো পণ্য নেই!' : 'Cart is empty!', 'error');
         return;
@@ -2135,8 +2246,10 @@
       }
 
       const invoiceId = 'INV-' + Date.now().toString().slice(-6);
+      const saleId = 'sale-' + Date.now();
       const saleRecord = {
-        id: 'sale-' + Date.now(),
+        id: saleId,
+        storeId: state.storeId,
         invoiceNo: invoiceId,
         date: new Date().toISOString(),
         customerId: customerId || null,
@@ -2150,39 +2263,66 @@
         paymentMethod: payMethod
       };
 
-      // 1. Deduct Stock
-      state.cart.forEach(cartItem => {
-        const prod = state.products.find(p => p.id === cartItem.product.id);
-        if (prod) {
-          prod.stock = Math.max(0, Number(prod.stock) - cartItem.qty);
-        }
-      });
-
-      // 2. Add to Sales Ledger
-      state.sales.push(saleRecord);
-
-      // 3. Dual Entry: Add Cash / Inflow into Daily Ledger
-      if (paid > 0) {
-        state.transactions.push({
-          id: 'tx-' + Date.now(),
-          date: new Date().toISOString(),
-          type: 'sale',
-          category: state.lang === 'bn' ? 'পণ্য বিক্রয়' : 'Product Sales',
-          amount: paid,
-          partyId: customerId || null,
-          partyName: saleRecord.customerName,
-          method: payMethod === 'Due' ? 'Cash' : payMethod,
-          note: `Invoice #${invoiceId}`,
-          invoiceId: invoiceId
+      // 1. Stock Decrement
+      if (isFirebaseReady && state.storeId && state.storeId !== 'demo-store-001') {
+        const batch = db.batch();
+        state.cart.forEach(cartItem => {
+          const prodRef = db.collection('stores').doc(state.storeId).collection('products').doc(cartItem.product.id);
+          const newStock = Math.max(0, Number(cartItem.product.stock) - cartItem.qty);
+          batch.update(prodRef, { stock: newStock });
         });
+
+        // 2. Add Sale Order to Firestore
+        const saleRef = db.collection('stores').doc(state.storeId).collection('sales').doc(saleId);
+        batch.set(saleRef, saleRecord);
+
+        // 3. Dual-Entry: Daily Ledger Inflow
+        if (paid > 0) {
+          const txId = 'tx-' + Date.now();
+          const txRef = db.collection('stores').doc(state.storeId).collection('transactions').doc(txId);
+          batch.set(txRef, {
+            id: txId,
+            storeId: state.storeId,
+            date: new Date().toISOString(),
+            type: 'sale',
+            category: 'পণ্য বিক্রয়',
+            amount: paid,
+            partyName: saleRecord.customerName,
+            method: payMethod === 'Due' ? 'Cash' : payMethod,
+            note: `Invoice #${invoiceId}`
+          });
+        }
+
+        // 4. If Due: Update Party Due Balance in Firestore
+        if (due > 0 && customer) {
+          const partyRef = db.collection('stores').doc(state.storeId).collection('parties').doc(customer.id);
+          const newBal = (Number(customer.balance) || 0) + due;
+          batch.update(partyRef, { balance: newBal });
+        }
+
+        await batch.commit();
+      } else {
+        // Fallback local memory
+        state.cart.forEach(cartItem => {
+          const prod = state.products.find(p => p.id === cartItem.product.id);
+          if (prod) prod.stock = Math.max(0, Number(prod.stock) - cartItem.qty);
+        });
+        state.sales.push(saleRecord);
+        if (paid > 0) {
+          state.transactions.push({
+            id: 'tx-' + Date.now(),
+            date: new Date().toISOString(),
+            type: 'sale',
+            category: 'পণ্য বিক্রয়',
+            amount: paid,
+            partyName: saleRecord.customerName,
+            method: payMethod === 'Due' ? 'Cash' : payMethod,
+            note: `Invoice #${invoiceId}`
+          });
+        }
+        if (due > 0 && customer) customer.balance = (Number(customer.balance) || 0) + due;
       }
 
-      // 4. If Due: Update Party Due Balance
-      if (due > 0 && customer) {
-        customer.balance = (Number(customer.balance) || 0) + due;
-      }
-
-      saveState();
       previewInvoice(saleRecord.id);
       clearCart();
       renderPosCatalog();
@@ -2190,7 +2330,7 @@
     }
 
     /* -------------------------------------------------------------
-       9. RECEIPT & THERMAL INVOICE PREVIEW / PRINT
+       10. THERMAL RECEIPT & PRINTABLE INVOICE
        ------------------------------------------------------------- */
     let activePreviewSale = null;
 
@@ -2202,9 +2342,9 @@
       const container = document.getElementById('printable-area');
       container.innerHTML = `
         <div class="text-center pb-2 border-b border-black">
-          <h2 class="text-base font-bold uppercase tracking-wider">${escapeHTML(state.shop.name)}</h2>
-          <p class="text-[10px]">${escapeHTML(state.shop.address)}</p>
-          <p class="text-[10px]">মোবাইল: ${escapeHTML(state.shop.phone)}</p>
+          <h2 class="text-base font-bold uppercase tracking-wider">${escapeHTML(state.store.shopName || state.store.name)}</h2>
+          <p class="text-[10px]">${escapeHTML(state.store.address)}</p>
+          <p class="text-[10px]">মোবাইল: ${escapeHTML(state.store.phone)}</p>
           <div class="text-[11px] font-bold mt-1 uppercase border-t border-b border-dashed border-black py-0.5">
             ${state.lang === 'bn' ? 'ক্যাশ মেমো / ইনভয়েস' : 'CASH MEMO / INVOICE'}
           </div>
@@ -2270,8 +2410,8 @@
         </div>
 
         <div class="text-center pt-2 text-[9px]">
-          <p class="font-bold">ধন্যবাদ, আবার আসবেন!</p>
-          <div class="font-mono text-[8px] text-slate-500 mt-0.5">Powered by Digital Talikhata ERP</div>
+          <p class="font-bold">${escapeHTML(state.store.invoiceFooter || 'ধন্যবাদ, আবার আসবেন!')}</p>
+          <div class="font-mono text-[8px] text-slate-500 mt-0.5">Powered by Digital Talikhata Cloud SaaS</div>
         </div>
       `;
 
@@ -2298,7 +2438,7 @@
     }
 
     /* -------------------------------------------------------------
-       10. INVENTORY CRUD & EXCEL EXPORT
+       11. INVENTORY CRUD & REALTIME CLOUD FIRESTORE
        ------------------------------------------------------------- */
     function renderInventoryTable() {
       const search = (document.getElementById('inv-search').value || '').toLowerCase().trim();
@@ -2314,9 +2454,8 @@
         return matchSearch && matchStock;
       });
 
-      // Metrics
-      const totalCost = state.products.reduce((a, b) => a + (Number(b.buyPrice || 0) * Number(b.stock || 0)), 0);
-      const totalSell = state.products.reduce((a, b) => a + (Number(b.sellPrice || 0) * Number(b.stock || 0)), 0);
+      const totalCost = state.products.reduce((a, b) => a + (Number(b.costPrice || b.buyPrice || 0) * Number(b.stock || 0)), 0);
+      const totalSell = state.products.reduce((a, b) => a + (Number(b.sellingPrice || b.sellPrice || 0) * Number(b.stock || 0)), 0);
       const lowCount = state.products.filter(p => Number(p.stock) <= Number(p.minStock || 5)).length;
 
       document.getElementById('inv-total-items').textContent = n(state.products.length);
@@ -2333,7 +2472,7 @@
       tbody.innerHTML = filtered.map(prod => {
         const isLow = Number(prod.stock) <= Number(prod.minStock || 5);
         const isOut = Number(prod.stock) <= 0;
-        const totalVal = Number(prod.stock) * Number(prod.buyPrice);
+        const totalVal = Number(prod.stock) * Number(prod.costPrice || prod.buyPrice || 0);
 
         return `
           <tr class="hover:bg-[var(--bg-subtle)] transition">
@@ -2342,18 +2481,18 @@
               <div class="text-[10px] text-slate-400 font-mono">SKU: ${highlightMatch(prod.sku || '-', search)}</div>
             </td>
             <td class="p-3.5 text-slate-600 dark:text-slate-300">${escapeHTML(prod.category || 'General')}</td>
-            <td class="p-3.5 text-right font-mono">${c(prod.buyPrice)}</td>
-            <td class="p-3.5 text-right font-mono font-bold text-emerald-600">${c(prod.sellPrice)}</td>
+            <td class="p-3.5 text-right font-mono">${c(prod.costPrice || prod.buyPrice)}</td>
+            <td class="p-3.5 text-right font-mono font-bold text-emerald-600">${c(prod.sellingPrice || prod.sellPrice)}</td>
             <td class="p-3.5 text-center">
               <span class="px-2 py-0.5 rounded-full text-[11px] font-mono font-bold ${isOut ? 'bg-rose-100 text-rose-800' : isLow ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
-                ${n(prod.stock)} ${prod.unit}
+                ${n(prod.stock)} ${prod.unit || 'Pcs'}
               </span>
             </td>
             <td class="p-3.5 text-right font-mono font-bold">${c(totalVal)}</td>
             <td class="p-3.5 text-center">
               <div class="flex items-center justify-center gap-1.5">
-                <button onclick="editProduct('${prod.id}')" class="p-1 rounded-md text-blue-600 hover:bg-blue-50" title="Edit">✎</button>
-                <button onclick="deleteProduct('${prod.id}')" class="p-1 rounded-md text-rose-600 hover:bg-rose-50" title="Delete">🗑</button>
+                <button onclick="editProduct('${prod.id}')" class="p-1 rounded-md text-blue-600 hover:bg-blue-50">✎</button>
+                <button onclick="deleteProduct('${prod.id}')" class="p-1 rounded-md text-rose-600 hover:bg-rose-50">🗑</button>
               </div>
             </td>
           </tr>
@@ -2384,72 +2523,81 @@
       document.getElementById('prod-name').value = prod.name;
       document.getElementById('prod-sku').value = prod.sku || '';
       document.getElementById('prod-category').value = prod.category || '';
-      document.getElementById('prod-buy-price').value = prod.buyPrice;
-      document.getElementById('prod-sell-price').value = prod.sellPrice;
+      document.getElementById('prod-buy-price').value = prod.costPrice || prod.buyPrice;
+      document.getElementById('prod-sell-price').value = prod.sellingPrice || prod.sellPrice;
       document.getElementById('prod-stock').value = prod.stock;
-      document.getElementById('prod-unit').value = prod.unit;
-      document.getElementById('prod-min-stock').value = prod.minStock;
+      document.getElementById('prod-unit').value = prod.unit || 'Pcs';
+      document.getElementById('prod-min-stock').value = prod.minStock || 5;
 
       document.getElementById('modal-product-title').textContent = state.lang === 'bn' ? 'পণ্য সংশোধন করুন' : 'Edit Product';
       document.getElementById('modal-product').classList.remove('hidden');
     }
 
-    function saveProduct(e) {
+    async function saveProduct(e) {
       e.preventDefault();
       const id = document.getElementById('prod-id').value;
       const productData = {
-        id: id || ('prod-' + Date.now()),
         name: document.getElementById('prod-name').value.trim(),
         sku: document.getElementById('prod-sku').value.trim(),
         category: document.getElementById('prod-category').value.trim(),
-        buyPrice: Number(document.getElementById('prod-buy-price').value) || 0,
-        sellPrice: Number(document.getElementById('prod-sell-price').value) || 0,
+        costPrice: Number(document.getElementById('prod-buy-price').value) || 0,
+        sellingPrice: Number(document.getElementById('prod-sell-price').value) || 0,
         stock: Number(document.getElementById('prod-stock').value) || 0,
         unit: document.getElementById('prod-unit').value,
         minStock: Number(document.getElementById('prod-min-stock').value) || 5
       };
 
-      if (id) {
-        const idx = state.products.findIndex(p => p.id === id);
-        if (idx !== -1) state.products[idx] = productData;
+      if (isFirebaseReady && state.storeId && state.storeId !== 'demo-store-001') {
+        const prodRef = db.collection('stores').doc(state.storeId).collection('products');
+        if (id) {
+          await prodRef.doc(id).update(productData);
+        } else {
+          await prodRef.add(productData);
+        }
       } else {
-        state.products.push(productData);
+        if (id) {
+          const idx = state.products.findIndex(p => p.id === id);
+          if (idx !== -1) state.products[idx] = { id, ...productData };
+        } else {
+          state.products.push({ id: 'prod-' + Date.now(), ...productData });
+        }
+        renderInventoryTable();
       }
 
-      saveState();
       closeProductModal();
-      renderInventoryTable();
-      showToast(state.lang === 'bn' ? 'পণ্য সফলভাবে সংরক্ষিত হয়েছে' : 'Product saved successfully', 'success');
+      showToast(state.lang === 'bn' ? 'পণ্য সফলভাবে ক্লাউডে সংরক্ষিত হয়েছে' : 'Product saved to cloud', 'success');
     }
 
-    function deleteProduct(id) {
+    async function deleteProduct(id) {
       if (!confirm(state.lang === 'bn' ? 'আপনি কি নিশ্চিতভাবে এই পণ্যটি মুছে ফেলতে চান?' : 'Are you sure you want to delete this product?')) return;
-      state.products = state.products.filter(p => p.id !== id);
-      saveState();
-      renderInventoryTable();
+      if (isFirebaseReady && state.storeId && state.storeId !== 'demo-store-001') {
+        await db.collection('stores').doc(state.storeId).collection('products').doc(id).delete();
+      } else {
+        state.products = state.products.filter(p => p.id !== id);
+        renderInventoryTable();
+      }
       showToast(state.lang === 'bn' ? 'পণ্য মুছে ফেলা হয়েছে' : 'Product deleted', 'info');
     }
 
     function exportInventoryExcel() {
       const data = state.products.map(p => ({
         'Product Name': p.name,
-        'SKU / Barcode': p.sku || '',
+        'SKU': p.sku || '',
         'Category': p.category || '',
-        'Buy Price (BDT)': p.buyPrice,
-        'Sell Price (BDT)': p.sellPrice,
-        'Stock Quantity': p.stock,
-        'Unit': p.unit,
-        'Total Valuation': p.stock * p.buyPrice
+        'Cost Price': p.costPrice || p.buyPrice,
+        'Selling Price': p.sellingPrice || p.sellPrice,
+        'Stock': p.stock,
+        'Unit': p.unit || 'Pcs'
       }));
       const ws = XLSX.utils.json_to_sheet(data);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Inventory");
-      XLSX.writeFile(wb, "Talikhata_Inventory.xlsx");
+      XLSX.writeFile(wb, "Cloud_Inventory.xlsx");
       logDownload('Inventory Catalog', 'Inventory', 'Excel', data.length);
     }
 
     /* -------------------------------------------------------------
-       11. DAILY LEDGER (INCOME & OPERATIONAL EXPENSES)
+       12. DAILY LEDGER & PARTIES CLOUD ACTIONS
        ------------------------------------------------------------- */
     function renderLedgerTable() {
       const search = (document.getElementById('ledger-search').value || '').toLowerCase().trim();
@@ -2513,10 +2661,9 @@
       document.getElementById('modal-tx').classList.add('hidden');
     }
 
-    function saveTransaction(e) {
+    async function saveTransaction(e) {
       e.preventDefault();
       const tx = {
-        id: 'tx-' + Date.now(),
         date: new Date(document.getElementById('tx-date').value).toISOString(),
         type: document.getElementById('tx-type').value,
         amount: Number(document.getElementById('tx-amount').value) || 0,
@@ -2526,18 +2673,25 @@
         note: document.getElementById('tx-note').value.trim()
       };
 
-      state.transactions.push(tx);
-      saveState();
+      if (isFirebaseReady && state.storeId && state.storeId !== 'demo-store-001') {
+        await db.collection('stores').doc(state.storeId).collection('transactions').add(tx);
+      } else {
+        state.transactions.push({ id: 'tx-' + Date.now(), ...tx });
+        renderLedgerTable();
+      }
+
       closeTxModal();
-      renderLedgerTable();
       showToast(state.lang === 'bn' ? 'লেনদেন সংরক্ষিত হয়েছে' : 'Entry saved', 'success');
     }
 
-    function deleteTransaction(id) {
-      if (!confirm(state.lang === 'bn' ? 'আপনি কি লেনদেনটি মুছে ফেলতে চান?' : 'Delete this ledger entry?')) return;
-      state.transactions = state.transactions.filter(t => t.id !== id);
-      saveState();
-      renderLedgerTable();
+    async function deleteTransaction(id) {
+      if (!confirm(state.lang === 'bn' ? 'আপনি কি লেনদেনটি মুছে ফেলতে চান?' : 'Delete this entry?')) return;
+      if (isFirebaseReady && state.storeId && state.storeId !== 'demo-store-001') {
+        await db.collection('stores').doc(state.storeId).collection('transactions').doc(id).delete();
+      } else {
+        state.transactions = state.transactions.filter(t => t.id !== id);
+        renderLedgerTable();
+      }
       showToast(state.lang === 'bn' ? 'লেনদেন মুছে ফেলা হয়েছে' : 'Entry deleted', 'info');
     }
 
@@ -2546,26 +2700,18 @@
         'Date': new Date(t.date).toLocaleDateString(),
         'Type': t.type,
         'Category': t.category,
-        'Party Name': t.partyName || '',
-        'Payment Method': t.method,
-        'Note': t.note || '',
-        'Amount (BDT)': t.amount
+        'Party': t.partyName || '',
+        'Amount': t.amount,
+        'Method': t.method
       }));
       const ws = XLSX.utils.json_to_sheet(data);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Ledger");
-      XLSX.writeFile(wb, "Talikhata_Daily_Ledger.xlsx");
+      XLSX.writeFile(wb, "Cloud_Ledger.xlsx");
       logDownload('Daily Ledger Statement', 'Daily Ledger', 'Excel', data.length);
     }
 
-    function exportLedgerPDF() {
-      window.print();
-      logDownload('Daily Ledger Statement', 'Daily Ledger', 'PDF', state.transactions.length);
-    }
-
-    /* -------------------------------------------------------------
-       12. PARTIES & CREDIT/DUE MANAGEMENT
-       ------------------------------------------------------------- */
+    /* PARTIES MODULE */
     function renderPartiesTable() {
       const search = (document.getElementById('party-search').value || '').toLowerCase().trim();
       const typeFilter = document.getElementById('party-type-filter').value;
@@ -2581,7 +2727,6 @@
         return matchSearch && matchType;
       });
 
-      // Metrics
       const totalReceivable = state.parties.filter(p => p.balance > 0).reduce((a, b) => a + b.balance, 0);
       const totalPayable = state.parties.filter(p => p.balance < 0).reduce((a, b) => a + Math.abs(b.balance), 0);
 
@@ -2597,14 +2742,11 @@
 
       tbody.innerHTML = filtered.map(party => {
         const isReceivable = party.balance > 0;
-        const isPayable = party.balance < 0;
         const isSettled = party.balance === 0;
 
         return `
           <tr class="hover:bg-[var(--bg-subtle)] transition">
-            <td class="p-3.5">
-              <div class="font-bold text-slate-800 dark:text-slate-100">${highlightMatch(party.name, search)}</div>
-            </td>
+            <td class="p-3.5 font-bold">${highlightMatch(party.name, search)}</td>
             <td class="p-3.5">
               <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${party.type === 'customer' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}">
                 ${party.type === 'customer' ? 'কাস্টমার' : 'সাপ্লায়ার'}
@@ -2617,10 +2759,8 @@
             </td>
             <td class="p-3.5 text-center">
               <div class="flex items-center justify-center gap-1.5">
-                <button onclick="openRepayModal('${party.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-[11px] hover:bg-emerald-200" title="Settle Due">
-                  আদায় / পরিশোধ
-                </button>
-                <button onclick="deleteParty('${party.id}')" class="p-1 text-rose-500 hover:text-rose-700" title="Delete">🗑</button>
+                <button onclick="openRepayModal('${party.id}')" class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 font-bold text-[11px] hover:bg-emerald-200">আদায় / পরিশোধ</button>
+                <button onclick="deleteParty('${party.id}')" class="p-1 text-rose-500 hover:text-rose-700">🗑</button>
               </div>
             </td>
           </tr>
@@ -2644,10 +2784,9 @@
       document.getElementById('modal-party').classList.add('hidden');
     }
 
-    function saveParty(e) {
+    async function saveParty(e) {
       e.preventDefault();
       const party = {
-        id: 'party-' + Date.now(),
         name: document.getElementById('party-name').value.trim(),
         type: document.getElementById('party-type').value,
         phone: document.getElementById('party-mobile').value.trim(),
@@ -2655,18 +2794,25 @@
         balance: Number(document.getElementById('party-balance').value) || 0
       };
 
-      state.parties.push(party);
-      saveState();
+      if (isFirebaseReady && state.storeId && state.storeId !== 'demo-store-001') {
+        await db.collection('stores').doc(state.storeId).collection('parties').add(party);
+      } else {
+        state.parties.push({ id: 'party-' + Date.now(), ...party });
+        renderPartiesTable();
+      }
+
       closePartyModal();
-      renderPartiesTable();
-      showToast(state.lang === 'bn' ? 'পার্টি যুক্ত হয়েছে' : 'Party contact added', 'success');
+      showToast(state.lang === 'bn' ? 'পার্টি ক্লাউডে যুক্ত হয়েছে' : 'Party contact saved', 'success');
     }
 
-    function deleteParty(id) {
+    async function deleteParty(id) {
       if (!confirm(state.lang === 'bn' ? 'আপনি কি পার্টি মুছে ফেলতে চান?' : 'Delete this party?')) return;
-      state.parties = state.parties.filter(p => p.id !== id);
-      saveState();
-      renderPartiesTable();
+      if (isFirebaseReady && state.storeId && state.storeId !== 'demo-store-001') {
+        await db.collection('stores').doc(state.storeId).collection('parties').doc(id).delete();
+      } else {
+        state.parties = state.parties.filter(p => p.id !== id);
+        renderPartiesTable();
+      }
       showToast(state.lang === 'bn' ? 'পার্টি মুছে ফেলা হয়েছে' : 'Party deleted', 'info');
     }
 
@@ -2674,7 +2820,7 @@
       const party = state.parties.find(p => p.id === partyId);
       if (!party) return;
       document.getElementById('repay-party-id').value = party.id;
-      document.getElementById('repay-party-display').textContent = `${party.name} (বর্তমান বাকি: ${c(party.balance)})`;
+      document.getElementById('repay-party-display').textContent = `${party.name} (${c(party.balance)})`;
       document.getElementById('repay-amount').value = Math.abs(party.balance);
       document.getElementById('modal-repay').classList.remove('hidden');
     }
@@ -2683,7 +2829,7 @@
       document.getElementById('modal-repay').classList.add('hidden');
     }
 
-    function saveRepayment(e) {
+    async function saveRepayment(e) {
       e.preventDefault();
       const partyId = document.getElementById('repay-party-id').value;
       const party = state.parties.find(p => p.id === partyId);
@@ -2693,40 +2839,42 @@
       const method = document.getElementById('repay-method').value;
       const note = document.getElementById('repay-note').value.trim() || 'বকেয়া সমন্বয়';
 
-      if (party.balance > 0) {
-        // Customer paying us back (Inflow)
-        party.balance = Math.max(0, party.balance - amt);
-        state.transactions.push({
-          id: 'tx-' + Date.now(),
-          date: new Date().toISOString(),
-          type: 'income',
-          category: 'বকেয়া আদায়',
-          amount: amt,
-          partyId: party.id,
-          partyName: party.name,
-          method: method,
-          note: note
-        });
+      let newBal = party.balance;
+      const isReceivable = party.balance > 0;
+
+      if (isReceivable) {
+        newBal = Math.max(0, party.balance - amt);
       } else {
-        // We paying supplier back (Outflow)
-        party.balance += amt;
-        state.transactions.push({
-          id: 'tx-' + Date.now(),
-          date: new Date().toISOString(),
-          type: 'expense',
-          category: 'বকেয়া পরিশোধ',
-          amount: amt,
-          partyId: party.id,
-          partyName: party.name,
-          method: method,
-          note: note
-        });
+        newBal += amt;
       }
 
-      saveState();
+      const txRecord = {
+        date: new Date().toISOString(),
+        type: isReceivable ? 'income' : 'expense',
+        category: isReceivable ? 'বকেয়া আদায়' : 'বকেয়া পরিশোধ',
+        amount: amt,
+        partyName: party.name,
+        method: method,
+        note: note
+      };
+
+      if (isFirebaseReady && state.storeId && state.storeId !== 'demo-store-001') {
+        const batch = db.batch();
+        const partyRef = db.collection('stores').doc(state.storeId).collection('parties').doc(party.id);
+        batch.update(partyRef, { balance: newBal });
+
+        const txRef = db.collection('stores').doc(state.storeId).collection('transactions').doc('tx-' + Date.now());
+        batch.set(txRef, txRecord);
+        await batch.commit();
+      } else {
+        party.balance = newBal;
+        state.transactions.push({ id: 'tx-' + Date.now(), ...txRecord });
+        renderPartiesTable();
+        renderLedgerTable();
+      }
+
       closeRepayModal();
-      renderPartiesTable();
-      showToast(state.lang === 'bn' ? 'টাকা সফলভাবে সমন্বয় করা হয়েছে' : 'Repayment recorded successfully', 'success');
+      showToast(state.lang === 'bn' ? 'বকেয়া সমন্বয় সম্পন্ন হয়েছে' : 'Repayment logged', 'success');
     }
 
     function exportPartiesExcel() {
@@ -2735,17 +2883,17 @@
         'Type': p.type,
         'Phone': p.phone || '',
         'Address': p.address || '',
-        'Due Balance (BDT)': p.balance
+        'Due Balance': p.balance
       }));
       const ws = XLSX.utils.json_to_sheet(data);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "Parties");
-      XLSX.writeFile(wb, "Talikhata_Parties_Due.xlsx");
-      logDownload('Parties Due Ledger', 'Parties', 'Excel', data.length);
+      XLSX.writeFile(wb, "Cloud_Parties.xlsx");
+      logDownload('Parties Ledger', 'Parties', 'Excel', data.length);
     }
 
     /* -------------------------------------------------------------
-       13. FINANCIAL REPORTS & PROFIT/LOSS STATEMENT
+       13. REPORTS, PROFIT/LOSS & DOWNLOAD LOGS
        ------------------------------------------------------------- */
     function generateReport() {
       const fromStr = document.getElementById('rep-from-date').value;
@@ -2760,7 +2908,7 @@
 
       const totalSales = filteredSales.reduce((a, b) => a + (Number(b.total) || 0), 0);
       const totalCOGS = filteredSales.reduce((acc, s) => {
-        return acc + (s.items || []).reduce((sum, i) => sum + (Number(i.buyPrice || 0) * Number(i.qty || 1)), 0);
+        return acc + (s.items || []).reduce((sum, i) => sum + (Number(i.buyPrice || i.costPrice || 0) * Number(i.qty || 1)), 0);
       }, 0);
       const grossProfit = totalSales - totalCOGS;
 
@@ -2791,12 +2939,9 @@
 
     function exportDashboardSummaryPDF() {
       window.print();
-      logDownload('Dashboard Business Summary', 'Dashboard', 'PDF', state.sales.length);
+      logDownload('Dashboard Summary', 'Dashboard', 'PDF', state.sales.length);
     }
 
-    /* -------------------------------------------------------------
-       14. DOWNLOAD HISTORY LOG
-       ------------------------------------------------------------- */
     function logDownload(title, section, format, rows) {
       const record = {
         id: 'dl-' + Date.now(),
@@ -2808,11 +2953,6 @@
       };
       state.downloadHistory.unshift(record);
       if (state.downloadHistory.length > 50) state.downloadHistory.pop();
-      saveState();
-      updateDownloadHistoryBadge();
-    }
-
-    function updateDownloadHistoryBadge() {
       document.getElementById('download-count-badge').textContent = n(state.downloadHistory.length);
     }
 
@@ -2845,82 +2985,30 @@
 
     function clearDownloadHistory() {
       state.downloadHistory = [];
-      saveState();
-      updateDownloadHistoryBadge();
+      document.getElementById('download-count-badge').textContent = n(0);
       openDownloadHistoryModal();
     }
 
-    /* -------------------------------------------------------------
-       15. SETTINGS, BACKUP & RESTORE
-       ------------------------------------------------------------- */
-    function saveShopSettings() {
-      state.shop.name = document.getElementById('setting-shop-name').value.trim() || 'মেসার্স ডিজিটাল স্টোর';
-      state.shop.phone = document.getElementById('setting-shop-phone').value.trim();
-      state.shop.address = document.getElementById('setting-shop-address').value.trim();
-      saveState();
-      showToast(state.lang === 'bn' ? 'দোকানের তথ্য সংরক্ষিত হয়েছে' : 'Shop details saved', 'success');
-    }
-
     function exportFullJSONBackup() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+      const backupData = {
+        store: state.store,
+        products: state.products,
+        sales: state.sales,
+        transactions: state.transactions,
+        parties: state.parties,
+        exportedAt: new Date().toISOString()
+      };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
       const dlAnchor = document.createElement('a');
       dlAnchor.setAttribute("href", dataStr);
-      dlAnchor.setAttribute("download", `Talikhata_ERP_Backup_${new Date().toISOString().split('T')[0]}.json`);
+      dlAnchor.setAttribute("download", `Talikhata_Cloud_Backup_${new Date().toISOString().split('T')[0]}.json`);
       document.body.appendChild(dlAnchor);
       dlAnchor.click();
       dlAnchor.remove();
-      logDownload('Full System JSON Backup', 'Settings', 'JSON', state.products.length + state.transactions.length + state.sales.length);
-      showToast(state.lang === 'bn' ? 'ব্যাকআপ ফাইল ডাউনলোড হয়েছে' : 'Backup downloaded', 'success');
+      logDownload('Full Tenant Backup', 'Settings', 'JSON', state.products.length + state.transactions.length);
+      showToast(state.lang === 'bn' ? 'ব্যাকআপ ডাউনলোড সম্পন্ন' : 'Backup downloaded', 'success');
     }
 
-    function importFullJSONBackup(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        try {
-          const imported = JSON.parse(evt.target.result);
-          if (imported && (imported.products || imported.sales || imported.transactions)) {
-            state = { ...state, ...imported, cart: [] };
-            saveState();
-            setTheme(state.theme || 'classic');
-            applyLanguage();
-            renderAllViews();
-            showToast(state.lang === 'bn' ? 'ডাটা সফলভাবে রিস্টোর করা হয়েছে' : 'Data restored successfully', 'success');
-          } else {
-            showToast(state.lang === 'bn' ? 'ফাইল ফরম্যাট সঠিক নয়!' : 'Invalid backup file structure!', 'error');
-          }
-        } catch (err) {
-          showToast(state.lang === 'bn' ? 'ব্যাকআপ ফাইলটি পড়তে ব্যর্থ হয়েছে' : 'Failed to parse JSON backup', 'error');
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    function resetAllDataWithConfirm() {
-      if (!confirm(state.lang === 'bn' ? 'সতর্কতা: আপনার সকল পণ্য, সেলস ও খাতার হিসাব মুছে যাবে! আপনি কি নিশ্চিত?' : 'WARNING: All products, sales, and ledger records will be deleted! Are you sure?')) return;
-      state = {
-        lang: 'bn',
-        theme: 'classic',
-        activeTab: 'dashboard',
-        pin: '',
-        isLocked: false,
-        shop: { name: 'মেসার্স ডিজিটাল স্টোর', phone: '০১৭০০-০০০০০০', address: 'ঢাকা, বাংলাদেশ' },
-        products: [],
-        transactions: [],
-        sales: [],
-        parties: [],
-        cart: [],
-        downloadHistory: []
-      };
-      saveState();
-      renderAllViews();
-      showToast(state.lang === 'bn' ? 'সকল ডাটা সফলভাবে মুছে ফেলা হয়েছে' : 'All data reset', 'info');
-    }
-
-    /* -------------------------------------------------------------
-       16. NOTIFICATION TOAST UTILITY
-       ------------------------------------------------------------- */
     function showToast(msg, type = 'info') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
@@ -2934,19 +3022,13 @@
       toast.textContent = msg;
 
       container.appendChild(toast);
-      setTimeout(() => {
-        toast.classList.remove('translate-y-2', 'opacity-0');
-      }, 10);
-
+      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
       setTimeout(() => {
         toast.classList.add('opacity-0', 'translate-y-2');
         setTimeout(() => toast.remove(), 300);
-      }, 3000);
+      }, 3200);
     }
 
-    /* -------------------------------------------------------------
-       17. GLOBAL INITIALIZATION
-       ------------------------------------------------------------- */
     function renderAllViews() {
       applyLanguage();
       renderDashboard();
@@ -2954,33 +3036,17 @@
       renderInventoryTable();
       renderLedgerTable();
       renderPartiesTable();
-      updateDownloadHistoryBadge();
-
-      // Populate settings fields
-      if (document.getElementById('setting-shop-name')) {
-        document.getElementById('setting-shop-name').value = state.shop.name;
-        document.getElementById('setting-shop-phone').value = state.shop.phone;
-        document.getElementById('setting-shop-address').value = state.shop.address;
-      }
-
-      if (window.lucide) lucide.createIcons();
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      loadState();
-      setTheme(state.theme || 'classic');
+      setTheme(state.theme);
       applyLanguage();
 
-      // Date defaults for report
       const now = new Date();
       const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
       const todayStr = now.toISOString().split('T')[0];
       if (document.getElementById('rep-from-date')) document.getElementById('rep-from-date').value = firstDay;
       if (document.getElementById('rep-to-date')) document.getElementById('rep-to-date').value = todayStr;
-
-      if (state.isLocked) {
-        document.getElementById('pin-lock-screen').classList.remove('hidden');
-      }
 
       renderAllViews();
     });

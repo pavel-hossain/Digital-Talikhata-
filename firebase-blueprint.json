@@ -1,0 +1,113 @@
+{
+  "entities": {
+    "Store": {
+      "title": "Store",
+      "description": "Multi-tenant store metadata and proprietor profile",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "ownerId": { "type": "string" },
+        "ownerEmail": { "type": "string" },
+        "shopName": { "type": "string", "maxLength": 100 },
+        "proprietor": { "type": "string", "maxLength": 100 },
+        "category": { "type": "string", "maxLength": 50 },
+        "phone": { "type": "string", "maxLength": 30 },
+        "address": { "type": "string", "maxLength": 200 },
+        "invoiceFooter": { "type": "string", "maxLength": 200 },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["ownerId", "shopName"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "Inventory product item within a store",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "storeId": { "type": "string" },
+        "name": { "type": "string", "maxLength": 120 },
+        "sku": { "type": "string", "maxLength": 60 },
+        "category": { "type": "string", "maxLength": 60 },
+        "costPrice": { "type": "number" },
+        "sellingPrice": { "type": "number" },
+        "stock": { "type": "number" },
+        "unit": { "type": "string", "maxLength": 20 },
+        "minStock": { "type": "number" }
+      },
+      "required": ["storeId", "name", "costPrice", "sellingPrice", "stock"]
+    },
+    "Sale": {
+      "title": "Sale",
+      "description": "POS sales invoice and order receipt",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "storeId": { "type": "string" },
+        "invoiceNo": { "type": "string", "maxLength": 40 },
+        "customerId": { "type": "string" },
+        "customerName": { "type": "string", "maxLength": 100 },
+        "subtotal": { "type": "number" },
+        "discount": { "type": "number" },
+        "total": { "type": "number" },
+        "paidAmount": { "type": "number" },
+        "dueAmount": { "type": "number" },
+        "paymentMethod": { "type": "string", "maxLength": 30 },
+        "date": { "type": "string" }
+      },
+      "required": ["storeId", "invoiceNo", "total", "paidAmount"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Daily ledger income and operational expense record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "storeId": { "type": "string" },
+        "type": { "type": "string", "enum": ["income", "expense", "sale"] },
+        "category": { "type": "string", "maxLength": 80 },
+        "amount": { "type": "number" },
+        "method": { "type": "string", "maxLength": 30 },
+        "note": { "type": "string", "maxLength": 250 },
+        "date": { "type": "string" }
+      },
+      "required": ["storeId", "type", "amount", "date"]
+    },
+    "Party": {
+      "title": "Party",
+      "description": "Customer and supplier contact with due balance",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "storeId": { "type": "string" },
+        "name": { "type": "string", "maxLength": 100 },
+        "type": { "type": "string", "enum": ["customer", "supplier"] },
+        "phone": { "type": "string", "maxLength": 30 },
+        "address": { "type": "string", "maxLength": 200 },
+        "balance": { "type": "number" }
+      },
+      "required": ["storeId", "name", "type"]
+    }
+  },
+  "firestore": {
+    "/stores/{storeId}": {
+      "schema": "Store",
+      "description": "Individual tenant store document"
+    },
+    "/stores/{storeId}/products/{productId}": {
+      "schema": "Product",
+      "description": "Store inventory products"
+    },
+    "/stores/{storeId}/sales/{saleId}": {
+      "schema": "Sale",
+      "description": "Store POS sales orders"
+    },
+    "/stores/{storeId}/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Store daily income and expense transactions"
+    },
+    "/stores/{storeId}/parties/{partyId}": {
+      "schema": "Party",
+      "description": "Store customer and supplier records"
+    }
+  }
+}
