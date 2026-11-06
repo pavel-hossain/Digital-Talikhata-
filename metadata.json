@@ -1,6 +1,6 @@
 {
   "name": "Digital Talikhata - ডিজিটাল টালি খাতা",
-  "description": "Modern Bengali digital ledger and accounting app with daily transactions, party balance ledger, reports, PDF/Excel export, and PIN security.",
+  "description": "Enterprise-grade bilingual (Bengali & English) Digital Talikhata & ERP with Inventory Management, POS Cash Memo, Profit/Loss Statement, Due Ledger, and Multi-format exports.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
