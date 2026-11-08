@@ -1011,9 +1011,10 @@
 
       <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-xs">
         <div class="overflow-x-auto scrollbar-thin">
-          <table class="w-full min-w-[640px] text-left text-xs">
+          <table class="w-full min-w-[680px] text-left text-xs">
             <thead class="bg-[var(--bg-subtle)] border-b border-[var(--border-color)] text-[var(--text-muted)] uppercase tracking-wider font-semibold">
               <tr>
+                <th class="p-3.5 w-14 text-center" data-i18n="imageCol">ছবি</th>
                 <th class="p-3.5" data-i18n="thProduct">পণ্যের বিবরণ</th>
                 <th class="p-3.5" data-i18n="thCategory">ক্যাটাগরি</th>
                 <th class="p-3.5 text-right" data-i18n="thBuyPrice">ক্রয় মূল্য</th>
@@ -1337,6 +1338,33 @@
       </div>
       <form id="product-form" onsubmit="saveProduct(event)" class="space-y-3 text-xs">
         <input type="hidden" id="prod-id">
+        <input type="hidden" id="prod-image-data">
+
+        <!-- Product Image Upload & URL Section -->
+        <div class="p-3 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-subtle)] space-y-2">
+          <label class="block font-semibold text-[var(--text-main)]" data-i18n="prodImageLabel">পণ্যের ছবি (ছবি আপলোড বা লিংক)</label>
+          <div class="flex items-center gap-3">
+            <div id="prod-image-preview-container" class="relative w-16 h-16 rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] flex items-center justify-center shrink-0 overflow-hidden shadow-2xs">
+              <img id="prod-image-preview" src="" alt="Preview" class="w-full h-full object-cover hidden">
+              <div id="prod-image-placeholder" class="text-slate-400 flex flex-col items-center justify-center text-[10px]">
+                <i data-lucide="image-plus" class="w-6 h-6 mb-0.5 opacity-60"></i>
+                <span class="text-[9px]" data-i18n="noImagePreview">ছবি নেই</span>
+              </div>
+              <button type="button" id="prod-image-remove-btn" onclick="removeProductImage()" class="hidden absolute top-1 right-1 w-4 h-4 bg-rose-600 hover:bg-rose-700 text-white rounded-full flex items-center justify-center text-[10px] shadow-xs leading-none">✕</button>
+            </div>
+            <div class="flex-1 space-y-1.5 min-w-0">
+              <input type="file" id="prod-image-file" accept="image/*" onchange="handleProductImageFile(event)" class="hidden">
+              <div class="flex items-center gap-2">
+                <button type="button" onclick="document.getElementById('prod-image-file').click()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-emerald-500 text-emerald-600 bg-emerald-500/10 hover:bg-emerald-500/20 text-xs font-bold transition active:scale-95 touch-manipulation">
+                  <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                  <span data-i18n="uploadImageBtn">ডিভাইস থেকে আপলোড</span>
+                </button>
+              </div>
+              <input type="url" id="prod-image-url" oninput="handleProductImageUrlInput()" placeholder="অথবা ছবির URL পেস্ট করুন (https://...)" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] px-2.5 py-1.5 text-[11px] outline-none text-[var(--text-main)] placeholder-[var(--text-muted)] focus:border-emerald-500">
+            </div>
+          </div>
+        </div>
+
         <div>
           <label class="block font-semibold mb-1" data-i18n="prodNameLabel">পণ্যের নাম *</label>
           <input type="text" id="prod-name" required placeholder="যেমন: মিনিকেট চাল" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2 outline-none">
@@ -1928,6 +1956,11 @@
         backupTitle: "ডাটা ব্যাকআপ ও এক্সপোর্ট",
         btnExportBackup: "ব্যাকআপ ফাইল ডাউনলোড করুন (.json)",
         modalNewProduct: "নতুন প্রোডাক্ট এন্ট্রি",
+        imageCol: "ছবি",
+        prodImageLabel: "পণ্যের ছবি (ছবি আপলোড বা লিংক)",
+        uploadImageBtn: "ডিভাইস থেকে আপলোড",
+        orPasteUrl: "অথবা ছবির URL পেস্ট করুন",
+        noImagePreview: "ছবি নেই",
         prodNameLabel: "পণ্যের নাম *",
         prodSkuLabel: "বারকোড / SKU",
         prodCatLabel: "ক্যাটাগরি",
@@ -2132,6 +2165,11 @@
         backupTitle: "Data Backup & Export",
         btnExportBackup: "Download Backup (.json)",
         modalNewProduct: "New Product Entry",
+        imageCol: "Image",
+        prodImageLabel: "Product Image (Upload or URL)",
+        uploadImageBtn: "Upload from Device",
+        orPasteUrl: "Or paste image URL",
+        noImagePreview: "No image",
         prodNameLabel: "Product Name *",
         prodSkuLabel: "Barcode / SKU",
         prodCatLabel: "Category",
@@ -2250,6 +2288,67 @@
       const val = Number(amount) || 0;
       const prefix = state.lang === 'bn' ? '৳ ' : 'BDT ';
       return prefix + n(val.toFixed(0));
+    }
+
+    /* -------------------------------------------------------------
+       DATE LOCALIZATION HELPER (BILINGUAL GREGORIAN / BENGALI)
+       Automatically switches based on active state.lang
+       Supports: 'standard', 'chart', 'datetime', 'short'
+       ------------------------------------------------------------- */
+    function formatDate(dateInput, formatType = 'standard') {
+      if (!dateInput) return '-';
+      const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+      if (isNaN(d.getTime())) return String(dateInput);
+
+      const isBn = state.lang === 'bn';
+      const bnDigits = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+      const toBn = (str) => String(str).replace(/[0-9]/g, digit => bnDigits[digit]);
+
+      const bnMonthsShort = ['জানু', 'ফেব্রু', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টে', 'অক্টো', 'নভে', 'ডিসে'];
+      const bnMonthsFull = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
+      const enMonthsShort = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const enMonthsFull = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
+      const day = d.getDate();
+      const month = d.getMonth();
+      const year = d.getFullYear();
+      const padDay = String(day).padStart(2, '0');
+      const padMonth = String(month + 1).padStart(2, '0');
+
+      let hours = d.getHours();
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      const isPM = hours >= 12;
+      const ampm = isBn ? (isPM ? 'অপরাহ্ন' : 'পূর্বাহ্ন') : (isPM ? 'PM' : 'AM');
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      const padHours = String(hours).padStart(2, '0');
+
+      if (formatType === 'chart') {
+        if (isBn) {
+          return `${toBn(padDay)} ${bnMonthsShort[month]}`;
+        }
+        return `${enMonthsShort[month]} ${padDay}`;
+      }
+
+      if (formatType === 'datetime' || formatType === 'full') {
+        if (isBn) {
+          return `${toBn(padDay)} ${bnMonthsFull[month]}, ${toBn(year)} • ${toBn(padHours)}:${toBn(minutes)} ${ampm}`;
+        }
+        return `${enMonthsShort[month]} ${padDay}, ${year} • ${padHours}:${minutes} ${ampm}`;
+      }
+
+      if (formatType === 'short') {
+        if (isBn) {
+          return `${toBn(padDay)}/${toBn(padMonth)}/${toBn(year)}`;
+        }
+        return `${padDay}/${padMonth}/${year}`;
+      }
+
+      // Default 'standard':
+      if (isBn) {
+        return `${toBn(padDay)} ${bnMonthsShort[month]}, ${toBn(year)}`;
+      }
+      return `${enMonthsShort[month]} ${padDay}, ${year}`;
     }
 
     function toggleLanguage() {
@@ -2388,6 +2487,72 @@
       };
 
       document.getElementById('auth-modal').classList.add('hidden');
+
+      if (state.products.length === 0) {
+        state.products = [
+          {
+            id: 'prod-demo-1',
+            name: 'মিনিকেট প্রিমিয়াম চাল (৫০ কেজি)',
+            sku: 'RICE-MIN-50',
+            category: 'মুদি (Grocery)',
+            costPrice: 3100,
+            sellingPrice: 3450,
+            stock: 24,
+            unit: 'Bag',
+            minStock: 5,
+            image: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=400&q=80'
+          },
+          {
+            id: 'prod-demo-2',
+            name: 'তীর সয়াবিন তেল (৫ লিটার)',
+            sku: 'OIL-TEER-5L',
+            category: 'ভোজ্যতেল',
+            costPrice: 820,
+            sellingPrice: 890,
+            stock: 18,
+            unit: 'Pcs',
+            minStock: 4,
+            image: 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=400&q=80'
+          },
+          {
+            id: 'prod-demo-3',
+            name: 'রাধুনি হলুদের গুঁড়া (২০০ গ্রাম)',
+            sku: 'RAD-TUR-200',
+            category: 'মশলা',
+            costPrice: 75,
+            sellingPrice: 95,
+            stock: 40,
+            unit: 'Pcs',
+            minStock: 8,
+            image: 'https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=400&q=80'
+          },
+          {
+            id: 'prod-demo-4',
+            name: 'দানো ফুলক্রিম মিল্ক পাউডার (১ কেজি)',
+            sku: 'MILK-DANO-1K',
+            category: 'দুগ্ধজাত',
+            costPrice: 840,
+            sellingPrice: 920,
+            stock: 12,
+            unit: 'Pcs',
+            minStock: 3,
+            image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=400&q=80'
+          },
+          {
+            id: 'prod-demo-5',
+            name: 'ফ্রেশ পরিশোধিত চিনি (১ কেজি)',
+            sku: 'SUGAR-FR-1K',
+            category: 'মুদি (Grocery)',
+            costPrice: 125,
+            sellingPrice: 140,
+            stock: 3,
+            unit: 'Pcs',
+            minStock: 6,
+            image: 'https://images.unsplash.com/photo-1581441363689-1f3c3c414635?auto=format&fit=crop&w=400&q=80'
+          }
+        ];
+      }
+
       updateTenantUI();
       renderAllViews();
       showToast(state.lang === 'bn' ? 'ডেমো স্টোরে সংযুক্ত হয়েছে' : 'Connected to Demo Store', 'success');
@@ -2712,7 +2877,7 @@
             badge: state.lang === 'bn' ? 'কাস্টম সেলস' : 'Custom Sale',
             badgeClass: 'bg-emerald-500/15 text-emerald-600 border border-emerald-500/30',
             title: cs.itemDesc || 'Item',
-            subtitle: `${cs.customer ? cs.customer + ' • ' : ''}${new Date(cs.date).toLocaleDateString()} • ${cs.method || 'Cash'}`,
+            subtitle: `${cs.customer ? cs.customer + ' • ' : ''}${formatDate(cs.date)} • ${cs.method || 'Cash'}`,
             amount: c(cs.total),
             targetTab: 'custom-sales',
             actionData: cs.id
@@ -2731,7 +2896,7 @@
             badge: state.lang === 'bn' ? 'ইনভয়েস' : 'Invoice',
             badgeClass: 'bg-blue-500/15 text-blue-600 border border-blue-500/30',
             title: s.customerName || 'Cash Sale',
-            subtitle: `${(s.items || []).map(i => i.name).slice(0, 2).join(', ')} • ${new Date(s.date).toLocaleDateString()}`,
+            subtitle: `${(s.items || []).map(i => i.name).slice(0, 2).join(', ')} • ${formatDate(s.date)}`,
             amount: c(s.total),
             targetTab: 'dashboard',
             actionData: s.id
@@ -2788,7 +2953,7 @@
             badge: tx.type === 'income' ? (state.lang === 'bn' ? 'আয় লেজার' : 'Income Tx') : (state.lang === 'bn' ? 'ব্যয় লেজার' : 'Expense Tx'),
             badgeClass: tx.type === 'income' ? 'bg-emerald-500/15 text-emerald-600 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-600 border border-rose-500/30',
             title: tx.note || tx.category || 'Transaction',
-            subtitle: `${tx.partyName ? tx.partyName + ' • ' : ''}${new Date(tx.date).toLocaleDateString()}`,
+            subtitle: `${tx.partyName ? tx.partyName + ' • ' : ''}${formatDate(tx.date)}`,
             amount: (tx.type === 'income' ? '+' : '-') + ' ' + c(tx.amount),
             targetTab: 'ledger',
             actionData: tx.id
@@ -3065,7 +3230,7 @@
                 <span>${escapeHTML(sale.customerName || 'নগদ ক্রেতা')}</span>
                 <span class="text-[10px] font-mono text-emerald-600 font-normal">#${sale.invoiceNo}</span>
               </div>
-              <div class="text-[10px] text-[var(--text-muted)]">${new Date(sale.date).toLocaleDateString()} | ${sale.paymentMethod}</div>
+              <div class="text-[10px] text-[var(--text-muted)]">${formatDate(sale.date, 'standard')} | ${sale.paymentMethod}</div>
             </div>
             <div class="text-right">
               <div class="font-mono font-bold text-emerald-600">${c(sale.total)}</div>
@@ -3108,7 +3273,7 @@
         const d = new Date();
         d.setDate(d.getDate() - i);
         const dateStr = d.toISOString().split('T')[0];
-        labels.push(dateStr.slice(5));
+        labels.push(formatDate(d, 'chart'));
 
         const daySales = state.sales.filter(s => s.date && s.date.startsWith(dateStr)).reduce((a, b) => a + (Number(b.total) || 0), 0);
         const dayExpense = state.transactions.filter(t => t.date && t.date.startsWith(dateStr) && t.type === 'expense').reduce((a, b) => a + (Number(b.amount) || 0), 0);
@@ -3221,24 +3386,35 @@
       grid.innerHTML = filtered.map(prod => {
         const isOutOfStock = Number(prod.stock) <= 0;
         return `
-          <div onclick="${isOutOfStock ? '' : `addToCart('${prod.id}')`}" class="p-3.5 rounded-2xl border ${isOutOfStock ? 'opacity-60 bg-slate-100 dark:bg-slate-900 border-slate-300' : 'bg-[var(--bg-surface)] border-[var(--border-color)] hover:border-emerald-500 cursor-pointer shadow-2xs hover:shadow-sm'} transition flex flex-col justify-between">
+          <div onclick="${isOutOfStock ? '' : `addToCart('${prod.id}')`}" class="group p-3 rounded-2xl border ${isOutOfStock ? 'opacity-60 bg-slate-100 dark:bg-slate-900 border-slate-300' : 'bg-[var(--bg-surface)] border-[var(--border-color)] hover:border-emerald-500 cursor-pointer shadow-2xs hover:shadow-sm'} transition flex flex-col justify-between">
             <div>
+              <div class="h-24 w-full rounded-xl overflow-hidden mb-2 bg-[var(--bg-subtle)] border border-[var(--border-color)] flex items-center justify-center relative">
+                ${prod.image
+                  ? `<img src="${escapeHTML(prod.image)}" alt="${escapeHTML(prod.name)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'flex items-center justify-center text-slate-400 opacity-60 text-lg\\'>📦</div>';">`
+                  : `<div class="flex flex-col items-center justify-center text-slate-400 gap-1 opacity-50">
+                       <i data-lucide="package" class="w-7 h-7"></i>
+                     </div>`
+                }
+                ${isOutOfStock ? `<span class="absolute inset-0 bg-slate-950/70 flex items-center justify-center text-rose-400 text-[10px] font-bold uppercase tracking-wider backdrop-blur-2xs">${state.lang === 'bn' ? 'স্টক শেষ' : 'Out of Stock'}</span>` : ''}
+              </div>
+
               <div class="flex items-start justify-between gap-1 mb-1">
-                <h4 class="font-bold text-xs line-clamp-1">${highlightMatch(prod.name, search)}</h4>
-                <span class="text-[10px] font-mono px-1.5 py-0.2 rounded-md ${isOutOfStock ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}">
+                <h4 class="font-bold text-xs line-clamp-1 group-hover:text-emerald-600 transition text-[var(--text-main)]">${highlightMatch(prod.name, search)}</h4>
+                <span class="text-[10px] font-mono px-1.5 py-0.2 rounded-md shrink-0 ${isOutOfStock ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}">
                   ${isOutOfStock ? 'Out' : n(prod.stock) + ' ' + (prod.unit || 'Pcs')}
                 </span>
               </div>
-              <div class="text-[10px] text-[var(--text-muted)]">${prod.category || 'General'}</div>
+              <div class="text-[10px] text-[var(--text-muted)] line-clamp-1">${prod.category || 'General'}</div>
             </div>
             <div class="flex items-center justify-between pt-2 mt-2 border-t border-[var(--border-color)]">
-              <span class="font-mono font-bold text-emerald-600 text-xs">${c(prod.sellingPrice || prod.sellPrice)}</span>
-              <button class="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-bold ${isOutOfStock ? 'hidden' : ''}">+</button>
+              <span class="font-mono font-bold text-emerald-600 text-xs sm:text-sm">${c(prod.sellingPrice || prod.sellPrice)}</span>
+              <button class="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-bold active:scale-95 transition ${isOutOfStock ? 'hidden' : ''}">+</button>
             </div>
           </div>
         `;
       }).join('');
 
+      if (window.lucide) lucide.createIcons({ root: grid });
       renderCartItems();
     }
 
@@ -3311,20 +3487,27 @@
       }
 
       container.innerHTML = state.cart.map((item, idx) => `
-        <div class="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] animated-row" style="animation-delay: ${Math.min(idx * 0.03, 0.25)}s">
-          <div class="flex-1 pr-2">
+        <div class="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] animated-row gap-2" style="animation-delay: ${Math.min(idx * 0.03, 0.25)}s">
+          <div class="w-8 h-8 rounded-lg overflow-hidden border border-[var(--border-color)] bg-[var(--bg-surface)] flex items-center justify-center shrink-0 shadow-2xs">
+            ${item.product.image
+              ? `<img src="${escapeHTML(item.product.image)}" alt="${escapeHTML(item.product.name)}" class="w-full h-full object-cover">`
+              : `<i data-lucide="package" class="w-4 h-4 text-slate-400 opacity-60"></i>`
+            }
+          </div>
+          <div class="flex-1 min-w-0 pr-1">
             <div class="font-bold text-xs truncate">${escapeHTML(item.product.name)}</div>
             <div class="text-[10px] text-[var(--text-muted)] font-mono">${c(item.price)} × ${n(item.qty)}</div>
           </div>
-          <div class="flex items-center gap-1.5">
-            <button onclick="updateCartQty(${idx}, -1)" class="w-6 h-6 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-color)] text-xs font-bold hover:bg-slate-200">-</button>
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button onclick="updateCartQty(${idx}, -1)" class="w-6 h-6 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-color)] text-xs font-bold hover:bg-slate-200 active:scale-95 transition">-</button>
             <span class="font-mono text-xs font-bold px-1">${n(item.qty)}</span>
-            <button onclick="updateCartQty(${idx}, 1)" class="w-6 h-6 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-color)] text-xs font-bold hover:bg-slate-200">+</button>
+            <button onclick="updateCartQty(${idx}, 1)" class="w-6 h-6 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-color)] text-xs font-bold hover:bg-slate-200 active:scale-95 transition">+</button>
             <span class="font-mono font-bold text-xs w-16 text-right text-emerald-600">${c(item.price * item.qty)}</span>
             <button onclick="removeCartItem(${idx})" class="text-rose-500 hover:text-rose-700 ml-1">✕</button>
           </div>
         </div>
       `).join('');
+      if (window.lucide) lucide.createIcons({ root: container });
     }
 
     function calculatePosTotals() {
@@ -3510,8 +3693,8 @@
             <div>ক্রেতা: <span class="font-bold">${escapeHTML(sale.customerName)}</span></div>
           </div>
           <div class="text-right">
-            <div>তারিখ: ${new Date(sale.date).toLocaleDateString()}</div>
-            <div>সময়: ${new Date(sale.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+            <div>${state.lang === 'bn' ? 'তারিখ:' : 'Date:'} ${formatDate(sale.date, 'standard')}</div>
+            <div>${state.lang === 'bn' ? 'সময়:' : 'Time:'} ${formatDate(sale.date, 'datetime').split(' • ')[1] || ''}</div>
           </div>
         </div>
 
@@ -3632,7 +3815,7 @@
 
       const tbody = document.getElementById('inventory-table-body');
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-slate-400 text-xs">${state.lang === 'bn' ? 'কোনো পণ্য পাওয়া যায়নি।' : 'No inventory items found.'}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400 text-xs">${state.lang === 'bn' ? 'কোনো পণ্য পাওয়া যায়নি।' : 'No inventory items found.'}</td></tr>`;
         return;
       }
 
@@ -3643,6 +3826,14 @@
 
         return `
           <tr class="hover:bg-[var(--bg-subtle)] transition animated-row" style="animation-delay: ${Math.min(idx * 0.03, 0.35)}s">
+            <td class="p-3.5 text-center">
+              <div class="w-10 h-10 rounded-xl overflow-hidden border border-[var(--border-color)] bg-[var(--bg-subtle)] mx-auto flex items-center justify-center shrink-0 shadow-2xs">
+                ${prod.image
+                  ? `<img src="${escapeHTML(prod.image)}" alt="${escapeHTML(prod.name)}" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'text-slate-400 opacity-60 text-xs\\'>📦</div>';">`
+                  : `<i data-lucide="package" class="w-5 h-5 text-slate-400 opacity-60"></i>`
+                }
+              </div>
+            </td>
             <td class="p-3.5">
               <div class="font-bold text-slate-800 dark:text-slate-100">${highlightMatch(prod.name, search)}</div>
               <div class="text-[10px] text-slate-400 font-mono">SKU: ${highlightMatch(prod.sku || '-', search)}</div>
@@ -3665,6 +3856,8 @@
           </tr>
         `;
       }).join('');
+
+      if (window.lucide) lucide.createIcons({ root: tbody });
     }
 
     function clearInvSearch() {
@@ -3672,11 +3865,101 @@
       renderInventoryTable();
     }
 
+    /* -------------------------------------------------------------
+       PRODUCT IMAGE FILE & URL PROCESSORS
+       ------------------------------------------------------------- */
+    function handleProductImageFile(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        showToast(state.lang === 'bn' ? 'দয়া করে একটি সঠিক ইমেজ ফাইল নির্বাচন করুন' : 'Please select a valid image file', 'error');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxSize = 360;
+
+          if (width > height) {
+            if (width > maxSize) {
+              height = Math.round((height * maxSize) / width);
+              width = maxSize;
+            }
+          } else {
+            if (height > maxSize) {
+              width = Math.round((width * maxSize) / height);
+              height = maxSize;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          const compressed = canvas.toDataURL('image/jpeg', 0.82);
+          setProductImagePreview(compressed);
+          document.getElementById('prod-image-data').value = compressed;
+          document.getElementById('prod-image-url').value = '';
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleProductImageUrlInput() {
+      const url = document.getElementById('prod-image-url').value.trim();
+      if (url) {
+        document.getElementById('prod-image-data').value = '';
+        setProductImagePreview(url);
+      } else {
+        setProductImagePreview('');
+      }
+    }
+
+    function removeProductImage() {
+      document.getElementById('prod-image-data').value = '';
+      document.getElementById('prod-image-url').value = '';
+      const fileInput = document.getElementById('prod-image-file');
+      if (fileInput) fileInput.value = '';
+      setProductImagePreview('');
+    }
+
+    function setProductImagePreview(src) {
+      const previewImg = document.getElementById('prod-image-preview');
+      const placeholder = document.getElementById('prod-image-placeholder');
+      const removeBtn = document.getElementById('prod-image-remove-btn');
+
+      if (src) {
+        if (previewImg) {
+          previewImg.src = src;
+          previewImg.classList.remove('hidden');
+        }
+        if (placeholder) placeholder.classList.add('hidden');
+        if (removeBtn) removeBtn.classList.remove('hidden');
+      } else {
+        if (previewImg) {
+          previewImg.src = '';
+          previewImg.classList.add('hidden');
+        }
+        if (placeholder) placeholder.classList.remove('hidden');
+        if (removeBtn) removeBtn.classList.add('hidden');
+      }
+    }
+
     function openProductModal() {
       document.getElementById('prod-id').value = '';
       document.getElementById('product-form').reset();
+      removeProductImage();
       document.getElementById('modal-product-title').textContent = t('modalNewProduct');
       document.getElementById('modal-product').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
     }
 
     function closeProductModal() {
@@ -3696,13 +3979,26 @@
       document.getElementById('prod-unit').value = prod.unit || 'Pcs';
       document.getElementById('prod-min-stock').value = prod.minStock || 5;
 
+      const imgVal = prod.image || '';
+      setProductImagePreview(imgVal);
+      if (imgVal.startsWith('data:')) {
+        document.getElementById('prod-image-data').value = imgVal;
+        document.getElementById('prod-image-url').value = '';
+      } else {
+        document.getElementById('prod-image-data').value = '';
+        document.getElementById('prod-image-url').value = imgVal;
+      }
+
       document.getElementById('modal-product-title').textContent = state.lang === 'bn' ? 'পণ্য সংশোধন করুন' : 'Edit Product';
       document.getElementById('modal-product').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
     }
 
     async function saveProduct(e) {
       e.preventDefault();
       const id = document.getElementById('prod-id').value;
+      const image = document.getElementById('prod-image-data').value || document.getElementById('prod-image-url').value.trim() || '';
+
       const productData = {
         name: document.getElementById('prod-name').value.trim(),
         sku: document.getElementById('prod-sku').value.trim(),
@@ -3711,7 +4007,8 @@
         sellingPrice: Number(document.getElementById('prod-sell-price').value) || 0,
         stock: Number(document.getElementById('prod-stock').value) || 0,
         unit: document.getElementById('prod-unit').value,
-        minStock: Number(document.getElementById('prod-min-stock').value) || 5
+        minStock: Number(document.getElementById('prod-min-stock').value) || 5,
+        image: image
       };
 
       if (isFirebaseReady && state.storeId && state.storeId !== 'demo-store-001') {
@@ -3729,6 +4026,7 @@
           state.products.push({ id: 'prod-' + Date.now(), ...productData });
         }
         renderInventoryTable();
+        renderPosCatalog();
       }
 
       closeProductModal();
@@ -3991,7 +4289,7 @@
         return `
           <tr class="hover:bg-[var(--bg-subtle)] transition animated-row" style="animation-delay: ${Math.min(idx * 0.03, 0.35)}s">
             <td class="p-3.5 font-mono text-slate-500 text-[11px] whitespace-nowrap">
-              ${new Date(cs.date).toLocaleDateString()}
+              ${formatDate(cs.date, 'standard')}
             </td>
             <td class="p-3.5">
               <div class="font-bold text-[var(--text-main)]">${highlightMatch(cs.itemDesc, search)}</div>
@@ -4088,8 +4386,8 @@
               <span class="inline-block px-3 py-1 rounded-md bg-slate-900 text-white font-mono text-[10px] font-bold tracking-wider uppercase">
                 ${state.lang === 'bn' ? 'কাস্টম সেলস স্টেটমেন্ট' : 'CUSTOM SALES STATEMENT'}
               </span>
-              <div class="text-[10px] text-slate-500 font-mono mt-1">${state.lang === 'bn' ? 'প্রস্তুতের সময়:' : 'Generated:'} ${new Date().toLocaleString()}</div>
-              <div class="text-[10px] text-slate-700 font-bold mt-0.5">${state.lang === 'bn' ? 'সময়কাল:' : 'Period:'} ${activeCustomStatementData.fromStr} - ${activeCustomStatementData.toStr}</div>
+              <div class="text-[10px] text-slate-500 font-mono mt-1">${state.lang === 'bn' ? 'প্রস্তুতের সময়:' : 'Generated:'} ${formatDate(new Date(), 'datetime')}</div>
+              <div class="text-[10px] text-slate-700 font-bold mt-0.5">${state.lang === 'bn' ? 'সময়কাল:' : 'Period:'} ${activeCustomStatementData.fromStr ? formatDate(activeCustomStatementData.fromStr) : '-'} ${state.lang === 'bn' ? 'হতে' : 'to'} ${activeCustomStatementData.toStr ? formatDate(activeCustomStatementData.toStr) : '-'}</div>
             </div>
           </div>
 
@@ -4138,7 +4436,7 @@
                   const p = (Number(s.total) || 0) - (Number(s.cost || 0) * Number(s.qty || 1));
                   return `
                     <tr class="text-slate-800">
-                      <td class="p-2 font-mono text-[11px] text-slate-500">${new Date(s.date).toLocaleDateString()}</td>
+                      <td class="p-2 font-mono text-[11px] text-slate-500">${formatDate(s.date, 'standard')}</td>
                       <td class="p-2 font-bold">${escapeHTML(s.itemDesc)}</td>
                       <td class="p-2 text-slate-600">${escapeHTML(s.customer || '-')}</td>
                       <td class="p-2 text-right font-mono">${n(s.qty)} × ${c(s.rate)}</td>
@@ -4211,7 +4509,7 @@
         ['দোকানের নাম / Store:', state.store.shopName || state.store.name || 'Store'],
         ['স্বত্বাধিকারী / Proprietor:', state.store.proprietor || 'Proprietor'],
         ['বিবরণ / Report:', 'Custom / Direct Sales Statement'],
-        ['তারিখ / Generated:', new Date().toLocaleString()],
+        ['তারিখ / Generated:', formatDate(new Date(), 'datetime')],
         [],
         ['তারিখ / Date', 'বিবরণ / Description', 'কাস্টমার / Customer', 'পরিমাণ / Qty', 'দর / Rate (৳)', 'ক্রয়মূল্য / Cost (৳)', 'মোট বিক্রয় / Total (৳)', 'লাভ / Profit (৳)', 'মাধ্যম / Method', 'নোট / Note']
       ];
@@ -4219,7 +4517,7 @@
       records.forEach(r => {
         const itemProfit = (Number(r.total) || 0) - (Number(r.cost || 0) * Number(r.qty || 1));
         data.push([
-          new Date(r.date).toLocaleDateString(),
+          formatDate(r.date, 'standard'),
           r.itemDesc,
           r.customer || '',
           r.qty,
@@ -4272,7 +4570,7 @@
 
         return `
           <tr class="hover:bg-[var(--bg-subtle)] transition animated-row" style="animation-delay: ${Math.min(idx * 0.03, 0.35)}s">
-            <td class="p-3.5 font-mono text-slate-500">${new Date(tx.date).toLocaleDateString()}</td>
+            <td class="p-3.5 font-mono text-slate-500">${formatDate(tx.date, 'standard')}</td>
             <td class="p-3.5">${typeBadge}</td>
             <td class="p-3.5 font-medium">${highlightMatch(tx.category || '-', search)}</td>
             <td class="p-3.5">${highlightMatch(tx.partyName || '-', search)}</td>
@@ -4341,7 +4639,7 @@
 
     function exportLedgerExcel() {
       const data = state.transactions.map(t => ({
-        'Date': new Date(t.date).toLocaleDateString(),
+        'Date': formatDate(t.date, 'standard'),
         'Type': t.type,
         'Category': t.category,
         'Party': t.partyName || '',
@@ -4661,8 +4959,8 @@
               ${state.lang === 'bn' ? 'আর্থিক লাভ-ক্ষতি ও আয়-ব্যয় বিবরণী' : 'COMPREHENSIVE STATEMENT OF PROFIT & LOSS'}
             </div>
             <div class="flex justify-between items-center text-[11px] text-slate-600 mt-3 pt-2 border-t border-dashed border-slate-300">
-              <div><strong>${state.lang === 'bn' ? 'তারিখ সীমা:' : 'Period:'}</strong> ${activeStatementData.fromStr} হতে ${activeStatementData.toStr}</div>
-              <div><strong>${state.lang === 'bn' ? 'প্রিন্ট সময়:' : 'Generated on:'}</strong> ${new Date().toLocaleString()}</div>
+              <div><strong>${state.lang === 'bn' ? 'তারিখ সীমা:' : 'Period:'}</strong> ${activeStatementData.fromStr ? formatDate(activeStatementData.fromStr) : '-'} ${state.lang === 'bn' ? 'হতে' : 'to'} ${activeStatementData.toStr ? formatDate(activeStatementData.toStr) : '-'}</div>
+              <div><strong>${state.lang === 'bn' ? 'প্রিন্ট সময়:' : 'Generated on:'}</strong> ${formatDate(new Date(), 'datetime')}</div>
             </div>
           </div>
 
@@ -4854,7 +5152,7 @@
         ['দোকানের নাম / Store:', state.store.shopName || state.store.name || 'Store'],
         ['স্বত্বাধিকারী / Proprietor:', state.store.proprietor || 'Proprietor'],
         ['তারিখ সীমা / Period:', `${activeStatementData.fromStr} to ${activeStatementData.toStr}`],
-        ['প্রস্তুতের সময় / Date:', new Date().toLocaleString()],
+        ['প্রস্তুতের সময় / Date:', formatDate(new Date(), 'datetime')],
         [],
         ['খাত / Account Line', 'প্রকৃতি / Type', 'পরিমাণ / Amount (৳)'],
         ['১. মোট পণ্য বিক্রয় টার্নওভার (Gross Sales)', 'Inflow', activeStatementData.totalSales],
@@ -4889,7 +5187,7 @@
         title: title,
         section: section,
         format: format,
-        date: new Date().toLocaleString(),
+        date: new Date().toISOString(),
         rows: rows || 0
       };
       state.downloadHistory.unshift(record);
@@ -4906,7 +5204,7 @@
           <div class="p-3 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)] flex items-center justify-between text-xs animated-row" style="animation-delay: ${Math.min(idx * 0.03, 0.3)}s">
             <div>
               <div class="font-bold text-slate-800 dark:text-slate-100">${escapeHTML(dl.title)}</div>
-              <div class="text-[10px] text-[var(--text-muted)]">${dl.section} • ${dl.date}</div>
+              <div class="text-[10px] text-[var(--text-muted)]">${dl.section} • ${formatDate(dl.date, 'datetime')}</div>
             </div>
             <div class="flex items-center gap-2">
               <span class="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono ${dl.format === 'PDF' ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800'}">
