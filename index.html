@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn" data-theme="emerald">
+<html lang="en" class="dark" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -39,8 +39,20 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
   <style>
-    /* Multi-Tenant Themes */
-    :root, [data-theme="emerald"] {
+    /* Multi-Tenant Themes (Default: Dark Mode) */
+    :root, [data-theme="dark"] {
+      --bg-canvas: #090d16;
+      --bg-surface: #0f172a;
+      --bg-subtle: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --primary-color: #10b981;
+      --primary-hover: #059669;
+      --primary-text: #ffffff;
+    }
+
+    [data-theme="emerald"] {
       --bg-canvas: #f8fafc;
       --bg-surface: #ffffff;
       --bg-subtle: #f1f5f9;
@@ -50,18 +62,6 @@
       --primary-color: #059669;
       --primary-hover: #047857;
       --primary-text: #ffffff;
-    }
-
-    [data-theme="dark"] {
-      --bg-canvas: #090d16;
-      --bg-surface: #111827;
-      --bg-subtle: #1f2937;
-      --text-main: #f9fafb;
-      --text-muted: #9ca3af;
-      --border-color: #374151;
-      --primary-color: #10b981;
-      --primary-hover: #34d399;
-      --primary-text: #042f2e;
     }
 
     [data-theme="light"] {
@@ -91,16 +91,17 @@
     body {
       background-color: var(--bg-canvas);
       color: var(--text-main);
-      font-family: 'Hind Siliguri', 'Inter', sans-serif;
+      font-family: 'Inter', 'Hind Siliguri', sans-serif;
       transition: background-color 0.2s, color 0.2s;
     }
 
     .search-highlight {
-      background-color: #fef08a !important;
-      color: #713f12 !important;
+      background-color: #fbbf24 !important;
+      color: #000000 !important;
       font-weight: 700;
-      padding: 0 3px;
-      border-radius: 3px;
+      padding: 1px 4px;
+      border-radius: 4px;
+      display: inline-block;
     }
 
     .thermal-receipt {
@@ -127,6 +128,67 @@
 
     .animated-row {
       animation: rowFadeSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes modalScaleIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.95) translateY(8px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .modal-animate {
+      animation: modalScaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes tabFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .tab-content-animate {
+      animation: tabFadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes toastSlideIn {
+      from {
+        transform: translateX(120%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .toast-animate {
+      animation: toastSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes pulseHighlight {
+      0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+      }
+      70% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+      }
+    }
+
+    .pulse-highlight {
+      animation: pulseHighlight 1.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     @media print {
@@ -284,7 +346,7 @@
           </div>
         </button>
 
-        <button onclick="switchTab('pos')" id="tab-btn-pos" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)]">
+        <button onclick="switchTab('pos')" id="tab-btn-pos" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)] hover:scale-[1.01] active:scale-[0.98]">
           <div class="flex items-center gap-3">
             <i data-lucide="shopping-cart" class="w-4 h-4"></i>
             <span data-i18n="navPOS">পিওএস ও মেমো</span>
@@ -292,7 +354,15 @@
           <span class="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold">POS</span>
         </button>
 
-        <button onclick="switchTab('inventory')" id="tab-btn-inventory" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)]">
+        <button onclick="switchTab('custom-sales')" id="tab-btn-custom-sales" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)] hover:scale-[1.01] active:scale-[0.98]">
+          <div class="flex items-center gap-3">
+            <i data-lucide="badge-dollar-sign" class="w-4 h-4"></i>
+            <span data-i18n="navCustomSales">কাস্টম সেলস</span>
+          </div>
+          <span class="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 font-bold">DIRECT</span>
+        </button>
+
+        <button onclick="switchTab('inventory')" id="tab-btn-inventory" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)] hover:scale-[1.01] active:scale-[0.98]">
           <div class="flex items-center gap-3">
             <i data-lucide="boxes" class="w-4 h-4"></i>
             <span data-i18n="navInventory">ক্লাউড ইনভেন্টরি</span>
@@ -300,28 +370,28 @@
           <span id="low-stock-count-badge" class="hidden px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-mono font-bold">0</span>
         </button>
 
-        <button onclick="switchTab('ledger')" id="tab-btn-ledger" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)]">
+        <button onclick="switchTab('ledger')" id="tab-btn-ledger" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)] hover:scale-[1.01] active:scale-[0.98]">
           <div class="flex items-center gap-3">
             <i data-lucide="receipt" class="w-4 h-4"></i>
             <span data-i18n="navLedger">দৈনিক আয়-ব্যয় খাতা</span>
           </div>
         </button>
 
-        <button onclick="switchTab('parties')" id="tab-btn-parties" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)]">
+        <button onclick="switchTab('parties')" id="tab-btn-parties" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)] hover:scale-[1.01] active:scale-[0.98]">
           <div class="flex items-center gap-3">
             <i data-lucide="users" class="w-4 h-4"></i>
             <span data-i18n="navParties">দেনা-পাওনা (পার্টি)</span>
           </div>
         </button>
 
-        <button onclick="switchTab('reports')" id="tab-btn-reports" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)]">
+        <button onclick="switchTab('reports')" id="tab-btn-reports" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)] hover:scale-[1.01] active:scale-[0.98]">
           <div class="flex items-center gap-3">
             <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
             <span data-i18n="navReports">রিপোর্ট ও প্রফিট/লস</span>
           </div>
         </button>
 
-        <button onclick="switchTab('settings')" id="tab-btn-settings" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)]">
+        <button onclick="switchTab('settings')" id="tab-btn-settings" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)] hover:scale-[1.01] active:scale-[0.98]">
           <div class="flex items-center gap-3">
             <i data-lucide="settings" class="w-4 h-4"></i>
             <span data-i18n="navSettings">দোকান প্রোফাইল</span>
@@ -363,50 +433,66 @@
     </aside>
 
     <!-- ================= 2. MAIN CONTENT AREA ================= -->
-    <div class="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
+    <div class="flex-1 flex flex-col h-full min-w-0 overflow-hidden relative">
       
-      <!-- Top Header Bar -->
-      <header class="sticky top-0 z-30 bg-[var(--bg-surface)] border-b border-[var(--border-color)] px-4 sm:px-6 py-3 flex items-center justify-between shrink-0 shadow-2xs">
+      <!-- Top Header Bar (Fully Responsive on Mobile, Tablet & Desktop) -->
+      <header class="sticky top-0 z-30 bg-[var(--bg-surface)] border-b border-[var(--border-color)] px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between shrink-0 shadow-2xs gap-2">
         
         <!-- Left: Mobile Menu Toggle Button & Dynamic Page Title -->
-        <div class="flex items-center gap-3 min-w-0">
-          <button onclick="openMobileSidebar()" class="lg:hidden p-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-surface)] text-slate-600 dark:text-slate-200 transition">
+        <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+          <button onclick="openMobileSidebar()" aria-label="Toggle Navigation Menu" class="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-surface)] text-slate-600 dark:text-slate-200 transition active:scale-95 shrink-0 touch-manipulation">
             <i data-lucide="menu" class="w-5 h-5"></i>
           </button>
           <div class="min-w-0">
-            <h2 id="top-bar-title" class="text-base sm:text-lg font-bold leading-tight tracking-tight text-[var(--text-main)] truncate">ড্যাশবোর্ড সামারি</h2>
-            <p id="top-bar-subtitle" class="text-[11px] text-[var(--text-muted)] hidden sm:block truncate">ক্লাউড রিয়েল-টাইম ক্যাশফ্লো, সেলস ও স্টক</p>
+            <h2 id="top-bar-title" class="text-sm sm:text-base font-bold leading-tight tracking-tight text-[var(--text-main)] truncate max-w-[90px] xs:max-w-[130px] sm:max-w-none">ড্যাশবোর্ড সামারি</h2>
+            <p id="top-bar-subtitle" class="text-[11px] text-[var(--text-muted)] hidden md:block truncate">ক্লাউড রিয়েল-টাইম ক্যাশফ্লো, সেলস ও স্টক</p>
+          </div>
+        </div>
+
+        <!-- Center: Sleek Global Omnibox Search Bar with Ctrl+K -->
+        <div id="global-search-container" class="relative flex-1 max-w-[130px] xs:max-w-[180px] sm:max-w-xs md:max-w-sm lg:max-w-md mx-1 sm:mx-3">
+          <div class="relative flex items-center">
+            <i data-lucide="search" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400 absolute left-2.5 sm:left-3 pointer-events-none"></i>
+            <input type="text" id="global-search-input" oninput="handleGlobalSearch(this.value)" onfocus="openGlobalSearchDropdown()" placeholder="Search... (Ctrl+K)" class="w-full text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] pl-8 sm:pl-9 pr-2 sm:pr-14 py-2 text-[var(--text-main)] placeholder-[var(--text-muted)] focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition shadow-2xs">
+            <div class="absolute right-2.5 hidden sm:flex items-center pointer-events-none">
+              <kbd class="inline-flex items-center px-1.5 py-0.5 text-[9px] font-mono font-bold text-slate-400 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded shadow-2xs">Ctrl K</kbd>
+            </div>
+          </div>
+
+          <!-- Categorized Omnibox Search Results Dropdown (Wide and clean on all viewports) -->
+          <div id="global-search-dropdown" class="hidden fixed inset-x-3 sm:absolute sm:inset-x-0 sm:left-0 sm:right-0 top-14 sm:top-full mt-1.5 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl shadow-2xl p-2 sm:p-2.5 z-50 max-h-[75vh] sm:max-h-96 overflow-y-auto no-scrollbar space-y-2">
+            <div id="global-search-results" class="space-y-1"></div>
           </div>
         </div>
 
         <!-- Right: Language Switcher & User Profile Avatar Dropdown -->
-        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
           <!-- Language Toggle -->
-          <button onclick="toggleLanguage()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] text-xs font-semibold hover:border-emerald-500 transition shadow-2xs">
+          <button onclick="toggleLanguage()" aria-label="Toggle Language" class="h-9 sm:h-auto flex items-center gap-1 px-2.5 py-1.5 sm:px-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] text-xs font-semibold hover:border-emerald-500 transition shadow-2xs active:scale-95 touch-manipulation">
             <i data-lucide="globe" class="w-3.5 h-3.5 text-emerald-600"></i>
-            <span id="lang-indicator">EN</span>
+            <span id="lang-indicator" class="font-bold">EN</span>
           </button>
 
           <!-- User Profile Avatar & Dropdown -->
           <div class="relative">
-            <button onclick="toggleUserMenu()" class="flex items-center gap-2 p-1.5 sm:px-3 sm:py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] hover:border-emerald-500 transition">
+            <button onclick="toggleUserMenu()" aria-label="User Account Menu" class="h-9 sm:h-auto flex items-center gap-1.5 p-1 sm:px-2.5 sm:py-1 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] hover:border-emerald-500 transition active:scale-95 touch-manipulation">
               <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-bold font-mono shadow-xs" id="user-avatar-initial">P</div>
-              <div class="hidden sm:block text-left text-xs leading-none">
-                <div id="user-display-email" class="font-bold max-w-[120px] truncate text-[var(--text-main)]">Pavel Hossain</div>
+              <div class="hidden md:block text-left text-xs leading-none">
+                <div id="user-display-email" class="font-bold max-w-[100px] lg:max-w-[130px] truncate text-[var(--text-main)]">Pavel Hossain</div>
                 <div id="header-shop-owner" class="text-[10px] text-[var(--text-muted)] truncate mt-0.5">মালিক</div>
               </div>
               <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
             </button>
             <div id="user-menu-dropdown" class="hidden absolute right-0 mt-2 w-52 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl shadow-xl p-2 z-50 text-xs space-y-1">
               <div class="px-2 py-1.5 border-b border-[var(--border-color)]">
-                <div id="menu-shop-title" class="font-bold truncate">Pavel Hossain-এর দোকান</div>
+                <div id="menu-shop-title" class="font-bold truncate">Pavel Hossain Store</div>
                 <div id="menu-user-email" class="text-[10px] text-[var(--text-muted)] truncate">pavelhossain9041@gmail.com</div>
               </div>
-              <button onclick="switchTab('settings'); toggleUserMenu();" class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-[var(--bg-subtle)] flex items-center gap-2">
+              <button onclick="switchTab('settings'); toggleUserMenu();" class="w-full text-left px-2 py-2 rounded-lg hover:bg-[var(--bg-subtle)] flex items-center gap-2">
                 <i data-lucide="settings" class="w-3.5 h-3.5 text-slate-500"></i>
                 <span data-i18n="navSettings">দোকান প্রোফাইল</span>
               </button>
-              <button onclick="signOutUser()" class="w-full text-left px-2 py-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center gap-2 font-bold">
+              <button onclick="signOutUser()" class="w-full text-left px-2 py-2 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center gap-2 font-bold">
                 <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
                 <span data-i18n="signOut">লগআউট (Sign Out)</span>
               </button>
@@ -415,8 +501,8 @@
         </div>
       </header>
 
-      <!-- Scrollable Main Viewport Container -->
-      <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+      <!-- Scrollable Main Viewport Container (Optimized for Mobile/Tablet/Desktop with smooth scrolling) -->
+      <main class="flex-1 overflow-y-auto p-3 sm:p-5 lg:p-6 space-y-5 sm:space-y-6 pb-24 lg:pb-6 scroll-smooth overscroll-contain">
 
     <!-- 1. DASHBOARD VIEW -->
     <div id="view-dashboard" class="space-y-6">
@@ -670,7 +756,7 @@
         </div>
 
         <!-- Cart & Checkout (5 Cols) -->
-        <div class="lg:col-span-5 bg-[var(--bg-surface)] border border-[var(--border-color)] p-5 rounded-2xl flex flex-col justify-between shadow-xs">
+        <div id="pos-cart-panel" class="lg:col-span-5 bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 sm:p-5 rounded-2xl flex flex-col justify-between shadow-xs">
           <div>
             <div class="flex items-center justify-between pb-3 border-b border-[var(--border-color)] mb-3">
               <h3 class="text-sm font-bold flex items-center gap-2">
@@ -731,17 +817,149 @@
               <span id="pos-due-balance" class="font-mono font-bold">৳ 0</span>
             </div>
 
-            <button onclick="completeSale()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition">
+            <button onclick="completeSale()" class="w-full py-3.5 sm:py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 flex items-center justify-center gap-2 transition hover:scale-[1.01] active:scale-[0.98] touch-manipulation">
               <i data-lucide="printer" class="w-4 h-4"></i>
               <span data-i18n="btnCompleteSale">সেলস সম্পন্ন ও রসিদ প্রিন্ট</span>
             </button>
           </div>
         </div>
       </div>
+
+      <!-- Floating Mobile Quick Cart Checkout Trigger (visible when cart has items on mobile/tablet) -->
+      <div id="pos-mobile-cart-bar" onclick="scrollToPosCart()" class="hidden lg:hidden fixed bottom-16 inset-x-3 z-30 bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-2xl shadow-xl flex items-center justify-between transition-all active:scale-[0.98] cursor-pointer touch-manipulation border border-white/20">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+            <i data-lucide="shopping-bag" class="w-5 h-5 text-white"></i>
+          </div>
+          <div>
+            <div id="pos-mob-cart-count" class="text-xs font-bold font-mono">0 আইটেম কার্টে</div>
+            <div class="text-[10px] text-emerald-100 flex items-center gap-1">
+              <span>চেকআউট ও বিল প্রিন্ট করুন</span>
+              <span>➔</span>
+            </div>
+          </div>
+        </div>
+        <div id="pos-mob-cart-total" class="text-base font-black font-mono">৳ 0</div>
+      </div>
+    </div>
+
+    <!-- 2.5 CUSTOM / DIRECT SALES VIEW -->
+    <div id="view-custom-sales" class="hidden space-y-6 tab-content-animate">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--bg-surface)] p-4 sm:p-5 rounded-2xl border border-[var(--border-color)] shadow-2xs">
+        <div>
+          <h2 class="text-base sm:text-lg font-bold flex items-center gap-2" data-i18n="customSalesTitle">
+            <span>কাস্টম ও তাৎক্ষণিক সেলস (Custom & Direct Sales)</span>
+          </h2>
+          <p class="text-xs text-[var(--text-muted)]" data-i18n="customSalesSubtitle">ইনভেন্টরি ছাড়া সরাসরি বিক্রয়, সার্ভিসিং, মেরামত ও তাৎক্ষণিক আয়ের হিসাব</p>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="exportCustomSalesStatementPDF()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-xs hover:scale-[1.02] active:scale-[0.98]">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span data-i18n="printStatement">স্টেটমেন্ট প্রিন্ট / PDF</span>
+          </button>
+          <button onclick="exportCustomSalesExcel()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-surface)] text-xs font-bold transition shadow-xs hover:scale-[1.02] active:scale-[0.98]">
+            <i data-lucide="sheet" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span data-i18n="exportExcel">এক্সেল ডাউনলোড</span>
+          </button>
+          <button onclick="openCustomSaleModal()" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs hover:scale-[1.02] active:scale-[0.98]">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span data-i18n="btnNewCustomSale">নতুন কাস্টম সেলস</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- KPI Summary Cards (4 Cards) -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl shadow-2xs">
+          <div class="flex items-center justify-between text-emerald-600 mb-2">
+            <span class="text-xs font-bold text-[var(--text-muted)]" data-i18n="kpiCustomRevenue">মোট কাস্টম বিক্রয়</span>
+            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
+          </div>
+          <div id="cs-kpi-revenue" class="text-lg lg:text-xl font-bold font-mono text-emerald-600">৳ 0</div>
+          <div id="cs-kpi-count" class="text-[11px] text-[var(--text-muted)] mt-1 font-mono">0 টি বিক্রয়</div>
+        </div>
+
+        <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl shadow-2xs">
+          <div class="flex items-center justify-between text-rose-600 mb-2">
+            <span class="text-xs font-bold text-[var(--text-muted)]" data-i18n="kpiCustomCost">মোট ক্রয়/সার্ভিস খরচ</span>
+            <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+          </div>
+          <div id="cs-kpi-cost" class="text-lg lg:text-xl font-bold font-mono text-rose-600">৳ 0</div>
+          <div class="text-[11px] text-[var(--text-muted)] mt-1" data-i18n="customCostDesc">আনুমানিক মূল খরচ</div>
+        </div>
+
+        <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl shadow-2xs">
+          <div class="flex items-center justify-between text-teal-600 mb-2">
+            <span class="text-xs font-bold text-[var(--text-muted)]" data-i18n="kpiCustomProfit">মোট নীট লাভ</span>
+            <i data-lucide="trending-up" class="w-4 h-4"></i>
+          </div>
+          <div id="cs-kpi-profit" class="text-lg lg:text-xl font-bold font-mono text-teal-600">৳ 0</div>
+          <div id="cs-kpi-margin" class="text-[11px] text-teal-700 dark:text-teal-400 font-semibold mt-1">০% লাভ মার্জিন</div>
+        </div>
+
+        <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl shadow-2xs">
+          <div class="flex items-center justify-between text-amber-600 mb-2">
+            <span class="text-xs font-bold text-[var(--text-muted)]" data-i18n="kpiCustomDue">মোট বকেয়া / বাকি</span>
+            <i data-lucide="badge-alert" class="w-4 h-4"></i>
+          </div>
+          <div id="cs-kpi-due" class="text-lg lg:text-xl font-bold font-mono text-amber-600">৳ 0</div>
+          <div class="text-[11px] text-[var(--text-muted)] mt-1" data-i18n="customDueDesc">বাকি পাওনা অংশ</div>
+        </div>
+      </div>
+
+      <!-- Filters & Search Toolbar -->
+      <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl flex flex-wrap gap-3 items-center justify-between shadow-2xs">
+        <div class="flex items-center gap-2 flex-1 min-w-[240px]">
+          <div class="relative flex-1">
+            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3"></i>
+            <input type="text" id="cs-search" oninput="renderCustomSalesTable()" placeholder="পণ্য/সার্ভিস বা কাস্টমারের নাম দিয়ে খুঁজুন..." class="w-full text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] pl-8 pr-8 py-2 text-[var(--text-main)] placeholder-[var(--text-muted)]">
+            <button id="cs-search-clear" onclick="clearCustomSalesSearch()" class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs">✕</button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <select id="cs-method-filter" onchange="renderCustomSalesTable()" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2 text-[var(--text-main)] font-semibold">
+            <option value="all" data-i18n="allMethods">সকল পেমেন্ট মাধ্যম</option>
+            <option value="Cash">নগদ (Cash)</option>
+            <option value="bKash">বিকাশ (bKash)</option>
+            <option value="Nagad">নগদ (Nagad)</option>
+            <option value="Bank">ব্যাংক (Bank)</option>
+            <option value="Due">বকেয়া / বাকি (Due)</option>
+          </select>
+
+          <input type="date" id="cs-from-date" onchange="renderCustomSalesTable()" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-2.5 py-2 font-mono text-[var(--text-main)]">
+          <span class="text-xs text-[var(--text-muted)]">to</span>
+          <input type="date" id="cs-to-date" onchange="renderCustomSalesTable()" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-2.5 py-2 font-mono text-[var(--text-main)]">
+        </div>
+      </div>
+
+      <!-- Custom Sales Table -->
+      <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-2xs">
+        <div class="overflow-x-auto scrollbar-thin">
+          <table class="w-full min-w-[760px] text-left text-xs">
+            <thead class="bg-[var(--bg-subtle)] text-[var(--text-muted)] font-bold border-b border-[var(--border-color)]">
+              <tr>
+                <th class="p-3.5" data-i18n="thDate">তারিখ</th>
+                <th class="p-3.5" data-i18n="thItemDescription">পণ্য বা সেবার বিবরণ</th>
+                <th class="p-3.5" data-i18n="thCustomer">কাস্টমার</th>
+                <th class="p-3.5" data-i18n="thMethod">পেমেন্ট মাধ্যম</th>
+                <th class="p-3.5 text-center" data-i18n="thQtyAndRate">পরিমাণ ও দর</th>
+                <th class="p-3.5 text-right" data-i18n="thCostPrice">ক্রয়/মূল খরচ</th>
+                <th class="p-3.5 text-right" data-i18n="thTotalAmount">মোট বিক্রয় (৳)</th>
+                <th class="p-3.5 text-right" data-i18n="thProfit">লাভ (৳)</th>
+                <th class="p-3.5 text-center" data-i18n="thAction">অ্যাকশন</th>
+              </tr>
+            </thead>
+            <tbody id="custom-sales-table-body" class="divide-y divide-[var(--border-color)]">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- 3. INVENTORY VIEW -->
-    <div id="view-inventory" class="hidden space-y-6">
+    <div id="view-inventory" class="hidden space-y-6 tab-content-animate">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[var(--bg-surface)] p-4 rounded-2xl border border-[var(--border-color)]">
         <div>
           <h2 class="text-base font-bold" data-i18n="inventoryTitle">ক্লাউড ইনভেন্টরি ও স্টক ব্যবস্থাপনা</h2>
@@ -792,8 +1010,8 @@
       </div>
 
       <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-xs">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
+        <div class="overflow-x-auto scrollbar-thin">
+          <table class="w-full min-w-[640px] text-left text-xs">
             <thead class="bg-[var(--bg-subtle)] border-b border-[var(--border-color)] text-[var(--text-muted)] uppercase tracking-wider font-semibold">
               <tr>
                 <th class="p-3.5" data-i18n="thProduct">পণ্যের বিবরণ</th>
@@ -845,8 +1063,8 @@
       </div>
 
       <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-xs">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
+        <div class="overflow-x-auto scrollbar-thin">
+          <table class="w-full min-w-[640px] text-left text-xs">
             <thead class="bg-[var(--bg-subtle)] border-b border-[var(--border-color)] text-[var(--text-muted)] uppercase tracking-wider font-semibold">
               <tr>
                 <th class="p-3.5" data-i18n="thDate">তারিখ ও সময়</th>
@@ -914,8 +1132,8 @@
       </div>
 
       <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl overflow-hidden shadow-xs">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
+        <div class="overflow-x-auto scrollbar-thin">
+          <table class="w-full min-w-[600px] text-left text-xs">
             <thead class="bg-[var(--bg-subtle)] border-b border-[var(--border-color)] text-[var(--text-muted)] uppercase tracking-wider font-semibold">
               <tr>
                 <th class="p-3.5" data-i18n="thPartyName">পার্টির নাম</th>
@@ -1072,6 +1290,39 @@
     </div>
 
       </main>
+
+      <!-- ================= MOBILE & TABLET BOTTOM DOCK NAVIGATION ================= -->
+      <nav id="mobile-bottom-nav" aria-label="Mobile Navigation" class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--bg-surface)]/95 backdrop-blur-md border-t border-[var(--border-color)] px-1 sm:px-3 py-1.5 flex items-center justify-around shadow-2xl safe-area-pb select-none">
+        <button onclick="switchTab('dashboard')" id="mobile-nav-dashboard" class="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl text-[10px] font-semibold text-emerald-600 transition active:scale-90 touch-manipulation">
+          <i data-lucide="layout-dashboard" class="w-5 h-5 mb-0.5"></i>
+          <span class="truncate max-w-[56px]" data-i18n="navDashboard">ড্যাশবোর্ড</span>
+        </button>
+
+        <button onclick="switchTab('pos')" id="mobile-nav-pos" class="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl text-[10px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] transition active:scale-90 touch-manipulation">
+          <i data-lucide="shopping-cart" class="w-5 h-5 mb-0.5"></i>
+          <span class="truncate max-w-[56px]" data-i18n="navPOS">পিওএস</span>
+        </button>
+
+        <button onclick="switchTab('custom-sales')" id="mobile-nav-custom-sales" class="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl text-[10px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] transition active:scale-90 touch-manipulation">
+          <i data-lucide="badge-dollar-sign" class="w-5 h-5 mb-0.5"></i>
+          <span class="truncate max-w-[56px]" data-i18n="navCustomSales">কাস্টম</span>
+        </button>
+
+        <button onclick="switchTab('inventory')" id="mobile-nav-inventory" class="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl text-[10px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] transition active:scale-90 touch-manipulation">
+          <i data-lucide="boxes" class="w-5 h-5 mb-0.5"></i>
+          <span class="truncate max-w-[56px]" data-i18n="navInventory">স্টক</span>
+        </button>
+
+        <button onclick="switchTab('ledger')" id="mobile-nav-ledger" class="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl text-[10px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] transition active:scale-90 touch-manipulation">
+          <i data-lucide="receipt" class="w-5 h-5 mb-0.5"></i>
+          <span class="truncate max-w-[56px]" data-i18n="navLedger">খাতা</span>
+        </button>
+
+        <button onclick="openMobileSidebar()" class="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl text-[10px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] transition active:scale-90 touch-manipulation">
+          <i data-lucide="menu" class="w-5 h-5 mb-0.5"></i>
+          <span class="truncate max-w-[56px]">মেন্যু</span>
+        </button>
+      </nav>
     </div>
   </div>
 
@@ -1079,7 +1330,7 @@
 
   <!-- 1. Product Modal -->
   <div id="modal-product" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-    <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
+    <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl p-5 sm:p-6 max-w-md w-full max-h-[92vh] flex flex-col shadow-2xl modal-animate overflow-y-auto space-y-4">
       <div class="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
         <h3 id="modal-product-title" class="text-base font-bold" data-i18n="modalNewProduct">নতুন প্রোডাক্ট এন্ট্রি</h3>
         <button onclick="closeProductModal()" class="text-slate-400 hover:text-slate-600">✕</button>
@@ -1140,7 +1391,7 @@
 
   <!-- 2. Transaction Modal -->
   <div id="modal-tx" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-    <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
+    <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl p-5 sm:p-6 max-w-md w-full max-h-[92vh] flex flex-col shadow-2xl modal-animate overflow-y-auto space-y-4">
       <div class="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
         <h3 id="modal-tx-title" class="text-base font-bold" data-i18n="modalNewTx">নতুন হিসাব এন্ট্রি</h3>
         <button onclick="closeTxModal()" class="text-slate-400 hover:text-slate-600">✕</button>
@@ -1197,7 +1448,7 @@
 
   <!-- 3. Party Modal -->
   <div id="modal-party" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-    <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4">
+    <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl p-5 sm:p-6 max-w-md w-full max-h-[92vh] flex flex-col shadow-2xl modal-animate overflow-y-auto space-y-4">
       <div class="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
         <h3 id="modal-party-title" class="text-base font-bold" data-i18n="modalNewParty">নতুন কাস্টমার / পার্টি এন্ট্রি</h3>
         <button onclick="closePartyModal()" class="text-slate-400 hover:text-slate-600">✕</button>
@@ -1333,7 +1584,7 @@
 
   <!-- 6. Due Repayment Modal -->
   <div id="modal-repay" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
-    <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4">
+    <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl p-5 sm:p-6 max-w-sm w-full max-h-[92vh] flex flex-col shadow-2xl modal-animate overflow-y-auto space-y-4">
       <div class="flex items-center justify-between border-b border-[var(--border-color)] pb-3">
         <h3 class="text-sm font-bold" data-i18n="repayDueTitle">বকেয়া টাকা গ্রহণ / পরিশোধ</h3>
         <button onclick="closeRepayModal()" class="text-slate-400 hover:text-slate-600">✕</button>
@@ -1369,8 +1620,143 @@
     </div>
   </div>
 
-  <!-- Toast Notification Container -->
-  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+  <!-- 7. Custom / Direct Sales Modal (Ad-hoc sale without inventory) -->
+  <div id="modal-custom-sale" class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 hidden">
+    <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl max-w-xl w-full max-h-[92vh] flex flex-col shadow-2xl modal-animate">
+      <div class="flex items-center justify-between p-4 sm:p-5 border-b border-[var(--border-color)]">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+            <i data-lucide="badge-dollar-sign" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-[var(--text-main)]" id="modal-custom-sale-title" data-i18n="modalNewCustomSale">নতুন কাস্টম / সরাসরি সেলস</h3>
+            <p class="text-[11px] text-[var(--text-muted)]" data-i18n="customSalesSubtitle">ইনভেন্টরি ছাড়া যে কোনো পণ্য বা সার্ভিসের তাৎক্ষণিক এন্ট্রি</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeCustomSaleModal()" class="w-8 h-8 rounded-xl bg-[var(--bg-subtle)] hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 transition">✕</button>
+      </div>
+
+      <form id="custom-sale-form" onsubmit="saveCustomSale(event)" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 text-xs">
+        <input type="hidden" id="cs-form-id">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-semibold mb-1 text-[var(--text-main)]" data-i18n="saleDateLabel">বিক্রয়ের তারিখ *</label>
+            <input type="date" id="cs-form-date" required class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2 text-[var(--text-main)] font-mono focus:border-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-[var(--text-main)]" data-i18n="customerNameLabel">কাস্টমার / ক্রেতার নাম</label>
+            <input type="text" id="cs-form-customer" placeholder="সাধারণ ক্রেতা / কাস্টমারের নাম" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2 text-[var(--text-main)] focus:border-emerald-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold mb-1 text-[var(--text-main)]" data-i18n="itemDescLabel">আইটেম / সার্ভিসের বিবরণ *</label>
+          <input type="text" id="cs-form-desc" required placeholder="উদাঃ কম্পিউটার সার্ভিসিং, কাস্টম স্টিকার ইত্যাদি" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2 text-[var(--text-main)] focus:border-emerald-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block font-semibold mb-1 text-[var(--text-main)]" data-i18n="qtyLabel">পরিমাণ (Qty) *</label>
+            <input type="number" id="cs-form-qty" required min="0.01" step="any" value="1" oninput="calculateCustomSaleTotal()" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2 text-[var(--text-main)] font-mono text-center focus:border-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-[var(--text-main)]" data-i18n="unitPriceLabel">একক দর (৳) *</label>
+            <input type="number" id="cs-form-rate" required min="0" step="any" placeholder="0.00" oninput="calculateCustomSaleTotal()" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2 text-[var(--text-main)] font-mono text-right font-bold text-emerald-600 focus:border-emerald-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-[var(--text-main)]" data-i18n="costPriceOptLabel">ক্রয়মূল্য (ঐচ্ছিক ৳)</label>
+            <input type="number" id="cs-form-cost" min="0" step="any" placeholder="0.00" oninput="calculateCustomSaleTotal()" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2 text-[var(--text-main)] font-mono text-right focus:border-emerald-500 focus:outline-none">
+          </div>
+        </div>
+
+        <!-- Live Auto-Calculation Summary Card -->
+        <div class="grid grid-cols-2 gap-3 p-3.5 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)]">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider" data-i18n="autoTotalLabel">মোট মূল্য (Total Amount)</div>
+            <div id="cs-form-total-display" class="text-lg font-black font-mono text-emerald-600 dark:text-emerald-400 mt-0.5">৳ 0.00</div>
+          </div>
+          <div class="text-right">
+            <div class="text-[10px] uppercase font-bold text-[var(--text-muted)] tracking-wider" data-i18n="estProfitLabel">সম্ভাব্য মোট লাভ (Profit)</div>
+            <div id="cs-form-profit-display" class="text-lg font-black font-mono text-cyan-600 dark:text-cyan-400 mt-0.5">৳ 0.00</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label class="block font-semibold mb-1 text-[var(--text-main)]" data-i18n="paymentMethod">পেমেন্ট মাধ্যম</label>
+            <select id="cs-form-method" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2 text-[var(--text-main)] focus:border-emerald-500 focus:outline-none">
+              <option value="Cash">নগদ (Cash)</option>
+              <option value="bKash">বিকাশ (bKash)</option>
+              <option value="Nagad">নগদ (Nagad)</option>
+              <option value="Due">বাকি (Due / Receivable)</option>
+              <option value="Bank">ব্যাংক (Bank)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-semibold mb-1 text-[var(--text-main)]" data-i18n="noteLabel">নোট / মেমো</label>
+            <input type="text" id="cs-form-note" placeholder="অতিরিক্ত বিবরণ বা রেফারেন্স" class="w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2 text-[var(--text-main)] focus:border-emerald-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-[var(--border-color)]">
+          <button type="button" onclick="closeCustomSaleModal()" class="px-4 py-2.5 rounded-xl border border-[var(--border-color)] text-xs font-semibold hover:bg-[var(--bg-subtle)] text-[var(--text-muted)] transition-all hover:scale-[1.01] active:scale-[0.98]" data-i18n="cancelBtn">বাতিল</button>
+          <button type="submit" class="flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md transition-all hover:scale-[1.01] active:scale-[0.98]">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            <span data-i18n="saveBtn">সংরক্ষণ করুন</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 8. Custom Sales Statement Print / Export Modal -->
+  <div id="modal-custom-statement-preview" class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 hidden">
+    <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl modal-animate">
+      <div class="flex items-center justify-between p-4 sm:p-5 border-b border-[var(--border-color)]">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-600 flex items-center justify-center shrink-0">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-[var(--text-main)]" data-i18n="customStatementTitle">কাস্টম সেলস স্টেটমেন্ট ও রিপোর্ট</h3>
+            <p class="text-[11px] text-[var(--text-muted)]" data-i18n="customStatementSubtitle">A4 সাইজে প্রিন্ট ও PDF ডাউনলোডের জন্য প্রস্তুতকৃত আনুষ্ঠানিক বিবরণী</p>
+          </div>
+        </div>
+        <button onclick="closeCustomStatementModal()" class="w-8 h-8 rounded-xl bg-[var(--bg-subtle)] hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 transition">✕</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100 dark:bg-slate-900/60 flex justify-center">
+        <!-- Printable Statement Paper Container -->
+        <div id="printable-custom-statement" class="w-full max-w-3xl bg-white text-slate-900 p-6 sm:p-8 rounded-2xl shadow-md border border-slate-200 print:border-none print:shadow-none print:p-0">
+          <!-- Dynamically populated by renderCustomSalesStatement() -->
+        </div>
+      </div>
+
+      <div class="p-4 sm:p-5 border-t border-[var(--border-color)] flex flex-wrap items-center justify-between gap-3">
+        <button onclick="closeCustomStatementModal()" class="px-4 py-2 rounded-xl border border-[var(--border-color)] text-xs font-semibold hover:bg-[var(--bg-subtle)] text-[var(--text-muted)]" data-i18n="closeBtn">
+          বন্ধ করুন
+        </button>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="exportCustomSalesExcel()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-emerald-500/30 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-xs font-bold transition hover:scale-[1.01] active:scale-[0.98]">
+            <i data-lucide="sheet" class="w-3.5 h-3.5"></i>
+            <span>এক্সেল (.xlsx)</span>
+          </button>
+          <button onclick="downloadCustomStatementPDF()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition hover:scale-[1.01] active:scale-[0.98]">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span data-i18n="downloadCustomStatementPDF">PDF ডাউনলোড</span>
+          </button>
+          <button onclick="printCustomStatementDoc()" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition hover:scale-[1.01] active:scale-[0.98]">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span data-i18n="printCustomStatementBtn">স্টেটমেন্ট প্রিন্ট (A4)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container (Positioned Top-Right with Micro-Interactions) -->
+  <div id="toast-container" class="fixed top-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- ================= FIREBASE & APP APPLICATION LOGIC ================= -->
   <script>
@@ -1576,7 +1962,40 @@
         repayPartyName: "পার্টির নাম",
         repayAmountLabel: "পরিশোধের পরিমাণ (৳) *",
         repayMethodLabel: "পেমেন্ট মাধ্যম",
-        repayNoteLabel: "নোট"
+        repayNoteLabel: "নোট",
+        navCustomSales: "কাস্টম সেলস",
+        customSalesTitle: "কাস্টম / সরাসরি সেলস ও স্টেটমেন্ট",
+        customSalesSubtitle: "ইনভেন্টরি ছাড়া তাৎক্ষণিক সেলস এন্ট্রি, কাস্টমার বাকি ও স্বয়ংক্রিয় প্রফিট ক্যালকুলেশন",
+        btnNewCustomSale: "নতুন কাস্টম সেলস",
+        kpiCustomRevenue: "মোট কাস্টম আয়",
+        kpiCustomCost: "ক্রয় খরচ (COGS)",
+        kpiCustomProfit: "মোট লাভ (Profit)",
+        kpiCustomDue: "বকেয়া কাস্টম সেলস",
+        customCostDesc: "আইটেম বা সার্ভিসের প্রাক্কলিত খরচ",
+        customDueDesc: "কাস্টমারের কাছে অপরিশোধিত বাকি",
+        allMethods: "সকল পেমেন্ট মাধ্যম",
+        thItemDescription: "আইটেম / সার্ভিসের বিবরণ",
+        thCustomer: "ক্রেতা / কাস্টমার",
+        thQtyAndRate: "পরিমাণ ও একক দর",
+        thCostPrice: "ক্রয়মূল্য",
+        thTotalAmount: "মোট বিক্রয়মূল্য",
+        thProfit: "লাভ",
+        modalNewCustomSale: "নতুন কাস্টম / সরাসরি সেলস",
+        saleDateLabel: "বিক্রয়ের তারিখ *",
+        customerNameLabel: "কাস্টমার / ক্রেতার নাম",
+        itemDescLabel: "আইটেম / সার্ভিসের বিবরণ *",
+        qtyLabel: "পরিমাণ (Qty) *",
+        unitPriceLabel: "একক দর (৳) *",
+        costPriceOptLabel: "ক্রয়মূল্য (ঐচ্ছিক ৳)",
+        autoTotalLabel: "মোট মূল্য (Total Amount)",
+        estProfitLabel: "সম্ভাব্য মোট লাভ (Profit)",
+        noteLabel: "নোট / মেমো",
+        customStatementTitle: "কাস্টম সেলস স্টেটমেন্ট ও অডিট রিপোর্ট",
+        customStatementSubtitle: "A4 সাইজে প্রিন্ট ও PDF ডাউনলোডের জন্য প্রস্তুতকৃত আনুষ্ঠানিক বিবরণী",
+        downloadCustomStatementPDF: "PDF ডাউনলোড",
+        printCustomStatementBtn: "স্টেটমেন্ট প্রিন্ট (A4)",
+        searchPlaceholder: "সার্চ করুন...",
+        globalSearchBadge: "গ্লোবাল সার্চ"
       },
       en: {
         authTitle: "Digital Talikhata Cloud",
@@ -1747,7 +2166,40 @@
         repayPartyName: "Party Name",
         repayAmountLabel: "Repayment Amount (৳) *",
         repayMethodLabel: "Payment Channel",
-        repayNoteLabel: "Note"
+        repayNoteLabel: "Note",
+        navCustomSales: "Custom Sales",
+        customSalesTitle: "Custom / Direct Sales & Statements",
+        customSalesSubtitle: "Ad-hoc sales entry without inventory, instant credit tracking & profit audit",
+        btnNewCustomSale: "New Custom Sale",
+        kpiCustomRevenue: "Total Custom Revenue",
+        kpiCustomCost: "Cost of Goods (COGS)",
+        kpiCustomProfit: "Gross Profit",
+        kpiCustomDue: "Outstanding Due",
+        customCostDesc: "Direct estimated cost of items/services",
+        customDueDesc: "Unpaid credit balance from customers",
+        allMethods: "All Payment Methods",
+        thItemDescription: "Item / Service Description",
+        thCustomer: "Customer Name",
+        thQtyAndRate: "Qty & Unit Rate",
+        thCostPrice: "Cost Price",
+        thTotalAmount: "Total Revenue",
+        thProfit: "Profit",
+        modalNewCustomSale: "New Custom / Direct Sale",
+        saleDateLabel: "Sale Date *",
+        customerNameLabel: "Customer Name",
+        itemDescLabel: "Item / Service Description *",
+        qtyLabel: "Quantity (Qty) *",
+        unitPriceLabel: "Unit Price (৳) *",
+        costPriceOptLabel: "Cost Price (Optional ৳)",
+        autoTotalLabel: "Total Amount",
+        estProfitLabel: "Estimated Gross Profit",
+        noteLabel: "Note / Memo",
+        customStatementTitle: "Custom Sales Statement & Audit Report",
+        customStatementSubtitle: "Official audit statement formatted for A4 printing and PDF export",
+        downloadCustomStatementPDF: "Download PDF",
+        printCustomStatementBtn: "Print Statement (A4)",
+        searchPlaceholder: "Search records, products, parties...",
+        globalSearchBadge: "Global Search"
       }
     };
 
@@ -1755,23 +2207,24 @@
        3. APPLICATION STATE & MULTI-TENANT ISOLATION
        ------------------------------------------------------------- */
     let state = {
-      lang: 'bn',
-      theme: 'emerald',
+      lang: localStorage.getItem('lang') || 'en',
+      theme: localStorage.getItem('theme') || 'dark',
       activeTab: 'dashboard',
       user: null,          // Firebase Auth User
       storeId: null,       // Tenant Store ID
       store: {
-        name: 'Pavel Hossain-এর দোকান',
-        shopName: 'Pavel Hossain-এর দোকান',
+        name: 'Pavel Hossain Store',
+        shopName: 'Pavel Hossain Store',
         proprietor: 'Pavel Hossain',
         category: 'Grocery & Retail',
-        phone: '০১৭০০-০০০০০০',
-        address: 'ঢাকা, বাংলাদেশ',
-        invoiceFooter: 'ধন্যবাদ, আবার আসবেন!'
+        phone: '01700-000000',
+        address: 'Dhaka, Bangladesh',
+        invoiceFooter: 'Thank you for your business!'
       },
       products: [],
       transactions: [],
       sales: [],
+      customSales: [],
       parties: [],
       cart: [],
       downloadHistory: []
@@ -1801,7 +2254,9 @@
 
     function toggleLanguage() {
       state.lang = state.lang === 'bn' ? 'en' : 'bn';
-      document.getElementById('lang-indicator').textContent = state.lang === 'bn' ? 'EN' : 'বাং';
+      localStorage.setItem('lang', state.lang);
+      const indicator = document.getElementById('lang-indicator');
+      if (indicator) indicator.textContent = state.lang === 'bn' ? 'বাং' : 'EN';
       document.documentElement.lang = state.lang;
       applyLanguage();
       renderAllViews();
@@ -1813,11 +2268,15 @@
         const key = el.getAttribute('data-i18n');
         el.textContent = t(key);
       });
+      const indicator = document.getElementById('lang-indicator');
+      if (indicator) indicator.textContent = state.lang === 'bn' ? 'বাং' : 'EN';
     }
 
     function setTheme(themeName) {
       state.theme = themeName;
+      localStorage.setItem('theme', themeName);
       document.documentElement.setAttribute('data-theme', themeName);
+      document.documentElement.classList.toggle('dark', themeName === 'dark');
       const dropdown = document.getElementById('theme-dropdown');
       if (dropdown) dropdown.classList.add('hidden');
     }
@@ -2042,6 +2501,17 @@
           renderDashboard();
         }, (err) => console.error("Parties sync err:", err));
       unsubs.push(unsubParties);
+
+      // 5. Custom Sales Listener (Ad-hoc sales sync)
+      const unsubCustomSales = db.collection('stores').doc(storeId).collection('customSales')
+        .onSnapshot((snapshot) => {
+          const list = [];
+          snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
+          state.customSales = list;
+          renderCustomSalesTable();
+          renderDashboard();
+        }, (err) => console.error("Custom sales sync err:", err));
+      unsubs.push(unsubCustomSales);
     }
 
     function openMobileSidebar() {
@@ -2055,11 +2525,11 @@
       const sidebar = document.getElementById('app-sidebar');
       const backdrop = document.getElementById('sidebar-backdrop');
       if (sidebar) sidebar.classList.add('-translate-x-full');
-      if (backdrop) backdrop.classList.add('hidden');
+      if (backdrop) backdrop.classList.remove('hidden');
     }
 
     function updateTenantUI() {
-      const shopName = state.store.shopName || state.store.name || 'Pavel Hossain-এর দোকান';
+      const shopName = state.store.shopName || state.store.name || 'Pavel Hossain Store';
       const proprietor = state.store.proprietor || 'Pavel Hossain';
 
       if (document.getElementById('sidebar-shop-name')) document.getElementById('sidebar-shop-name').textContent = shopName;
@@ -2079,13 +2549,13 @@
         document.getElementById('setting-proprietor').value = proprietor;
         document.getElementById('setting-shop-phone').value = state.store.phone || '';
         document.getElementById('setting-shop-address').value = state.store.address || '';
-        document.getElementById('setting-shop-footer').value = state.store.invoiceFooter || 'ধন্যবাদ, আবার আসবেন!';
+        document.getElementById('setting-shop-footer').value = state.store.invoiceFooter || 'Thank you for your business!';
       }
     }
 
     async function saveStoreSettings() {
       const updated = {
-        shopName: document.getElementById('setting-shop-name').value.trim() || 'আমার দোকান',
+        shopName: document.getElementById('setting-shop-name').value.trim() || 'My Store',
         proprietor: document.getElementById('setting-proprietor').value.trim(),
         phone: document.getElementById('setting-shop-phone').value.trim(),
         address: document.getElementById('setting-shop-address').value.trim(),
@@ -2109,16 +2579,37 @@
       closeMobileSidebar();
 
       document.querySelectorAll('.sidebar-item').forEach(btn => {
-        btn.className = "sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)]";
+        btn.className = "sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)] hover:scale-[1.01] active:scale-[0.98]";
       });
       const activeBtn = document.getElementById(`tab-btn-${tabId}`);
       if (activeBtn) {
-        activeBtn.className = "sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition bg-emerald-600 text-white shadow-xs";
+        activeBtn.className = "sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition bg-emerald-600 text-white shadow-xs hover:scale-[1.01] active:scale-[0.98]";
+      }
+
+      // Sync mobile bottom navigation dock active indicators
+      ['dashboard', 'pos', 'custom-sales', 'inventory', 'ledger'].forEach(id => {
+        const mobBtn = document.getElementById(`mobile-nav-${id}`);
+        if (mobBtn) {
+          mobBtn.className = id === tabId
+            ? "flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl text-[10px] font-semibold text-emerald-600 transition active:scale-90 touch-manipulation"
+            : "flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl text-[10px] font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] transition active:scale-90 touch-manipulation";
+        }
+      });
+
+      // Show/hide floating POS mobile checkout bar
+      const cartBar = document.getElementById('pos-mobile-cart-bar');
+      if (cartBar) {
+        if (tabId === 'pos' && (state.cart || []).length > 0) {
+          cartBar.classList.remove('hidden');
+        } else {
+          cartBar.classList.add('hidden');
+        }
       }
 
       const pageTitles = {
         dashboard: { bn: "ড্যাশবোর্ড সামারি", en: "Dashboard Overview", subBn: "ক্লাউড রিয়েল-টাইম ক্যাশফ্লো, সেলস ও স্টক", subEn: "Real-time cashflow, sales and stock" },
         pos: { bn: "পিওএস ও বিক্রয় মেমো", en: "POS & Billing Counter", subBn: "পণ্য বিক্রয়, ডিসকাউন্ট ও রসিদ প্রিন্ট", subEn: "Product billing, discounts and receipt" },
+        'custom-sales': { bn: "কাস্টম / সরাসরি সেলস", en: "Custom / Direct Sales", subBn: "ইনভেন্টরি ছাড়া সরাসরি বিক্রয় ও স্টেটমেন্ট", subEn: "Ad-hoc direct sales entry and statements" },
         inventory: { bn: "ক্লাউড ইনভেন্টরি ও স্টক", en: "Cloud Inventory & Stock", subBn: "ক্রয় মূল্য, বিক্রয় মূল্য ও স্টক সতর্কতা", subEn: "Cost, selling price and stock alerts" },
         ledger: { bn: "দৈনিক আয়-ব্যয় খাতা", en: "Daily Cash & Expense Ledger", subBn: "দোকান ভাড়া, বিল, স্টাফ বেতন ও ক্যাশ খাতা", subEn: "Shop rent, bills, payroll and cash in hand" },
         parties: { bn: "দেনা-পাওনা খাতা (পার্টি)", en: "Party & Credit Ledger", subBn: "কাস্টমার ও সাপ্লায়ারদের বাকি হিসাব", subEn: "Customer and supplier credit management" },
@@ -2132,13 +2623,14 @@
       if (titleEl) titleEl.textContent = state.lang === 'bn' ? titleObj.bn : titleObj.en;
       if (subEl) subEl.textContent = state.lang === 'bn' ? titleObj.subBn : titleObj.subEn;
 
-      ['dashboard', 'pos', 'inventory', 'ledger', 'parties', 'reports', 'settings'].forEach(id => {
+      ['dashboard', 'pos', 'custom-sales', 'inventory', 'ledger', 'parties', 'reports', 'settings'].forEach(id => {
         const view = document.getElementById(`view-${id}`);
         if (view) view.classList.toggle('hidden', id !== tabId);
       });
 
       if (tabId === 'dashboard') renderDashboard();
       if (tabId === 'pos') renderPosCatalog();
+      if (tabId === 'custom-sales') renderCustomSalesTable();
       if (tabId === 'inventory') renderInventoryTable();
       if (tabId === 'ledger') renderLedgerTable();
       if (tabId === 'parties') renderPartiesTable();
@@ -2150,6 +2642,238 @@
     /* -------------------------------------------------------------
        7. SEARCH HIGHLIGHTING UTILITY
        ------------------------------------------------------------- */
+    function highlightMatch(text, query) {
+      if (!text) return '';
+      if (!query || !query.trim()) return escapeHTML(text);
+      const safeText = escapeHTML(text);
+      const q = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`(${q})`, 'gi');
+      return safeText.replace(regex, '<mark class="search-highlight">$1</mark>');
+    }
+
+    function escapeHTML(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    /* -------------------------------------------------------------
+       7.5 GLOBAL OMNIBOX SEARCH & SHORTCUT CONTROLLER
+       ------------------------------------------------------------- */
+    function openGlobalSearchDropdown() {
+      const dropdown = document.getElementById('global-search-dropdown');
+      if (dropdown) dropdown.classList.remove('hidden');
+    }
+
+    function closeGlobalSearchDropdown() {
+      const dropdown = document.getElementById('global-search-dropdown');
+      if (dropdown) dropdown.classList.add('hidden');
+    }
+
+    function clearGlobalSearch() {
+      const input = document.getElementById('global-search-input');
+      if (input) input.value = '';
+      closeGlobalSearchDropdown();
+    }
+
+    function handleGlobalSearch(query) {
+      const q = (query || '').trim().toLowerCase();
+      const container = document.getElementById('global-search-results');
+      if (!container) return;
+
+      if (!q || q.length < 1) {
+        container.innerHTML = `
+          <div class="p-8 text-center text-slate-400 text-xs">
+            <i data-lucide="search" class="w-6 h-6 mx-auto mb-2 opacity-40"></i>
+            <div>${state.lang === 'bn' ? 'কাস্টম সেলস, ইনভেন্টরি, কাস্টমার বা লেজার খুঁজুন...' : 'Type to search custom sales, inventory, customers, or ledger...'}</div>
+          </div>
+        `;
+        if (window.lucide) lucide.createIcons({ root: container });
+        openGlobalSearchDropdown();
+        return;
+      }
+
+      openGlobalSearchDropdown();
+
+      // Collect matches across 5 domains
+      const results = [];
+
+      // 1. Custom Sales matches
+      (state.customSales || []).forEach(cs => {
+        const descMatch = (cs.itemDesc || '').toLowerCase().includes(q);
+        const custMatch = (cs.customer || '').toLowerCase().includes(q);
+        const noteMatch = (cs.note || '').toLowerCase().includes(q);
+        if (descMatch || custMatch || noteMatch) {
+          results.push({
+            type: 'customSale',
+            badge: state.lang === 'bn' ? 'কাস্টম সেলস' : 'Custom Sale',
+            badgeClass: 'bg-emerald-500/15 text-emerald-600 border border-emerald-500/30',
+            title: cs.itemDesc || 'Item',
+            subtitle: `${cs.customer ? cs.customer + ' • ' : ''}${new Date(cs.date).toLocaleDateString()} • ${cs.method || 'Cash'}`,
+            amount: c(cs.total),
+            targetTab: 'custom-sales',
+            actionData: cs.id
+          });
+        }
+      });
+
+      // 2. POS Sales / Invoices matches
+      (state.sales || []).forEach(s => {
+        const custMatch = (s.customerName || '').toLowerCase().includes(q);
+        const idMatch = (s.id || '').toLowerCase().includes(q);
+        const itemsMatch = (s.items || []).some(item => (item.name || '').toLowerCase().includes(q));
+        if (custMatch || idMatch || itemsMatch) {
+          results.push({
+            type: 'sale',
+            badge: state.lang === 'bn' ? 'ইনভয়েস' : 'Invoice',
+            badgeClass: 'bg-blue-500/15 text-blue-600 border border-blue-500/30',
+            title: s.customerName || 'Cash Sale',
+            subtitle: `${(s.items || []).map(i => i.name).slice(0, 2).join(', ')} • ${new Date(s.date).toLocaleDateString()}`,
+            amount: c(s.total),
+            targetTab: 'dashboard',
+            actionData: s.id
+          });
+        }
+      });
+
+      // 3. Products / Inventory matches
+      (state.products || []).forEach(p => {
+        const nameMatch = (p.name || '').toLowerCase().includes(q);
+        const skuMatch = (p.sku || '').toLowerCase().includes(q);
+        const catMatch = (p.category || '').toLowerCase().includes(q);
+        if (nameMatch || skuMatch || catMatch) {
+          results.push({
+            type: 'product',
+            badge: state.lang === 'bn' ? 'ইনভেন্টরি' : 'Inventory',
+            badgeClass: 'bg-purple-500/15 text-purple-600 border border-purple-500/30',
+            title: p.name,
+            subtitle: `${p.category || 'General'} • ${state.lang === 'bn' ? 'স্টক:' : 'Stock:'} ${n(p.stock)} ${p.unit || 'Pcs'}`,
+            amount: c(p.sellingPrice || p.sellPrice),
+            targetTab: 'inventory',
+            actionData: p.id
+          });
+        }
+      });
+
+      // 4. Parties matches
+      (state.parties || []).forEach(p => {
+        const nameMatch = (p.name || '').toLowerCase().includes(q);
+        const mobileMatch = (p.mobile || '').toLowerCase().includes(q);
+        const addrMatch = (p.address || '').toLowerCase().includes(q);
+        if (nameMatch || mobileMatch || addrMatch) {
+          results.push({
+            type: 'party',
+            badge: state.lang === 'bn' ? 'পার্টি / বাকি' : 'Party / Due',
+            badgeClass: 'bg-amber-500/15 text-amber-600 border border-amber-500/30',
+            title: p.name,
+            subtitle: `${p.mobile || ''} • ${p.address || ''}`,
+            amount: c(p.balance),
+            targetTab: 'parties',
+            actionData: p.id
+          });
+        }
+      });
+
+      // 5. Transactions / Ledger matches
+      (state.transactions || []).forEach(tx => {
+        const noteMatch = (tx.note || '').toLowerCase().includes(q);
+        const partyMatch = (tx.partyName || '').toLowerCase().includes(q);
+        const catMatch = (tx.category || '').toLowerCase().includes(q);
+        if (noteMatch || partyMatch || catMatch) {
+          results.push({
+            type: 'transaction',
+            badge: tx.type === 'income' ? (state.lang === 'bn' ? 'আয় লেজার' : 'Income Tx') : (state.lang === 'bn' ? 'ব্যয় লেজার' : 'Expense Tx'),
+            badgeClass: tx.type === 'income' ? 'bg-emerald-500/15 text-emerald-600 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-600 border border-rose-500/30',
+            title: tx.note || tx.category || 'Transaction',
+            subtitle: `${tx.partyName ? tx.partyName + ' • ' : ''}${new Date(tx.date).toLocaleDateString()}`,
+            amount: (tx.type === 'income' ? '+' : '-') + ' ' + c(tx.amount),
+            targetTab: 'ledger',
+            actionData: tx.id
+          });
+        }
+      });
+
+      if (results.length === 0) {
+        container.innerHTML = `
+          <div class="p-8 text-center text-slate-400 text-xs">
+            <i data-lucide="frown" class="w-6 h-6 mx-auto mb-2 opacity-40"></i>
+            <div>${state.lang === 'bn' ? 'কোনো ফলাফল পাওয়া যায়নি' : 'No matching records found for'} "<strong>${escapeHTML(q)}</strong>"</div>
+          </div>
+        `;
+      } else {
+        container.innerHTML = `
+          <div class="p-2 border-b border-[var(--border-color)] text-[10px] uppercase font-bold text-[var(--text-muted)] flex justify-between items-center px-3">
+            <span>${n(results.length)} ${state.lang === 'bn' ? 'টি ফলাফল পাওয়া গেছে' : 'results found'}</span>
+            <span class="text-slate-400">Esc to close</span>
+          </div>
+          <div class="divide-y divide-[var(--border-color)]">
+            ${results.slice(0, 20).map((item) => `
+              <div onclick="selectGlobalSearchResult('${item.targetTab}', '${escapeHTML(item.title).replace(/'/g, "\\'")}')" class="p-3 hover:bg-[var(--bg-subtle)] cursor-pointer flex items-center justify-between transition-all gap-3">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0 ${item.badgeClass}">${item.badge}</span>
+                  <div class="min-w-0">
+                    <div class="text-xs font-bold text-[var(--text-main)] truncate">${highlightMatch(item.title, q)}</div>
+                    <div class="text-[11px] text-[var(--text-muted)] truncate">${highlightMatch(item.subtitle, q)}</div>
+                  </div>
+                </div>
+                <div class="text-right shrink-0">
+                  <div class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">${item.amount}</div>
+                  <div class="text-[10px] text-slate-400 flex items-center gap-1 justify-end">
+                    <span>${state.lang === 'bn' ? 'যান ➔' : 'View ➔'}</span>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }
+      if (window.lucide) lucide.createIcons({ root: container });
+    }
+
+    function selectGlobalSearchResult(tabId, searchTerm) {
+      closeGlobalSearchDropdown();
+      switchTab(tabId);
+      if (tabId === 'custom-sales') {
+        const input = document.getElementById('cs-search-input');
+        if (input) { input.value = searchTerm; renderCustomSalesTable(); }
+      } else if (tabId === 'inventory') {
+        const input = document.getElementById('inventory-search');
+        if (input) { input.value = searchTerm; renderInventoryTable(); }
+      } else if (tabId === 'ledger') {
+        const input = document.getElementById('ledger-search');
+        if (input) { input.value = searchTerm; renderLedgerTable(); }
+      } else if (tabId === 'parties') {
+        const input = document.getElementById('parties-search');
+        if (input) { input.value = searchTerm; renderPartiesTable(); }
+      }
+      showToast(`${state.lang === 'bn' ? 'ওপেন করা হয়েছে:' : 'Opened:'} ${searchTerm}`, 'info');
+    }
+
+    // Global Keyboard Shortcut: Ctrl + K / Cmd + K to focus Omnibox Search
+    window.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        const input = document.getElementById('global-search-input');
+        if (input) {
+          input.focus();
+          input.select();
+          openGlobalSearchDropdown();
+        }
+      } else if (e.key === 'Escape') {
+        closeGlobalSearchDropdown();
+      }
+    });
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+      const container = document.getElementById('global-search-container');
+      if (container && !container.contains(e.target)) {
+        closeGlobalSearchDropdown();
+      }
+    });
     function highlightMatch(text, query) {
       if (!text) return '';
       if (!query || !query.trim()) return escapeHTML(text);
@@ -2197,25 +2921,35 @@
       }
 
       const filteredSales = state.sales.filter(s => new Date(s.date) >= startDate);
-      const totalSalesAmt = filteredSales.reduce((acc, s) => acc + (Number(s.total) || 0), 0);
-      const totalCOGS = filteredSales.reduce((acc, s) => {
+      const filteredCustomSales = (state.customSales || []).filter(cs => new Date(cs.date) >= startDate);
+
+      const posSalesAmt = filteredSales.reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+      const customSalesAmt = filteredCustomSales.reduce((acc, cs) => acc + (Number(cs.total) || 0), 0);
+      const totalSalesAmt = posSalesAmt + customSalesAmt;
+
+      const posCOGS = filteredSales.reduce((acc, s) => {
         const cost = (s.items || []).reduce((itemAcc, item) => itemAcc + (Number(item.buyPrice || item.costPrice || 0) * Number(item.qty || 1)), 0);
         return acc + cost;
       }, 0);
+      const customCOGS = filteredCustomSales.reduce((acc, cs) => acc + (Number(cs.cost || 0) * Number(cs.qty || 1)), 0);
+      const totalCOGS = posCOGS + customCOGS;
       const grossProfit = totalSalesAmt - totalCOGS;
 
       const filteredTx = state.transactions.filter(tx => new Date(tx.date) >= startDate);
       const totalExpenses = filteredTx.filter(t => t.type === 'expense').reduce((a, b) => a + (Number(b.amount) || 0), 0);
       const totalGeneralIncome = filteredTx.filter(t => t.type === 'income').reduce((a, b) => a + (Number(b.amount) || 0), 0);
-      const salesCashInflow = filteredSales.reduce((acc, s) => acc + (Number(s.paidAmount) || 0), 0);
-      const netCashBalance = (salesCashInflow + totalGeneralIncome) - totalExpenses;
 
-      const totalDue = state.parties.reduce((acc, p) => p.balance > 0 ? acc + p.balance : acc, 0);
+      const posCashInflow = filteredSales.reduce((acc, s) => acc + (Number(s.paidAmount) || 0), 0);
+      const customCashInflow = filteredCustomSales.filter(cs => cs.method !== 'Due').reduce((acc, cs) => acc + (Number(cs.total) || 0), 0);
+      const netCashBalance = (posCashInflow + customCashInflow + totalGeneralIncome) - totalExpenses;
+
+      const customDueTotal = (state.customSales || []).filter(cs => cs.method === 'Due').reduce((acc, cs) => acc + (Number(cs.total) || 0), 0);
+      const totalDue = state.parties.reduce((acc, p) => p.balance > 0 ? acc + p.balance : acc, 0) + customDueTotal;
       const stockValCost = state.products.reduce((acc, p) => acc + (Number(p.costPrice || p.buyPrice || 0) * Number(p.stock || 0)), 0);
       const lowStockCount = state.products.filter(p => Number(p.stock) <= Number(p.minStock || 5)).length;
 
       document.getElementById('kpi-sales-amount').textContent = c(totalSalesAmt);
-      document.getElementById('kpi-sales-count').textContent = `${n(filteredSales.length)} ${state.lang === 'bn' ? 'টি ইনভয়েস' : 'invoices'}`;
+      document.getElementById('kpi-sales-count').textContent = `${n(filteredSales.length + filteredCustomSales.length)} ${state.lang === 'bn' ? 'টি বিক্রয়' : 'sales'}`;
       document.getElementById('kpi-gross-profit').textContent = c(grossProfit);
       document.getElementById('kpi-net-balance').textContent = c(netCashBalance);
       document.getElementById('kpi-total-expense').textContent = c(totalExpenses);
@@ -2236,22 +2970,32 @@
       // Daily Business Analysis Calculations (Always for Today)
       const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const todaySales = state.sales.filter(s => new Date(s.date) >= todayStart);
-      const todaySalesInflow = todaySales.reduce((acc, s) => acc + (Number(s.paidAmount) || 0), 0);
+      const todayCustomSales = (state.customSales || []).filter(cs => new Date(cs.date) >= todayStart);
+
+      const todayPosInflow = todaySales.reduce((acc, s) => acc + (Number(s.paidAmount) || 0), 0);
+      const todayCustomInflow = todayCustomSales.filter(cs => cs.method !== 'Due').reduce((acc, cs) => acc + (Number(cs.total) || 0), 0);
       const todayTx = state.transactions.filter(tx => new Date(tx.date) >= todayStart);
       const todayGeneralIncome = todayTx.filter(t => t.type === 'income').reduce((a, b) => a + (Number(b.amount) || 0), 0);
-      const todayTotalInflow = todaySalesInflow + todayGeneralIncome;
+      const todayTotalInflow = todayPosInflow + todayCustomInflow + todayGeneralIncome;
 
       const todayExpenses = todayTx.filter(t => t.type === 'expense').reduce((a, b) => a + (Number(b.amount) || 0), 0);
       const todayNetFlow = todayTotalInflow - todayExpenses;
 
-      const todayTotalSales = todaySales.reduce((acc, s) => acc + (Number(s.total) || 0), 0);
-      const todayCOGS = todaySales.reduce((acc, s) => {
+      const todayPosSales = todaySales.reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+      const todayCustomRevenue = todayCustomSales.reduce((acc, cs) => acc + (Number(cs.total) || 0), 0);
+      const todayTotalSales = todayPosSales + todayCustomRevenue;
+
+      const todayPosCOGS = todaySales.reduce((acc, s) => {
         return acc + (s.items || []).reduce((sum, item) => sum + (Number(item.buyPrice || item.costPrice || 0) * Number(item.qty || 1)), 0);
       }, 0);
+      const todayCustomCOGS = todayCustomSales.reduce((acc, cs) => acc + (Number(cs.cost || 0) * Number(cs.qty || 1)), 0);
+      const todayCOGS = todayPosCOGS + todayCustomCOGS;
+
       const todayGrossProfit = todayTotalSales - todayCOGS;
       const todayMarginPct = todayTotalSales > 0 ? ((todayGrossProfit / todayTotalSales) * 100).toFixed(1) : '0';
-      const todayAOV = todaySales.length > 0 ? Math.round(todayTotalSales / todaySales.length) : 0;
-      const todayDueCreated = todaySales.reduce((acc, s) => acc + (Number(s.dueAmount) || 0), 0);
+      const todayOrdersCount = todaySales.length + todayCustomSales.length;
+      const todayAOV = todayOrdersCount > 0 ? Math.round(todayTotalSales / todayOrdersCount) : 0;
+      const todayDueCreated = todaySales.reduce((acc, s) => acc + (Number(s.dueAmount) || 0), 0) + todayCustomSales.filter(cs => cs.method === 'Due').reduce((acc, cs) => acc + (Number(cs.total) || 0), 0);
 
       const elInflow = document.getElementById('daily-val-inflow');
       if (elInflow) elInflow.textContent = c(todayTotalInflow);
@@ -2608,6 +3352,30 @@
         document.getElementById('pos-due-balance').textContent = c(due);
       } else {
         dueWarning.classList.add('hidden');
+      }
+
+      // Update Mobile Floating Quick Cart Bar
+      const mobCartBar = document.getElementById('pos-mobile-cart-bar');
+      const mobCount = document.getElementById('pos-mob-cart-count');
+      const mobTotal = document.getElementById('pos-mob-cart-total');
+      if (mobCartBar && mobCount && mobTotal) {
+        if (state.cart.length > 0 && state.activeTab === 'pos') {
+          mobCartBar.classList.remove('hidden');
+          const totalQty = state.cart.reduce((a, b) => a + b.qty, 0);
+          mobCount.textContent = `${n(totalQty)} ${state.lang === 'bn' ? 'টি পণ্য কার্টে' : 'items in cart'}`;
+          mobTotal.textContent = c(grandTotal);
+        } else {
+          mobCartBar.classList.add('hidden');
+        }
+      }
+    }
+
+    function scrollToPosCart() {
+      const panel = document.getElementById('pos-cart-panel');
+      if (panel) {
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        panel.classList.add('pulse-highlight');
+        setTimeout(() => panel.classList.remove('pulse-highlight'), 1600);
       }
     }
 
@@ -2993,6 +3761,483 @@
       XLSX.utils.book_append_sheet(wb, ws, "Inventory");
       XLSX.writeFile(wb, "Cloud_Inventory.xlsx");
       logDownload('Inventory Catalog', 'Inventory', 'Excel', data.length);
+    }
+
+    /* -------------------------------------------------------------
+       11.5 CUSTOM / DIRECT SALES & STATEMENT MODULE
+       ------------------------------------------------------------- */
+    let activeCustomStatementData = null;
+
+    function openCustomSaleModal(id = null) {
+      const modal = document.getElementById('modal-custom-sale');
+      const title = document.getElementById('modal-custom-sale-title');
+      const form = document.getElementById('custom-sale-form');
+      form.reset();
+
+      if (id) {
+        const item = (state.customSales || []).find(s => s.id === id);
+        if (item) {
+          document.getElementById('cs-form-id').value = item.id;
+          document.getElementById('cs-form-date').value = (item.date || '').split('T')[0];
+          document.getElementById('cs-form-customer').value = item.customer || '';
+          document.getElementById('cs-form-desc').value = item.itemDesc || '';
+          document.getElementById('cs-form-qty').value = item.qty || 1;
+          document.getElementById('cs-form-rate').value = item.rate || 0;
+          document.getElementById('cs-form-cost').value = item.cost || 0;
+          document.getElementById('cs-form-method').value = item.method || 'Cash';
+          document.getElementById('cs-form-note').value = item.note || '';
+          if (title) title.textContent = state.lang === 'bn' ? 'কাস্টম সেলস এন্ট্রি সম্পাদনা' : 'Edit Custom Sale Entry';
+        }
+      } else {
+        document.getElementById('cs-form-id').value = '';
+        document.getElementById('cs-form-date').value = new Date().toISOString().split('T')[0];
+        document.getElementById('cs-form-qty').value = 1;
+        document.getElementById('cs-form-rate').value = '';
+        document.getElementById('cs-form-cost').value = '';
+        document.getElementById('cs-form-method').value = 'Cash';
+        if (title) title.textContent = state.lang === 'bn' ? 'নতুন কাস্টম / সরাসরি সেলস' : 'New Custom / Direct Sale';
+      }
+
+      calculateCustomSaleTotal();
+      modal.classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeCustomSaleModal() {
+      const modal = document.getElementById('modal-custom-sale');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function calculateCustomSaleTotal() {
+      const qty = parseFloat(document.getElementById('cs-form-qty').value) || 0;
+      const rate = parseFloat(document.getElementById('cs-form-rate').value) || 0;
+      const cost = parseFloat(document.getElementById('cs-form-cost').value) || 0;
+
+      const total = qty * rate;
+      const profit = total - (cost * qty);
+
+      const totalEl = document.getElementById('cs-form-total-display');
+      const profitEl = document.getElementById('cs-form-profit-display');
+      if (totalEl) totalEl.textContent = c(total);
+      if (profitEl) {
+        profitEl.textContent = (profit >= 0 ? '+' : '') + c(profit);
+        profitEl.className = profit >= 0
+          ? 'text-lg font-black font-mono text-cyan-600 dark:text-cyan-400 mt-0.5'
+          : 'text-lg font-black font-mono text-rose-600 dark:text-rose-400 mt-0.5';
+      }
+    }
+
+    async function saveCustomSale(e) {
+      e.preventDefault();
+      const id = document.getElementById('cs-form-id').value;
+      const dateStr = document.getElementById('cs-form-date').value;
+      const customer = document.getElementById('cs-form-customer').value.trim();
+      const desc = document.getElementById('cs-form-desc').value.trim();
+      const qty = parseFloat(document.getElementById('cs-form-qty').value) || 1;
+      const rate = parseFloat(document.getElementById('cs-form-rate').value) || 0;
+      const cost = parseFloat(document.getElementById('cs-form-cost').value) || 0;
+      const method = document.getElementById('cs-form-method').value;
+      const note = document.getElementById('cs-form-note').value.trim();
+
+      const total = qty * rate;
+      const profit = total - (cost * qty);
+
+      const saleData = {
+        date: dateStr ? new Date(dateStr).toISOString() : new Date().toISOString(),
+        customer: customer || (state.lang === 'bn' ? 'সাধারণ ক্রেতা' : 'Walk-in Customer'),
+        itemDesc: desc,
+        qty: qty,
+        rate: rate,
+        cost: cost,
+        total: total,
+        profit: profit,
+        method: method,
+        note: note,
+        updatedAt: new Date().toISOString()
+      };
+
+      try {
+        if (isFirebaseReady && state.storeId && state.storeId !== 'demo-store-001') {
+          const colRef = db.collection('stores').doc(state.storeId).collection('customSales');
+          if (id) {
+            await colRef.doc(id).update(saleData);
+          } else {
+            await colRef.add({ ...saleData, createdAt: new Date().toISOString() });
+          }
+        } else {
+          // Offline / Local State
+          if (id) {
+            const idx = state.customSales.findIndex(s => s.id === id);
+            if (idx !== -1) state.customSales[idx] = { id, ...saleData };
+          } else {
+            state.customSales.unshift({ id: 'cs-' + Date.now(), ...saleData });
+          }
+          renderCustomSalesTable();
+          renderDashboard();
+        }
+
+        closeCustomSaleModal();
+        showToast(id
+          ? (state.lang === 'bn' ? 'কাস্টম সেলস সফলভাবে আপডেট হয়েছে' : 'Custom sale updated successfully')
+          : (state.lang === 'bn' ? 'কাস্টম সেলস রেকর্ড সংরক্ষিত হয়েছে' : 'Custom sale recorded successfully'),
+          'success'
+        );
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function editCustomSale(id) {
+      openCustomSaleModal(id);
+    }
+
+    async function deleteCustomSale(id) {
+      if (!confirm(state.lang === 'bn' ? 'আপনি কি নিশ্চিতভাবে এই কাস্টম সেলস রেকর্ডটি মুছে ফেলতে চান?' : 'Are you sure you want to delete this custom sale record?')) return;
+      try {
+        if (isFirebaseReady && state.storeId && state.storeId !== 'demo-store-001') {
+          await db.collection('stores').doc(state.storeId).collection('customSales').doc(id).delete();
+        } else {
+          state.customSales = (state.customSales || []).filter(s => s.id !== id);
+          renderCustomSalesTable();
+          renderDashboard();
+        }
+        showToast(state.lang === 'bn' ? 'কাস্টম সেলস মুছে ফেলা হয়েছে' : 'Custom sale deleted', 'info');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function clearCustomSalesSearch() {
+      const searchInput = document.getElementById('cs-search') || document.getElementById('cs-search-input');
+      if (searchInput) searchInput.value = '';
+      const clearBtn = document.getElementById('cs-search-clear');
+      if (clearBtn) clearBtn.classList.add('hidden');
+      renderCustomSalesTable();
+    }
+
+    function renderCustomSalesTable() {
+      const searchInput = document.getElementById('cs-search') || document.getElementById('cs-search-input');
+      const search = (searchInput?.value || '').toLowerCase().trim();
+      const methodFilter = document.getElementById('cs-method-filter')?.value || 'all';
+      const fromStr = document.getElementById('cs-from-date')?.value || document.getElementById('cs-date-from')?.value;
+      const toStr = document.getElementById('cs-to-date')?.value || document.getElementById('cs-date-to')?.value;
+
+      const clearBtn = document.getElementById('cs-search-clear');
+      if (clearBtn) {
+        clearBtn.classList.toggle('hidden', !search);
+      }
+
+      const fromDate = fromStr ? new Date(fromStr) : null;
+      const toDate = toStr ? new Date(toStr + 'T23:59:59') : null;
+
+      const filtered = (state.customSales || []).filter(cs => {
+        const d = new Date(cs.date);
+        const matchDate = (!fromDate || d >= fromDate) && (!toDate || d <= toDate);
+        const matchMethod = methodFilter === 'all' || cs.method === methodFilter;
+        const matchSearch = !search ||
+          (cs.itemDesc && cs.itemDesc.toLowerCase().includes(search)) ||
+          (cs.customer && cs.customer.toLowerCase().includes(search)) ||
+          (cs.note && cs.note.toLowerCase().includes(search));
+        return matchDate && matchMethod && matchSearch;
+      });
+
+      // KPI summary metrics
+      const totalRevenue = filtered.reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+      const totalCost = filtered.reduce((acc, s) => acc + (Number(s.cost || 0) * Number(s.qty || 1)), 0);
+      const netProfit = totalRevenue - totalCost;
+      const totalDue = filtered.filter(s => s.method === 'Due').reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+
+      const revEl = document.getElementById('cs-kpi-revenue');
+      const costEl = document.getElementById('cs-kpi-cost');
+      const profitEl = document.getElementById('cs-kpi-profit');
+      const dueEl = document.getElementById('cs-kpi-due');
+
+      if (revEl) revEl.textContent = c(totalRevenue);
+      if (costEl) costEl.textContent = c(totalCost);
+      if (profitEl) {
+        profitEl.textContent = c(netProfit);
+        profitEl.className = netProfit >= 0
+          ? 'text-lg sm:text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5'
+          : 'text-lg sm:text-2xl font-bold font-mono text-rose-600 dark:text-rose-400 mt-0.5';
+      }
+      if (dueEl) dueEl.textContent = c(totalDue);
+
+      const tbody = document.getElementById('custom-sales-table-body');
+      if (!tbody) return;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9" class="p-8 text-center text-slate-400 text-xs">
+              <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 opacity-40"></i>
+              <div>${state.lang === 'bn' ? 'কোনো কাস্টম সেলস রেকর্ড নেই।' : 'No custom direct sales records found.'}</div>
+            </td>
+          </tr>
+        `;
+        if (window.lucide) lucide.createIcons({ root: tbody });
+        return;
+      }
+
+      tbody.innerHTML = filtered.slice().reverse().map((cs, idx) => {
+        const itemProfit = (Number(cs.total) || 0) - (Number(cs.cost || 0) * Number(cs.qty || 1));
+        const methodColors = {
+          Cash: 'bg-emerald-500/15 text-emerald-600 border border-emerald-500/30',
+          bKash: 'bg-pink-500/15 text-pink-600 border border-pink-500/30',
+          Nagad: 'bg-orange-500/15 text-orange-600 border border-orange-500/30',
+          Due: 'bg-amber-500/15 text-amber-600 border border-amber-500/30 font-bold',
+          Bank: 'bg-blue-500/15 text-blue-600 border border-blue-500/30'
+        };
+
+        return `
+          <tr class="hover:bg-[var(--bg-subtle)] transition animated-row" style="animation-delay: ${Math.min(idx * 0.03, 0.35)}s">
+            <td class="p-3.5 font-mono text-slate-500 text-[11px] whitespace-nowrap">
+              ${new Date(cs.date).toLocaleDateString()}
+            </td>
+            <td class="p-3.5">
+              <div class="font-bold text-[var(--text-main)]">${highlightMatch(cs.itemDesc, search)}</div>
+              ${cs.note ? `<div class="text-[10px] text-[var(--text-muted)] truncate max-w-xs">${highlightMatch(cs.note, search)}</div>` : ''}
+            </td>
+            <td class="p-3.5 text-slate-600 dark:text-slate-300">
+              <span class="inline-flex items-center gap-1 font-medium">
+                <i data-lucide="user" class="w-3 h-3 text-slate-400"></i>
+                ${highlightMatch(cs.customer || (state.lang === 'bn' ? 'সাধারণ ক্রেতা' : 'Walk-in'), search)}
+              </span>
+            </td>
+            <td class="p-3.5 text-right font-mono">
+              <span class="font-bold">${n(cs.qty)}</span> <span class="text-[10px] text-slate-400">×</span> <span class="text-slate-500">${c(cs.rate)}</span>
+            </td>
+            <td class="p-3.5 text-right font-mono text-slate-500 text-[11px]">
+              ${cs.cost > 0 ? c(cs.cost * cs.qty) : '-'}
+            </td>
+            <td class="p-3.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">
+              ${c(cs.total)}
+            </td>
+            <td class="p-3.5 text-right font-mono text-[11px] font-semibold ${itemProfit >= 0 ? 'text-cyan-600 dark:text-cyan-400' : 'text-rose-600'}">
+              ${itemProfit !== 0 ? ((itemProfit >= 0 ? '+' : '') + c(itemProfit)) : '-'}
+            </td>
+            <td class="p-3.5 text-center">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${methodColors[cs.method] || 'bg-slate-100 text-slate-700'}">
+                ${cs.method || 'Cash'}
+              </span>
+            </td>
+            <td class="p-3.5 text-center whitespace-nowrap">
+              <div class="flex items-center justify-center gap-1.5">
+                <button onclick="editCustomSale('${cs.id}')" class="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 hover:text-emerald-600 transition hover:scale-[1.05] active:scale-[0.95]" title="Edit">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                </button>
+                <button onclick="deleteCustomSale('${cs.id}')" class="p-1 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-950 text-slate-400 hover:text-rose-600 transition hover:scale-[1.05] active:scale-[0.95]" title="Delete">
+                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      if (window.lucide) lucide.createIcons({ root: tbody });
+    }
+
+    /* -------------------------------------------------------------
+       CUSTOM SALES STATEMENT & PDF / EXCEL REPORTING
+       ------------------------------------------------------------- */
+    function openCustomStatementModal() {
+      const fromStr = document.getElementById('cs-date-from')?.value;
+      const toStr = document.getElementById('cs-date-to')?.value;
+      const methodFilter = document.getElementById('cs-method-filter')?.value || 'all';
+
+      const fromDate = fromStr ? new Date(fromStr) : new Date(0);
+      const toDate = toStr ? new Date(toStr + 'T23:59:59') : new Date();
+
+      const filtered = (state.customSales || []).filter(cs => {
+        const d = new Date(cs.date);
+        const matchDate = d >= fromDate && d <= toDate;
+        const matchMethod = methodFilter === 'all' || cs.method === methodFilter;
+        return matchDate && matchMethod;
+      });
+
+      const totalRevenue = filtered.reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+      const totalCost = filtered.reduce((acc, s) => acc + (Number(s.cost || 0) * Number(s.qty || 1)), 0);
+      const netProfit = totalRevenue - totalCost;
+      const totalDue = filtered.filter(s => s.method === 'Due').reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+      const totalPaid = totalRevenue - totalDue;
+      const marginPct = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) : '0';
+
+      activeCustomStatementData = {
+        fromStr: fromStr || (state.lang === 'bn' ? 'প্রারম্ভিক' : 'Beginning'),
+        toStr: toStr || (state.lang === 'bn' ? 'আজ পর্যন্ত' : 'Today'),
+        records: filtered,
+        totalRevenue,
+        totalCost,
+        netProfit,
+        totalDue,
+        totalPaid,
+        marginPct
+      };
+
+      const printable = document.getElementById('printable-custom-statement');
+      if (printable) {
+        printable.innerHTML = `
+          <!-- Header Branding -->
+          <div class="border-b-2 border-slate-900 pb-4 mb-5 flex justify-between items-start">
+            <div>
+              <div class="text-xl font-black text-slate-900 uppercase tracking-tight">${escapeHTML(state.store.shopName || state.store.name || 'Digital Store')}</div>
+              <div class="text-xs text-slate-600 mt-0.5">${escapeHTML(state.store.proprietor || '')} • ${escapeHTML(state.store.category || 'Retail')}</div>
+              <div class="text-[11px] text-slate-500">${escapeHTML(state.store.phone || '')} | ${escapeHTML(state.store.address || '')}</div>
+            </div>
+            <div class="text-right">
+              <span class="inline-block px-3 py-1 rounded-md bg-slate-900 text-white font-mono text-[10px] font-bold tracking-wider uppercase">
+                ${state.lang === 'bn' ? 'কাস্টম সেলস স্টেটমেন্ট' : 'CUSTOM SALES STATEMENT'}
+              </span>
+              <div class="text-[10px] text-slate-500 font-mono mt-1">${state.lang === 'bn' ? 'প্রস্তুতের সময়:' : 'Generated:'} ${new Date().toLocaleString()}</div>
+              <div class="text-[10px] text-slate-700 font-bold mt-0.5">${state.lang === 'bn' ? 'সময়কাল:' : 'Period:'} ${activeCustomStatementData.fromStr} - ${activeCustomStatementData.toStr}</div>
+            </div>
+          </div>
+
+          <!-- KPI Summary Grid -->
+          <div class="grid grid-cols-4 gap-3 mb-5">
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+              <div class="text-[10px] uppercase font-bold text-slate-500">${state.lang === 'bn' ? 'মোট বিক্রয় আয়' : 'Total Revenue'}</div>
+              <div class="text-base font-black font-mono text-slate-900 mt-0.5">${c(totalRevenue)}</div>
+              <div class="text-[10px] text-slate-400 font-mono">${n(filtered.length)} ${state.lang === 'bn' ? 'টি এন্ট্রি' : 'records'}</div>
+            </div>
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+              <div class="text-[10px] uppercase font-bold text-slate-500">${state.lang === 'bn' ? 'মোট ক্রয় খরচ' : 'Total Cost'}</div>
+              <div class="text-base font-black font-mono text-rose-700 mt-0.5">${c(totalCost)}</div>
+              <div class="text-[10px] text-slate-400 font-mono">${state.lang === 'bn' ? 'প্রাক্কলিত খরচ' : 'Cost of sales'}</div>
+            </div>
+            <div class="p-3 ${netProfit >= 0 ? 'bg-emerald-50 border-emerald-300' : 'bg-rose-50 border-rose-300'} border rounded-xl">
+              <div class="text-[10px] uppercase font-bold ${netProfit >= 0 ? 'text-emerald-800' : 'text-rose-800'}">${state.lang === 'bn' ? 'মোট লাভ (GP)' : 'Gross Profit'}</div>
+              <div class="text-base font-black font-mono ${netProfit >= 0 ? 'text-emerald-700' : 'text-rose-700'} mt-0.5">${c(netProfit)}</div>
+              <div class="text-[10px] ${netProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'} font-mono font-bold">${n(marginPct)}% ${state.lang === 'bn' ? 'মার্জিন' : 'margin'}</div>
+            </div>
+            <div class="p-3 bg-amber-50 border border-amber-300 rounded-xl">
+              <div class="text-[10px] uppercase font-bold text-amber-800">${state.lang === 'bn' ? 'বকেয়া বাকি' : 'Unsettled Due'}</div>
+              <div class="text-base font-black font-mono text-amber-700 mt-0.5">${c(totalDue)}</div>
+              <div class="text-[10px] text-amber-600 font-mono">${state.lang === 'bn' ? 'আদায়যোগ্য' : 'Receivable'}</div>
+            </div>
+          </div>
+
+          <!-- Detailed Itemized Table -->
+          <div class="border border-slate-300 rounded-xl overflow-hidden mb-6">
+            <table class="w-full text-left text-xs">
+              <thead class="bg-slate-100 border-b border-slate-300 text-slate-700 font-bold">
+                <tr>
+                  <th class="p-2.5">${state.lang === 'bn' ? 'তারিখ' : 'Date'}</th>
+                  <th class="p-2.5">${state.lang === 'bn' ? 'আইটেম / সার্ভিসের বিবরণ' : 'Description'}</th>
+                  <th class="p-2.5">${state.lang === 'bn' ? 'কাস্টমার' : 'Customer'}</th>
+                  <th class="p-2.5 text-right">${state.lang === 'bn' ? 'পরিমাণ ও দর' : 'Qty & Rate'}</th>
+                  <th class="p-2.5 text-right">${state.lang === 'bn' ? 'মোট মূল্য' : 'Total (৳)'}</th>
+                  <th class="p-2.5 text-right">${state.lang === 'bn' ? 'লাভ' : 'Profit (৳)'}</th>
+                  <th class="p-2.5 text-center">${state.lang === 'bn' ? 'পেমেন্ট' : 'Method'}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                ${filtered.length === 0 ? `
+                  <tr><td colspan="7" class="p-6 text-center text-slate-400 text-xs">${state.lang === 'bn' ? 'এই সময়সীমার মধ্যে কোনো সেলস নেই।' : 'No custom sales recorded in this timeframe.'}</td></tr>
+                ` : filtered.map((s) => {
+                  const p = (Number(s.total) || 0) - (Number(s.cost || 0) * Number(s.qty || 1));
+                  return `
+                    <tr class="text-slate-800">
+                      <td class="p-2 font-mono text-[11px] text-slate-500">${new Date(s.date).toLocaleDateString()}</td>
+                      <td class="p-2 font-bold">${escapeHTML(s.itemDesc)}</td>
+                      <td class="p-2 text-slate-600">${escapeHTML(s.customer || '-')}</td>
+                      <td class="p-2 text-right font-mono">${n(s.qty)} × ${c(s.rate)}</td>
+                      <td class="p-2 text-right font-mono font-bold text-slate-900">${c(s.total)}</td>
+                      <td class="p-2 text-right font-mono ${p >= 0 ? 'text-emerald-700' : 'text-rose-700'}">${p !== 0 ? c(p) : '-'}</td>
+                      <td class="p-2 text-center font-mono text-[10px]">${s.method}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+              <tfoot class="bg-slate-100 border-t-2 border-slate-300 font-bold">
+                <tr>
+                  <td colspan="4" class="p-2.5 text-slate-800 text-right uppercase tracking-wider text-[11px]">${state.lang === 'bn' ? 'সর্বমোট স্থিতি (Total):' : 'Grand Total:'}</td>
+                  <td class="p-2.5 text-right font-mono text-slate-900 font-black">${c(totalRevenue)}</td>
+                  <td class="p-2.5 text-right font-mono text-emerald-800 font-black">${c(netProfit)}</td>
+                  <td class="p-2.5 text-center text-[10px] font-mono text-slate-500">${n(filtered.length)} pcs</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <!-- Official Authorization Footer -->
+          <div class="mt-8 pt-6 border-t border-slate-200 flex justify-between items-end text-xs text-slate-500">
+            <div>
+              <div class="w-36 border-b border-slate-400 mb-1"></div>
+              <div>${state.lang === 'bn' ? 'প্রস্তুতকারীর স্বাক্ষর' : 'Prepared By'}</div>
+            </div>
+            <div class="text-right">
+              <div class="w-44 border-b border-slate-400 mb-1 ml-auto"></div>
+              <div class="font-bold text-slate-800">${escapeHTML(state.store.proprietor || 'Proprietor')}</div>
+              <div class="text-[10px] text-slate-400">${state.lang === 'bn' ? 'স্বত্বাধিকারী / অনুমোদিত স্বাক্ষর' : 'Proprietor / Authorized Signature'}</div>
+            </div>
+          </div>
+        `;
+      }
+
+      document.getElementById('modal-custom-statement-preview').classList.remove('hidden');
+    }
+
+    function closeCustomStatementModal() {
+      document.getElementById('modal-custom-statement-preview').classList.add('hidden');
+    }
+
+    function exportCustomSalesStatementPDF() {
+      openCustomStatementModal();
+    }
+
+    function printCustomStatementDoc() {
+      window.print();
+    }
+
+    function downloadCustomStatementPDF() {
+      const element = document.getElementById('printable-custom-statement');
+      if (!element) return;
+      const opt = {
+        margin: [8, 8, 8, 8],
+        filename: `Custom_Sales_Statement_${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(element).save();
+      logDownload('Custom Sales Statement (PDF)', 'Custom Sales', 'PDF', activeCustomStatementData?.records?.length || 0);
+      showToast(state.lang === 'bn' ? 'স্টেটমেন্ট PDF ডাউনলোড শুরু হয়েছে' : 'Statement PDF download started', 'success');
+    }
+
+    function exportCustomSalesExcel() {
+      const records = activeCustomStatementData?.records || state.customSales || [];
+      const data = [
+        ['দোকানের নাম / Store:', state.store.shopName || state.store.name || 'Store'],
+        ['স্বত্বাধিকারী / Proprietor:', state.store.proprietor || 'Proprietor'],
+        ['বিবরণ / Report:', 'Custom / Direct Sales Statement'],
+        ['তারিখ / Generated:', new Date().toLocaleString()],
+        [],
+        ['তারিখ / Date', 'বিবরণ / Description', 'কাস্টমার / Customer', 'পরিমাণ / Qty', 'দর / Rate (৳)', 'ক্রয়মূল্য / Cost (৳)', 'মোট বিক্রয় / Total (৳)', 'লাভ / Profit (৳)', 'মাধ্যম / Method', 'নোট / Note']
+      ];
+
+      records.forEach(r => {
+        const itemProfit = (Number(r.total) || 0) - (Number(r.cost || 0) * Number(r.qty || 1));
+        data.push([
+          new Date(r.date).toLocaleDateString(),
+          r.itemDesc,
+          r.customer || '',
+          r.qty,
+          r.rate,
+          r.cost || 0,
+          r.total,
+          itemProfit,
+          r.method,
+          r.note || ''
+        ]);
+      });
+
+      const ws = XLSX.utils.aoa_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "CustomSales");
+      XLSX.writeFile(wb, `Custom_Sales_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+      logDownload('Custom Sales Report (Excel)', 'Custom Sales', 'Excel', records.length);
+      showToast(state.lang === 'bn' ? 'এক্সেল রিপোর্ট ডাউনলোড সম্পন্ন' : 'Excel report downloaded', 'success');
     }
 
     /* -------------------------------------------------------------
@@ -3690,6 +4935,7 @@
         store: state.store,
         products: state.products,
         sales: state.sales,
+        customSales: state.customSales,
         transactions: state.transactions,
         parties: state.parties,
         exportedAt: new Date().toISOString()
@@ -3701,34 +4947,44 @@
       document.body.appendChild(dlAnchor);
       dlAnchor.click();
       dlAnchor.remove();
-      logDownload('Full Tenant Backup', 'Settings', 'JSON', state.products.length + state.transactions.length);
+      logDownload('Full Tenant Backup', 'Settings', 'JSON', state.products.length + state.transactions.length + (state.customSales || []).length);
       showToast(state.lang === 'bn' ? 'ব্যাকআপ ডাউনলোড সম্পন্ন' : 'Backup downloaded', 'success');
     }
 
     function showToast(msg, type = 'info') {
       const container = document.getElementById('toast-container');
+      if (!container) return;
       const toast = document.createElement('div');
       const colors = {
-        success: 'bg-emerald-600 text-white',
-        error: 'bg-rose-600 text-white',
-        warning: 'bg-amber-600 text-white',
-        info: 'bg-slate-900 text-white'
+        success: 'bg-emerald-600 text-white shadow-emerald-950/40',
+        error: 'bg-rose-600 text-white shadow-rose-950/40',
+        warning: 'bg-amber-600 text-white shadow-amber-950/40',
+        info: 'bg-slate-900 border border-slate-700 text-white shadow-slate-950/40'
       };
-      toast.className = `px-4 py-2.5 rounded-2xl shadow-xl text-xs font-semibold flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto ${colors[type] || colors.info}`;
-      toast.textContent = msg;
+      const icons = {
+        success: 'check-circle-2',
+        error: 'alert-circle',
+        warning: 'alert-triangle',
+        info: 'info'
+      };
+      toast.className = `px-4 py-3 rounded-2xl shadow-2xl text-xs font-semibold flex items-center gap-2.5 toast-animate pointer-events-auto border border-white/10 ${colors[type] || colors.info}`;
+      toast.innerHTML = `<i data-lucide="${icons[type] || 'info'}" class="w-4 h-4 shrink-0"></i><span>${escapeHTML(msg)}</span>`;
 
       container.appendChild(toast);
-      setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+      if (window.lucide) lucide.createIcons({ root: toast });
       setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-2');
-        setTimeout(() => toast.remove(), 300);
-      }, 3200);
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        toast.style.transition = 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)';
+        setTimeout(() => toast.remove(), 320);
+      }, 3500);
     }
 
     function renderAllViews() {
       applyLanguage();
       renderDashboard();
       renderPosCatalog();
+      renderCustomSalesTable();
       renderInventoryTable();
       renderLedgerTable();
       renderPartiesTable();
@@ -3743,6 +4999,8 @@
       const todayStr = now.toISOString().split('T')[0];
       if (document.getElementById('rep-from-date')) document.getElementById('rep-from-date').value = firstDay;
       if (document.getElementById('rep-to-date')) document.getElementById('rep-to-date').value = todayStr;
+      if (document.getElementById('cs-date-from')) document.getElementById('cs-date-from').value = firstDay;
+      if (document.getElementById('cs-date-to')) document.getElementById('cs-date-to').value = todayStr;
 
       renderAllViews();
     });
