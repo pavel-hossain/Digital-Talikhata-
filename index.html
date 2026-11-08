@@ -121,7 +121,7 @@
     }
   </style>
 </head>
-<body class="min-h-screen flex flex-col antialiased select-none">
+<body class="h-screen overflow-hidden antialiased select-none bg-[var(--bg-canvas)] text-[var(--text-main)]">
 
   <!-- ================= AUTH GATE OVERLAY ================= -->
   <div id="auth-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
@@ -202,127 +202,182 @@
     </div>
   </div>
 
-  <!-- ================= TOP NAVIGATION HEADER ================= -->
-  <header class="sticky top-0 z-40 bg-[var(--bg-surface)] border-b border-[var(--border-color)] shadow-xs px-4 lg:px-6 py-2.5 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-600/20">
-        <i data-lucide="cloud-check" class="w-5 h-5"></i>
-      </div>
-      <div>
-        <div class="flex items-center gap-2">
-          <h1 id="header-shop-name" class="text-base sm:text-lg font-bold leading-tight tracking-tight">ডিজিটাল টালি খাতা</h1>
-          <span id="cloud-sync-status" class="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Cloud Live
-          </span>
-        </div>
-        <p id="header-shop-owner" class="text-[11px] text-[var(--text-muted)] font-medium">ক্লাউড মাল্টি-টেন্যান্ট স্টোর</p>
-      </div>
-    </div>
+  <!-- ================= ERP WORKSPACE LAYOUT ================= -->
+  <div class="flex h-screen w-screen overflow-hidden">
 
-    <!-- Right Controls: Language, Theme, Download Log, Store Profile -->
-    <div class="flex items-center gap-2 sm:gap-3">
-      <!-- Language Switcher -->
-      <button onclick="toggleLanguage()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] text-xs font-semibold hover:border-emerald-500 transition" title="Language">
-        <i data-lucide="globe" class="w-4 h-4 text-emerald-600"></i>
-        <span id="lang-indicator">EN</span>
-      </button>
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div id="sidebar-backdrop" onclick="closeMobileSidebar()" class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-xs transition-opacity duration-300 hidden lg:hidden"></div>
 
-      <!-- Theme Switcher -->
-      <div class="relative">
-        <button onclick="toggleThemeDropdown()" class="p-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] hover:border-emerald-500 transition" title="Theme">
-          <i data-lucide="palette" class="w-4 h-4 text-emerald-600"></i>
-        </button>
-        <div id="theme-dropdown" class="hidden absolute right-0 mt-2 w-44 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl shadow-xl p-2 z-50 text-xs">
-          <button onclick="setTheme('emerald')" class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-[var(--bg-subtle)] flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-emerald-600"></span> Emerald Green
-          </button>
-          <button onclick="setTheme('dark')" class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-[var(--bg-subtle)] flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-slate-900 border border-slate-700"></span> Dark Slate
-          </button>
-          <button onclick="setTheme('light')" class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-[var(--bg-subtle)] flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-blue-600"></span> Clean Light
-          </button>
-          <button onclick="setTheme('sand')" class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-[var(--bg-subtle)] flex items-center gap-2">
-            <span class="w-3 h-3 rounded-full bg-amber-500"></span> Warm Sand
-          </button>
-        </div>
-      </div>
-
-      <!-- Download History Log Modal -->
-      <button onclick="openDownloadHistoryModal()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] text-xs font-semibold hover:border-emerald-500 transition" title="Download History">
-        <i data-lucide="download" class="w-4 h-4 text-emerald-600"></i>
-        <span class="hidden md:inline" data-i18n="downloads">ডাউনলোড হিস্টরি</span>
-        <span id="download-count-badge" class="px-1.5 py-0.2 rounded-full bg-emerald-600 text-white text-[10px] font-mono">0</span>
-      </button>
-
-      <!-- Store Profile & Logout Menu -->
-      <div class="relative">
-        <button onclick="toggleUserMenu()" class="flex items-center gap-2 p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] hover:border-emerald-500 transition">
-          <div class="w-6 h-6 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-bold font-mono" id="user-avatar-initial">S</div>
-          <span id="user-display-email" class="text-xs font-semibold max-w-[100px] truncate hidden sm:inline">Store</span>
-          <i data-lucide="chevron-down" class="w-3 h-3 text-slate-400"></i>
-        </button>
-        <div id="user-menu-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl shadow-xl p-2 z-50 text-xs space-y-1">
-          <div class="px-2 py-1.5 border-b border-[var(--border-color)]">
-            <div id="menu-shop-title" class="font-bold truncate">মেসার্স ডিজিটাল স্টোর</div>
-            <div id="menu-user-email" class="text-[10px] text-[var(--text-muted)] truncate">owner@store.com</div>
+    <!-- ================= 1. VERTICAL LEFT SIDEBAR ================= -->
+    <aside id="app-sidebar" class="fixed lg:static inset-y-0 left-0 z-50 w-64 sm:w-72 bg-[var(--bg-surface)] border-r border-[var(--border-color)] flex flex-col justify-between transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 shadow-2xl lg:shadow-none shrink-0 h-full overflow-hidden select-none">
+      
+      <!-- Sidebar Header / Shop Branding -->
+      <div class="p-4 sm:p-5 border-b border-[var(--border-color)] shrink-0">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-600/30 shrink-0">
+              <i data-lucide="cloud-check" class="w-5 h-5"></i>
+            </div>
+            <div class="min-w-0 flex-1">
+              <h1 id="sidebar-shop-name" class="text-sm sm:text-base font-bold tracking-tight truncate leading-tight text-[var(--text-main)]">Pavel Hossain-এর দোকান</h1>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <span id="cloud-sync-status" class="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Cloud Live
+                </span>
+              </div>
+            </div>
           </div>
-          <button onclick="switchTab('settings'); toggleUserMenu();" class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-[var(--bg-subtle)] flex items-center gap-2">
-            <i data-lucide="settings" class="w-3.5 h-3.5 text-slate-500"></i>
-            <span data-i18n="navSettings">দোকান সেটিংস</span>
-          </button>
-          <button onclick="signOutUser()" class="w-full text-left px-2 py-1.5 rounded-lg text-rose-600 hover:bg-rose-50 flex items-center gap-2 font-bold">
-            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
-            <span data-i18n="signOut">লগআউট (Sign Out)</span>
+          <!-- Mobile Close Button -->
+          <button onclick="closeMobileSidebar()" class="lg:hidden p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-[var(--bg-subtle)]">
+            <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
       </div>
-    </div>
-  </header>
 
-  <!-- ================= MAIN TAB NAVIGATION ================= -->
-  <nav class="bg-[var(--bg-surface)] border-b border-[var(--border-color)] px-4 lg:px-6 overflow-x-auto no-scrollbar">
-    <div class="flex space-x-1 sm:space-x-2 py-2 min-w-max text-xs sm:text-sm font-semibold">
-      <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="tab-button flex items-center gap-2 px-3.5 py-2 rounded-xl transition bg-emerald-600 text-white shadow-xs">
-        <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
-        <span data-i18n="navDashboard">ড্যাশবোর্ড</span>
-      </button>
+      <!-- Sidebar Menu Links (Vertical List) -->
+      <div class="flex-1 overflow-y-auto p-3 sm:p-4 space-y-1.5 no-scrollbar">
+        <div class="px-3 py-1 text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">ERP মেন্যু (Navigation)</div>
 
-      <button onclick="switchTab('pos')" id="tab-btn-pos" class="tab-button flex items-center gap-2 px-3.5 py-2 rounded-xl transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]">
-        <i data-lucide="shopping-cart" class="w-4 h-4"></i>
-        <span data-i18n="navPOS">পিওএস ও মেমো (POS)</span>
-      </button>
+        <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition bg-emerald-600 text-white shadow-xs">
+          <div class="flex items-center gap-3">
+            <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+            <span data-i18n="navDashboard">ড্যাশবোর্ড</span>
+          </div>
+        </button>
 
-      <button onclick="switchTab('inventory')" id="tab-btn-inventory" class="tab-button flex items-center gap-2 px-3.5 py-2 rounded-xl transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]">
-        <i data-lucide="boxes" class="w-4 h-4"></i>
-        <span data-i18n="navInventory">ক্লাউড ইনভেন্টরি</span>
-        <span id="low-stock-count-badge" class="hidden px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-mono">0</span>
-      </button>
+        <button onclick="switchTab('pos')" id="tab-btn-pos" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)]">
+          <div class="flex items-center gap-3">
+            <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+            <span data-i18n="navPOS">পিওএস ও মেমো</span>
+          </div>
+          <span class="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold">POS</span>
+        </button>
 
-      <button onclick="switchTab('ledger')" id="tab-btn-ledger" class="tab-button flex items-center gap-2 px-3.5 py-2 rounded-xl transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]">
-        <i data-lucide="receipt" class="w-4 h-4"></i>
-        <span data-i18n="navLedger">দৈনিক আয়-ব্যয় খাতা</span>
-      </button>
+        <button onclick="switchTab('inventory')" id="tab-btn-inventory" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)]">
+          <div class="flex items-center gap-3">
+            <i data-lucide="boxes" class="w-4 h-4"></i>
+            <span data-i18n="navInventory">ক্লাউড ইনভেন্টরি</span>
+          </div>
+          <span id="low-stock-count-badge" class="hidden px-2 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-mono font-bold">0</span>
+        </button>
 
-      <button onclick="switchTab('parties')" id="tab-btn-parties" class="tab-button flex items-center gap-2 px-3.5 py-2 rounded-xl transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]">
-        <i data-lucide="users" class="w-4 h-4"></i>
-        <span data-i18n="navParties">দেনা-পাওনা (পার্টি)</span>
-      </button>
+        <button onclick="switchTab('ledger')" id="tab-btn-ledger" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)]">
+          <div class="flex items-center gap-3">
+            <i data-lucide="receipt" class="w-4 h-4"></i>
+            <span data-i18n="navLedger">দৈনিক আয়-ব্যয় খাতা</span>
+          </div>
+        </button>
 
-      <button onclick="switchTab('reports')" id="tab-btn-reports" class="tab-button flex items-center gap-2 px-3.5 py-2 rounded-xl transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]">
-        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
-        <span data-i18n="navReports">রিপোর্ট ও প্রফিট/লস</span>
-      </button>
+        <button onclick="switchTab('parties')" id="tab-btn-parties" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)]">
+          <div class="flex items-center gap-3">
+            <i data-lucide="users" class="w-4 h-4"></i>
+            <span data-i18n="navParties">দেনা-পাওনা (পার্টি)</span>
+          </div>
+        </button>
 
-      <button onclick="switchTab('settings')" id="tab-btn-settings" class="tab-button flex items-center gap-2 px-3.5 py-2 rounded-xl transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]">
-        <i data-lucide="settings" class="w-4 h-4"></i>
-        <span data-i18n="navSettings">দোকান প্রোফাইল</span>
-      </button>
-    </div>
-  </nav>
+        <button onclick="switchTab('reports')" id="tab-btn-reports" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)]">
+          <div class="flex items-center gap-3">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+            <span data-i18n="navReports">রিপোর্ট ও প্রফিট/লস</span>
+          </div>
+        </button>
 
-  <!-- ================= MAIN CONTENT VIEWPORT ================= -->
-  <main class="flex-1 p-4 lg:p-6 max-w-7xl w-full mx-auto space-y-6">
+        <button onclick="switchTab('settings')" id="tab-btn-settings" class="sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)]">
+          <div class="flex items-center gap-3">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+            <span data-i18n="navSettings">দোকান প্রোফাইল</span>
+          </div>
+        </button>
+      </div>
+
+      <!-- Sidebar Footer (Pinned at Bottom) -->
+      <div class="p-3 sm:p-4 border-t border-[var(--border-color)] bg-[var(--bg-subtle)]/40 space-y-2 shrink-0">
+        <!-- Download History Trigger -->
+        <button onclick="openDownloadHistoryModal()" class="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] hover:border-emerald-500 text-xs font-semibold transition shadow-2xs">
+          <div class="flex items-center gap-2">
+            <i data-lucide="download" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span data-i18n="downloads">ডাউনলোড হিস্টরি</span>
+          </div>
+          <span id="download-count-badge" class="px-1.5 py-0.2 rounded-full bg-emerald-600 text-white text-[10px] font-mono">0</span>
+        </button>
+
+        <!-- Theme Switcher -->
+        <div class="flex items-center justify-between px-3 py-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-surface)] text-xs">
+          <div class="flex items-center gap-2 text-[var(--text-muted)] font-medium">
+            <i data-lucide="palette" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span>থিম কালার</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="setTheme('emerald')" class="w-4 h-4 rounded-full bg-emerald-600 hover:scale-110 transition shadow-xs" title="Emerald"></button>
+            <button onclick="setTheme('dark')" class="w-4 h-4 rounded-full bg-slate-900 border border-slate-700 hover:scale-110 transition shadow-xs" title="Dark"></button>
+            <button onclick="setTheme('light')" class="w-4 h-4 rounded-full bg-blue-600 hover:scale-110 transition shadow-xs" title="Light"></button>
+            <button onclick="setTheme('sand')" class="w-4 h-4 rounded-full bg-amber-500 hover:scale-110 transition shadow-xs" title="Sand"></button>
+          </div>
+        </div>
+
+        <!-- Logout Action Button -->
+        <button onclick="signOutUser()" class="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 text-xs font-bold transition">
+          <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+          <span data-i18n="signOut">লগআউট (Sign Out)</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- ================= 2. MAIN CONTENT AREA ================= -->
+    <div class="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
+      
+      <!-- Top Header Bar -->
+      <header class="sticky top-0 z-30 bg-[var(--bg-surface)] border-b border-[var(--border-color)] px-4 sm:px-6 py-3 flex items-center justify-between shrink-0 shadow-2xs">
+        
+        <!-- Left: Mobile Menu Toggle Button & Dynamic Page Title -->
+        <div class="flex items-center gap-3 min-w-0">
+          <button onclick="openMobileSidebar()" class="lg:hidden p-2 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-surface)] text-slate-600 dark:text-slate-200 transition">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+          <div class="min-w-0">
+            <h2 id="top-bar-title" class="text-base sm:text-lg font-bold leading-tight tracking-tight text-[var(--text-main)] truncate">ড্যাশবোর্ড সামারি</h2>
+            <p id="top-bar-subtitle" class="text-[11px] text-[var(--text-muted)] hidden sm:block truncate">ক্লাউড রিয়েল-টাইম ক্যাশফ্লো, সেলস ও স্টক</p>
+          </div>
+        </div>
+
+        <!-- Right: Language Switcher & User Profile Avatar Dropdown -->
+        <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+          <!-- Language Toggle -->
+          <button onclick="toggleLanguage()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] text-xs font-semibold hover:border-emerald-500 transition shadow-2xs">
+            <i data-lucide="globe" class="w-3.5 h-3.5 text-emerald-600"></i>
+            <span id="lang-indicator">EN</span>
+          </button>
+
+          <!-- User Profile Avatar & Dropdown -->
+          <div class="relative">
+            <button onclick="toggleUserMenu()" class="flex items-center gap-2 p-1.5 sm:px-3 sm:py-1.5 rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] hover:border-emerald-500 transition">
+              <div class="w-7 h-7 rounded-lg bg-emerald-600 text-white flex items-center justify-center text-xs font-bold font-mono shadow-xs" id="user-avatar-initial">P</div>
+              <div class="hidden sm:block text-left text-xs leading-none">
+                <div id="user-display-email" class="font-bold max-w-[120px] truncate text-[var(--text-main)]">Pavel Hossain</div>
+                <div id="header-shop-owner" class="text-[10px] text-[var(--text-muted)] truncate mt-0.5">মালিক</div>
+              </div>
+              <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-slate-400"></i>
+            </button>
+            <div id="user-menu-dropdown" class="hidden absolute right-0 mt-2 w-52 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl shadow-xl p-2 z-50 text-xs space-y-1">
+              <div class="px-2 py-1.5 border-b border-[var(--border-color)]">
+                <div id="menu-shop-title" class="font-bold truncate">Pavel Hossain-এর দোকান</div>
+                <div id="menu-user-email" class="text-[10px] text-[var(--text-muted)] truncate">pavelhossain9041@gmail.com</div>
+              </div>
+              <button onclick="switchTab('settings'); toggleUserMenu();" class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-[var(--bg-subtle)] flex items-center gap-2">
+                <i data-lucide="settings" class="w-3.5 h-3.5 text-slate-500"></i>
+                <span data-i18n="navSettings">দোকান প্রোফাইল</span>
+              </button>
+              <button onclick="signOutUser()" class="w-full text-left px-2 py-1.5 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 flex items-center gap-2 font-bold">
+                <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
+                <span data-i18n="signOut">লগআউট (Sign Out)</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Scrollable Main Viewport Container -->
+      <main class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
 
     <!-- 1. DASHBOARD VIEW -->
     <div id="view-dashboard" class="space-y-6">
@@ -888,7 +943,9 @@
       </div>
     </div>
 
-  </main>
+      </main>
+    </div>
+  </div>
 
   <!-- ================= MODALS ================= -->
 
@@ -1493,9 +1550,10 @@
       user: null,          // Firebase Auth User
       storeId: null,       // Tenant Store ID
       store: {
-        name: 'মেসার্স ডিজিটাল স্টোর',
-        proprietor: 'মালিক',
-        category: 'Grocery',
+        name: 'Pavel Hossain-এর দোকান',
+        shopName: 'Pavel Hossain-এর দোকান',
+        proprietor: 'Pavel Hossain',
+        category: 'Grocery & Retail',
         phone: '০১৭০০-০০০০০০',
         address: 'ঢাকা, বাংলাদেশ',
         invoiceFooter: 'ধন্যবাদ, আবার আসবেন!'
@@ -1549,11 +1607,13 @@
     function setTheme(themeName) {
       state.theme = themeName;
       document.documentElement.setAttribute('data-theme', themeName);
-      document.getElementById('theme-dropdown').classList.add('hidden');
+      const dropdown = document.getElementById('theme-dropdown');
+      if (dropdown) dropdown.classList.add('hidden');
     }
 
     function toggleThemeDropdown() {
-      document.getElementById('theme-dropdown').classList.toggle('hidden');
+      const dropdown = document.getElementById('theme-dropdown');
+      if (dropdown) dropdown.classList.toggle('hidden');
     }
 
     function toggleUserMenu() {
@@ -1641,7 +1701,7 @@
     }
 
     function loginAsDemoUser() {
-      setupTenantOffline('demo-store-001', 'demo.owner@talikhata.com', 'মেসার্স ডেমো স্টোর');
+      setupTenantOffline('demo-store-001', 'pavelhossain9041@gmail.com', 'Pavel Hossain-এর দোকান');
     }
 
     function setupTenantOffline(uid, email, defaultShopName) {
@@ -1649,8 +1709,9 @@
       state.storeId = uid;
       state.store = {
         name: defaultShopName,
-        proprietor: 'করিম সাহেব',
-        category: 'Grocery',
+        shopName: defaultShopName,
+        proprietor: 'Pavel Hossain',
+        category: 'Grocery & Retail',
         phone: '০১৭০০-০০০০০০',
         address: 'ঢাকা, বাংলাদেশ',
         invoiceFooter: 'ধন্যবাদ, আবার আসবেন!'
@@ -1772,21 +1833,39 @@
       unsubs.push(unsubParties);
     }
 
+    function openMobileSidebar() {
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      if (sidebar) sidebar.classList.remove('-translate-x-full');
+      if (backdrop) backdrop.classList.remove('hidden');
+    }
+
+    function closeMobileSidebar() {
+      const sidebar = document.getElementById('app-sidebar');
+      const backdrop = document.getElementById('sidebar-backdrop');
+      if (sidebar) sidebar.classList.add('-translate-x-full');
+      if (backdrop) backdrop.classList.add('hidden');
+    }
+
     function updateTenantUI() {
-      document.getElementById('header-shop-name').textContent = state.store.shopName || state.store.name;
-      document.getElementById('header-shop-owner').textContent = `${state.store.proprietor || 'মালিক'} • ${state.store.category || 'Retail'}`;
-      document.getElementById('user-display-email').textContent = (state.user && state.user.email) ? state.user.email.split('@')[0] : 'Owner';
-      document.getElementById('user-avatar-initial').textContent = (state.store.shopName || 'S').charAt(0).toUpperCase();
+      const shopName = state.store.shopName || state.store.name || 'Pavel Hossain-এর দোকান';
+      const proprietor = state.store.proprietor || 'Pavel Hossain';
 
-      document.getElementById('menu-shop-title').textContent = state.store.shopName || state.store.name;
-      document.getElementById('menu-user-email').textContent = (state.user && state.user.email) || 'owner@store.com';
+      if (document.getElementById('sidebar-shop-name')) document.getElementById('sidebar-shop-name').textContent = shopName;
+      if (document.getElementById('header-shop-name')) document.getElementById('header-shop-name').textContent = shopName;
+      if (document.getElementById('header-shop-owner')) document.getElementById('header-shop-owner').textContent = `${proprietor} • ${state.store.category || 'Retail'}`;
+      if (document.getElementById('user-display-email')) document.getElementById('user-display-email').textContent = proprietor;
+      if (document.getElementById('user-avatar-initial')) document.getElementById('user-avatar-initial').textContent = (proprietor || 'P').charAt(0).toUpperCase();
 
-      document.getElementById('tenant-id-display').textContent = state.storeId || 'LOCAL-TENANT';
-      document.getElementById('tenant-email-display').textContent = (state.user && state.user.email) || 'demo@store.com';
+      if (document.getElementById('menu-shop-title')) document.getElementById('menu-shop-title').textContent = shopName;
+      if (document.getElementById('menu-user-email')) document.getElementById('menu-user-email').textContent = (state.user && state.user.email) || 'pavelhossain9041@gmail.com';
+
+      if (document.getElementById('tenant-id-display')) document.getElementById('tenant-id-display').textContent = state.storeId || 'LOCAL-TENANT';
+      if (document.getElementById('tenant-email-display')) document.getElementById('tenant-email-display').textContent = (state.user && state.user.email) || 'pavelhossain9041@gmail.com';
 
       if (document.getElementById('setting-shop-name')) {
-        document.getElementById('setting-shop-name').value = state.store.shopName || state.store.name;
-        document.getElementById('setting-proprietor').value = state.store.proprietor || '';
+        document.getElementById('setting-shop-name').value = shopName;
+        document.getElementById('setting-proprietor').value = proprietor;
         document.getElementById('setting-shop-phone').value = state.store.phone || '';
         document.getElementById('setting-shop-address').value = state.store.address || '';
         document.getElementById('setting-shop-footer').value = state.store.invoiceFooter || 'ধন্যবাদ, আবার আসবেন!';
@@ -1816,13 +1895,31 @@
        ------------------------------------------------------------- */
     function switchTab(tabId) {
       state.activeTab = tabId;
-      document.querySelectorAll('.tab-button').forEach(btn => {
-        btn.className = "tab-button flex items-center gap-2 px-3.5 py-2 rounded-xl transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)]";
+      closeMobileSidebar();
+
+      document.querySelectorAll('.sidebar-item').forEach(btn => {
+        btn.className = "sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-main)]";
       });
       const activeBtn = document.getElementById(`tab-btn-${tabId}`);
       if (activeBtn) {
-        activeBtn.className = "tab-button flex items-center gap-2 px-3.5 py-2 rounded-xl transition bg-emerald-600 text-white shadow-xs";
+        activeBtn.className = "sidebar-item w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition bg-emerald-600 text-white shadow-xs";
       }
+
+      const pageTitles = {
+        dashboard: { bn: "ড্যাশবোর্ড সামারি", en: "Dashboard Overview", subBn: "ক্লাউড রিয়েল-টাইম ক্যাশফ্লো, সেলস ও স্টক", subEn: "Real-time cashflow, sales and stock" },
+        pos: { bn: "পিওএস ও বিক্রয় মেমো", en: "POS & Billing Counter", subBn: "পণ্য বিক্রয়, ডিসকাউন্ট ও রসিদ প্রিন্ট", subEn: "Product billing, discounts and receipt" },
+        inventory: { bn: "ক্লাউড ইনভেন্টরি ও স্টক", en: "Cloud Inventory & Stock", subBn: "ক্রয় মূল্য, বিক্রয় মূল্য ও স্টক সতর্কতা", subEn: "Cost, selling price and stock alerts" },
+        ledger: { bn: "দৈনিক আয়-ব্যয় খাতা", en: "Daily Cash & Expense Ledger", subBn: "দোকান ভাড়া, বিল, স্টাফ বেতন ও ক্যাশ খাতা", subEn: "Shop rent, bills, payroll and cash in hand" },
+        parties: { bn: "দেনা-পাওনা খাতা (পার্টি)", en: "Party & Credit Ledger", subBn: "কাস্টমার ও সাপ্লায়ারদের বাকি হিসাব", subEn: "Customer and supplier credit management" },
+        reports: { bn: "রিপোর্ট ও লাভ-ক্ষতি বিবরণী", en: "Financial Reports & P/L", subBn: "তারিখ অনুযায়ী আয়, ব্যয় ও নীট লাভ বিবরণী", subEn: "Income, COGS, expenses and net profit statement" },
+        settings: { bn: "দোকান প্রোফাইল ও কনফিগারেশন", en: "Store Profile & Settings", subBn: "দোকানের নাম, ঠিকানা ও ক্লাউড ব্যাকআপ", subEn: "Store profile, address and cloud backup" }
+      };
+
+      const titleObj = pageTitles[tabId] || pageTitles.dashboard;
+      const titleEl = document.getElementById('top-bar-title');
+      const subEl = document.getElementById('top-bar-subtitle');
+      if (titleEl) titleEl.textContent = state.lang === 'bn' ? titleObj.bn : titleObj.en;
+      if (subEl) subEl.textContent = state.lang === 'bn' ? titleObj.subBn : titleObj.subEn;
 
       ['dashboard', 'pos', 'inventory', 'ledger', 'parties', 'reports', 'settings'].forEach(id => {
         const view = document.getElementById(`view-${id}`);
@@ -1916,11 +2013,13 @@
       document.getElementById('kpi-low-stock-count').textContent = `${n(lowStockCount)} ${state.lang === 'bn' ? 'টি কম স্টক' : 'items low'}`;
 
       const badge = document.getElementById('low-stock-count-badge');
-      if (lowStockCount > 0) {
-        badge.textContent = n(lowStockCount);
-        badge.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
+      if (badge) {
+        if (lowStockCount > 0) {
+          badge.textContent = n(lowStockCount);
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
       }
 
       // Recent Sales List
