@@ -114,10 +114,49 @@
       border: 1px dashed #cbd5e1;
     }
 
+    @keyframes rowFadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animated-row {
+      animation: rowFadeSlideIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
     @media print {
-      body * { visibility: hidden; }
-      #printable-area, #printable-area * { visibility: visible; }
-      #printable-area { position: absolute; left: 0; top: 0; width: 100%; }
+      body {
+        background: #fff !important;
+        color: #000 !important;
+      }
+      body * {
+        visibility: hidden !important;
+      }
+      .print-active, .print-active * {
+        visibility: visible !important;
+      }
+      .print-active {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: block !important;
+        background: #fff !important;
+        color: #000 !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+      @page {
+        margin: 10mm;
+        size: auto;
+      }
     }
   </style>
 </head>
@@ -454,6 +493,95 @@
           </div>
           <div id="kpi-stock-value" class="text-lg lg:text-xl font-bold font-mono text-indigo-600">৳ 0</div>
           <div id="kpi-low-stock-count" class="text-[11px] text-amber-600 font-semibold mt-1">০ টি কম স্টক</div>
+        </div>
+      </div>
+
+      <!-- Daily Business Analysis & Performance Pulse Card -->
+      <div id="dash-daily-analysis-card" class="bg-gradient-to-r from-emerald-500/10 via-teal-500/5 to-blue-500/10 border border-emerald-500/25 rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm relative overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-emerald-500/15 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-600/20 shrink-0">
+              <i data-lucide="activity" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-sm sm:text-base font-bold text-[var(--text-main)]" data-i18n="dailyAnalysisTitle">দৈনিক ব্যবসা বিশ্লেষণ ও পারফরম্যান্স পালস</h3>
+                <span class="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 font-mono text-[10px] font-bold animate-pulse flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span data-i18n="dailyLiveBadge">LIVE TODAY</span>
+                </span>
+              </div>
+              <p class="text-xs text-[var(--text-muted)]" data-i18n="dailyAnalysisSubtitle">আজকের নগদ ইনফ্লো, খরচ আউটফ্লো, গড় বাস্কেট সাইজ ও ব্যবসায়িক স্বাস্থ্য</p>
+            </div>
+          </div>
+          
+          <div id="daily-health-badge" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-bold self-start sm:self-auto shadow-2xs">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-600"></i>
+            <span id="daily-health-text">ব্যবসায়িক স্বাস্থ্য: চমৎকার</span>
+          </div>
+        </div>
+
+        <!-- 6 Analysis KPI Metrics Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-3.5 rounded-2xl shadow-2xs">
+            <div class="flex items-center justify-between text-emerald-600 mb-1">
+              <span class="text-[11px] font-bold text-[var(--text-muted)]" data-i18n="dailyInflow">আজকের মোট ইনফ্লো</span>
+              <i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i>
+            </div>
+            <div id="daily-val-inflow" class="text-base sm:text-lg font-bold font-mono text-emerald-600">৳ 0</div>
+            <div class="text-[10px] text-[var(--text-muted)] truncate mt-0.5" data-i18n="subDailyInflow">নগদ সেলস + আয়</div>
+          </div>
+
+          <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-3.5 rounded-2xl shadow-2xs">
+            <div class="flex items-center justify-between text-rose-600 mb-1">
+              <span class="text-[11px] font-bold text-[var(--text-muted)]" data-i18n="dailyOutflow">আজকের আউটফ্লো</span>
+              <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+            </div>
+            <div id="daily-val-outflow" class="text-base sm:text-lg font-bold font-mono text-rose-600">৳ 0</div>
+            <div class="text-[10px] text-[var(--text-muted)] truncate mt-0.5" data-i18n="subDailyOutflow">দৈনিক ব্যয় ও বিল</div>
+          </div>
+
+          <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-3.5 rounded-2xl shadow-2xs">
+            <div class="flex items-center justify-between text-blue-600 mb-1">
+              <span class="text-[11px] font-bold text-[var(--text-muted)]" data-i18n="dailyNetFlow">দৈনিক নীট ক্যাশফ্লো</span>
+              <i data-lucide="wallet" class="w-3.5 h-3.5"></i>
+            </div>
+            <div id="daily-val-netflow" class="text-base sm:text-lg font-bold font-mono text-blue-600">৳ 0</div>
+            <div class="text-[10px] text-[var(--text-muted)] truncate mt-0.5" data-i18n="subDailyNetFlow">ইনফ্লো - আউটফ্লো</div>
+          </div>
+
+          <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-3.5 rounded-2xl shadow-2xs">
+            <div class="flex items-center justify-between text-teal-600 mb-1">
+              <span class="text-[11px] font-bold text-[var(--text-muted)]" data-i18n="dailyMargin">আজকের লাভ মার্জিন</span>
+              <i data-lucide="pie-chart" class="w-3.5 h-3.5"></i>
+            </div>
+            <div id="daily-val-margin" class="text-base sm:text-lg font-bold font-mono text-teal-600">0%</div>
+            <div class="text-[10px] text-[var(--text-muted)] truncate mt-0.5" data-i18n="subDailyMargin">গ্রস মার্জিন শতকরা</div>
+          </div>
+
+          <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-3.5 rounded-2xl shadow-2xs">
+            <div class="flex items-center justify-between text-indigo-600 mb-1">
+              <span class="text-[11px] font-bold text-[var(--text-muted)]" data-i18n="dailyAOV">গড় বাস্কেট / AOV</span>
+              <i data-lucide="shopping-bag" class="w-3.5 h-3.5"></i>
+            </div>
+            <div id="daily-val-aov" class="text-base sm:text-lg font-bold font-mono text-indigo-600">৳ 0</div>
+            <div class="text-[10px] text-[var(--text-muted)] truncate mt-0.5" data-i18n="subDailyAOV">প্রতি অর্ডারে গড় বিক্রয়</div>
+          </div>
+
+          <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-3.5 rounded-2xl shadow-2xs">
+            <div class="flex items-center justify-between text-amber-600 mb-1">
+              <span class="text-[11px] font-bold text-[var(--text-muted)]" data-i18n="dailyDueRatio">আজকের বাকি অনুপাত</span>
+              <i data-lucide="badge-percent" class="w-3.5 h-3.5"></i>
+            </div>
+            <div id="daily-val-due" class="text-base sm:text-lg font-bold font-mono text-amber-600">৳ 0</div>
+            <div class="text-[10px] text-[var(--text-muted)] truncate mt-0.5" data-i18n="subDailyDue">নতুন বকেয়া বিক্রয়</div>
+          </div>
+        </div>
+
+        <!-- Smart Analysis Insight Footnote -->
+        <div id="daily-insight-tip" class="flex items-center gap-2 text-xs bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl px-3.5 py-2.5 text-[var(--text-main)] shadow-2xs">
+          <i data-lucide="sparkles" class="w-4 h-4 text-emerald-500 shrink-0"></i>
+          <span id="daily-insight-text">আজকের ব্যবসায়িক বিশ্লেষণ প্রস্তুত হচ্ছে...</span>
         </div>
       </div>
 
@@ -1130,10 +1258,55 @@
           <i data-lucide="download" class="w-3.5 h-3.5"></i>
           <span data-i18n="downloadReceiptPDF">PDF সেভ করুন</span>
         </button>
-        <button onclick="window.print()" class="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs">
+        <button onclick="printThermalReceipt()" class="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs">
           <i data-lucide="printer" class="w-3.5 h-3.5"></i>
           <span data-i18n="printThermalBtn">প্রিন্ট রসিদ</span>
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4.1 Statement of Profit & Loss Print / Export Modal -->
+  <div id="modal-statement-preview" class="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 hidden">
+    <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl">
+      <div class="flex items-center justify-between p-4 sm:p-5 border-b border-[var(--border-color)]">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-[var(--text-main)]" data-i18n="statementPreviewTitle">লাভ-ক্ষতি ও আর্থিক স্টেটমেন্ট প্রিভিউ</h3>
+            <p class="text-[11px] text-[var(--text-muted)]" data-i18n="statementPreviewSubtitle">প্রিন্ট ও PDF ডাউনলোডের জন্য প্রস্তুতকৃত আনুষ্ঠানিক বিবরণী</p>
+          </div>
+        </div>
+        <button onclick="closeStatementModal()" class="w-8 h-8 rounded-xl bg-[var(--bg-subtle)] hover:bg-slate-200 dark:hover:bg-slate-800 flex items-center justify-center text-slate-500 transition">✕</button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 sm:p-6 bg-slate-100 dark:bg-slate-900/60 flex justify-center">
+        <!-- Printable Statement Paper Container -->
+        <div id="printable-statement" class="w-full max-w-3xl bg-white text-slate-900 p-6 sm:p-8 rounded-2xl shadow-md border border-slate-200 print:border-none print:shadow-none print:p-0">
+          <!-- Dynamically filled by exportComprehensiveReportPDF() -->
+        </div>
+      </div>
+
+      <div class="p-4 sm:p-5 border-t border-[var(--border-color)] flex flex-wrap items-center justify-between gap-3">
+        <button onclick="closeStatementModal()" class="px-4 py-2 rounded-xl border border-[var(--border-color)] text-xs font-semibold hover:bg-[var(--bg-subtle)] text-[var(--text-muted)]" data-i18n="closeBtn">
+          বন্ধ করুন
+        </button>
+        <div class="flex items-center gap-2 flex-wrap">
+          <button onclick="exportStatementExcel()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-emerald-500/30 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-xs font-bold transition">
+            <i data-lucide="sheet" class="w-3.5 h-3.5"></i>
+            <span>এক্সেল (.xlsx)</span>
+          </button>
+          <button onclick="downloadStatementPDF()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition">
+            <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            <span data-i18n="downloadStatementPDF">PDF ডাউনলোড</span>
+          </button>
+          <button onclick="printStatementDoc()" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span data-i18n="printStatementBtn">স্টেটমেন্ট প্রিন্ট (A4)</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -1338,6 +1511,25 @@
         repOperatingExp: "৩. অন্যান্য পরিচালনা খরচ (Operating Expenses)",
         repOtherIncome: "৪. অন্যান্য সাধারণ আয় (Other Non-Sales Income)",
         repNetProfit: "সর্বমোট নীট লাভ / লোকসান (Net Profit / Loss)",
+        dailyAnalysisTitle: "দৈনিক ব্যবসা বিশ্লেষণ ও পারফরম্যান্স পালস",
+        dailyAnalysisSubtitle: "আজকের নগদ ইনফ্লো, খরচ আউটফ্লো, গড় বাস্কেট সাইজ ও ব্যবসায়িক স্বাস্থ্য",
+        dailyLiveBadge: "LIVE TODAY",
+        dailyInflow: "আজকের মোট ইনফ্লো",
+        dailyOutflow: "আজকের আউটফ্লো",
+        dailyNetFlow: "দৈনিক নীট ক্যাশফ্লো",
+        dailyMargin: "আজকের লাভ মার্জিন",
+        dailyAOV: "গড় বাস্কেট / AOV",
+        dailyDueRatio: "আজকের বাকি অনুপাত",
+        subDailyInflow: "নগদ সেলস + আয়",
+        subDailyOutflow: "দৈনিক ব্যয় ও বিল",
+        subDailyNetFlow: "ইনফ্লো - আউটফ্লো",
+        subDailyMargin: "গ্রস মার্জিন শতকরা",
+        subDailyAOV: "প্রতি অর্ডারে গড় বিক্রয়",
+        subDailyDue: "নতুন বকেয়া বিক্রয়",
+        statementPreviewTitle: "লাভ-ক্ষতি ও আর্থিক স্টেটমেন্ট প্রিভিউ",
+        statementPreviewSubtitle: "প্রিন্ট ও PDF ডাউনলোডের জন্য প্রস্তুতকৃত আনুষ্ঠানিক বিবরণী",
+        downloadStatementPDF: "PDF ডাউনলোড",
+        printStatementBtn: "স্টেটমেন্ট প্রিন্ট (A4)",
         settingsTitle: "দোকান প্রোফাইল ও ক্লাউড কনফিগারেশন",
         settingsSubtitle: "দোকানের রসিদের তথ্য, ঠিকানা ও ক্লাউড সিঙ্ক স্থিতি",
         shopDetailsTitle: "দোকান ও রসিদের তথ্য",
@@ -1490,6 +1682,25 @@
         repOperatingExp: "3. Operating Expenses",
         repOtherIncome: "4. Other Non-Sales Income",
         repNetProfit: "Net Profit / Loss",
+        dailyAnalysisTitle: "Daily Business Analysis & Performance Pulse",
+        dailyAnalysisSubtitle: "Today's cash inflow, expense outflow, average basket size & financial health",
+        dailyLiveBadge: "LIVE TODAY",
+        dailyInflow: "Today's Cash Inflow",
+        dailyOutflow: "Today's Cash Outflow",
+        dailyNetFlow: "Daily Net Cash Flow",
+        dailyMargin: "Today's Profit Margin",
+        dailyAOV: "Avg Basket / AOV",
+        dailyDueRatio: "Today's Due Ratio",
+        subDailyInflow: "Cash Sales + Inflow",
+        subDailyOutflow: "Daily Expense & Bills",
+        subDailyNetFlow: "Inflow - Outflow",
+        subDailyMargin: "Gross Margin %",
+        subDailyAOV: "Avg Sale per Order",
+        subDailyDue: "New Credit Sales",
+        statementPreviewTitle: "Profit & Loss Statement Preview",
+        statementPreviewSubtitle: "Audit-ready financial statement formatted for print & PDF",
+        downloadStatementPDF: "Download PDF",
+        printStatementBtn: "Print Statement (A4)",
         settingsTitle: "Store Profile & Cloud Config",
         settingsSubtitle: "Shop receipt details, address & sync status",
         shopDetailsTitle: "Store & Receipt Information",
@@ -2022,13 +2233,89 @@
         }
       }
 
+      // Daily Business Analysis Calculations (Always for Today)
+      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const todaySales = state.sales.filter(s => new Date(s.date) >= todayStart);
+      const todaySalesInflow = todaySales.reduce((acc, s) => acc + (Number(s.paidAmount) || 0), 0);
+      const todayTx = state.transactions.filter(tx => new Date(tx.date) >= todayStart);
+      const todayGeneralIncome = todayTx.filter(t => t.type === 'income').reduce((a, b) => a + (Number(b.amount) || 0), 0);
+      const todayTotalInflow = todaySalesInflow + todayGeneralIncome;
+
+      const todayExpenses = todayTx.filter(t => t.type === 'expense').reduce((a, b) => a + (Number(b.amount) || 0), 0);
+      const todayNetFlow = todayTotalInflow - todayExpenses;
+
+      const todayTotalSales = todaySales.reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+      const todayCOGS = todaySales.reduce((acc, s) => {
+        return acc + (s.items || []).reduce((sum, item) => sum + (Number(item.buyPrice || item.costPrice || 0) * Number(item.qty || 1)), 0);
+      }, 0);
+      const todayGrossProfit = todayTotalSales - todayCOGS;
+      const todayMarginPct = todayTotalSales > 0 ? ((todayGrossProfit / todayTotalSales) * 100).toFixed(1) : '0';
+      const todayAOV = todaySales.length > 0 ? Math.round(todayTotalSales / todaySales.length) : 0;
+      const todayDueCreated = todaySales.reduce((acc, s) => acc + (Number(s.dueAmount) || 0), 0);
+
+      const elInflow = document.getElementById('daily-val-inflow');
+      if (elInflow) elInflow.textContent = c(todayTotalInflow);
+
+      const elOutflow = document.getElementById('daily-val-outflow');
+      if (elOutflow) elOutflow.textContent = c(todayExpenses);
+
+      const elNetFlow = document.getElementById('daily-val-netflow');
+      if (elNetFlow) {
+        elNetFlow.textContent = (todayNetFlow >= 0 ? '+' : '') + c(todayNetFlow);
+        elNetFlow.className = todayNetFlow >= 0
+          ? 'text-base sm:text-lg font-bold font-mono text-emerald-600'
+          : 'text-base sm:text-lg font-bold font-mono text-rose-600';
+      }
+
+      const elMargin = document.getElementById('daily-val-margin');
+      if (elMargin) elMargin.textContent = n(todayMarginPct) + '%';
+
+      const elAOV = document.getElementById('daily-val-aov');
+      if (elAOV) elAOV.textContent = c(todayAOV);
+
+      const elDue = document.getElementById('daily-val-due');
+      if (elDue) elDue.textContent = c(todayDueCreated);
+
+      // Daily Business Health Pulse Badge & Insight
+      const healthBadge = document.getElementById('daily-health-badge');
+      const healthText = document.getElementById('daily-health-text');
+      const insightText = document.getElementById('daily-insight-text');
+
+      if (healthBadge && healthText && insightText) {
+        if (todayTotalSales === 0 && todayTotalInflow === 0 && todayExpenses === 0) {
+          healthBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl border border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300 text-xs font-bold self-start sm:self-auto shadow-2xs';
+          healthText.textContent = state.lang === 'bn' ? 'ব্যবসায়িক স্বাস্থ্য: প্রস্তুত (নতুন দিন)' : 'Business Health: Ready (New Day)';
+          insightText.textContent = state.lang === 'bn'
+            ? 'আজকের কোনো বিক্রয় বা ব্যয় এখনো লিপিবদ্ধ হয়নি। নতুন লেনদেন এন্ট্রি দিয়ে আজকের হিসাব ট্র্যাক করুন।'
+            : 'No sales or expense recorded today yet. Start logging entries to track real-time daily metrics.';
+        } else if (todayNetFlow >= 0 && Number(todayMarginPct) >= 15) {
+          healthBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-bold self-start sm:self-auto shadow-2xs';
+          healthText.textContent = state.lang === 'bn' ? 'ব্যবসায়িক স্বাস্থ্য: চমৎকার (উচ্চ লাভজনক)' : 'Business Health: Excellent (High Profit)';
+          insightText.textContent = state.lang === 'bn'
+            ? `আজকের ইনফ্লো শক্তিশালী, নীট ক্যাশ মার্জিন ${c(todayNetFlow)} এবং গড় লাভ ${n(todayMarginPct)}%। ব্যবসায়িক গতি স্বাভাবিক রয়েছে।`
+            : `Strong daily cashflow with ${c(todayNetFlow)} net margin and ${todayMarginPct}% gross margin. Store performance is optimal.`;
+        } else if (todayNetFlow >= 0) {
+          healthBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl border border-teal-500/30 bg-teal-500/10 text-teal-700 dark:text-teal-300 text-xs font-bold self-start sm:self-auto shadow-2xs';
+          healthText.textContent = state.lang === 'bn' ? 'ব্যবসায়িক স্বাস্থ্য: স্থিতিশীল (স্বাভাবিক)' : 'Business Health: Stable (Positive Flow)';
+          insightText.textContent = state.lang === 'bn'
+            ? `আজকের ক্যাশফ্লো ইতিবাচক (+${c(todayNetFlow)})। উচ্চ মার্জিনের পণ্য বিক্রয়ে জোর দিন।`
+            : `Daily net cashflow is positive (+${c(todayNetFlow)}). Promote higher-margin items to boost profitability.`;
+        } else {
+          healthBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300 text-xs font-bold self-start sm:self-auto shadow-2xs';
+          healthText.textContent = state.lang === 'bn' ? 'ব্যবসায়িক স্বাস্থ্য: খরচ পর্যবেক্ষণ প্রয়োজন' : 'Business Health: Monitor Outflows';
+          insightText.textContent = state.lang === 'bn'
+            ? `সতর্কতা: আজকের আউটফ্লো (${c(todayExpenses)}) ইনফ্লোর চেয়ে বেশি হয়েছে। অপ্রয়োজনীয় পরিচালনা খরচ নিয়ন্ত্রণ করুন।`
+            : `Notice: Today's outflows (${c(todayExpenses)}) exceed cash inflows. Control non-essential operational expenses.`;
+        }
+      }
+
       // Recent Sales List
       const recentSalesContainer = document.getElementById('dash-recent-sales-list');
       if (state.sales.length === 0) {
         recentSalesContainer.innerHTML = `<div class="p-4 text-center text-slate-400 text-xs">${state.lang === 'bn' ? 'এখনো কোনো বিক্রয় রেকর্ড নেই' : 'No sales records yet'}</div>`;
       } else {
-        recentSalesContainer.innerHTML = state.sales.slice(-5).reverse().map(sale => `
-          <div class="flex items-center justify-between p-2.5 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)]">
+        recentSalesContainer.innerHTML = state.sales.slice(-5).reverse().map((sale, idx) => `
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] animated-row" style="animation-delay: ${Math.min(idx * 0.04, 0.25)}s">
             <div>
               <div class="font-bold text-slate-800 dark:text-slate-100 flex items-center gap-1.5">
                 <span>${escapeHTML(sale.customerName || 'নগদ ক্রেতা')}</span>
@@ -2050,8 +2337,8 @@
       if (lowStockItems.length === 0) {
         lowStockContainer.innerHTML = `<div class="p-4 text-center text-emerald-600 text-xs">${state.lang === 'bn' ? 'সকল পণ্যের পর্যাপ্ত স্টক আছে' : 'All items in stock'}</div>`;
       } else {
-        lowStockContainer.innerHTML = lowStockItems.slice(0, 5).map(prod => `
-          <div class="flex items-center justify-between p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30">
+        lowStockContainer.innerHTML = lowStockItems.slice(0, 5).map((prod, idx) => `
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 animated-row" style="animation-delay: ${Math.min(idx * 0.04, 0.25)}s">
             <div>
               <div class="font-bold text-amber-900 dark:text-amber-200">${escapeHTML(prod.name)}</div>
               <div class="text-[10px] text-amber-700/80 dark:text-amber-400/80">সতর্কতা লেভেল: ${n(prod.minStock)} ${prod.unit}</div>
@@ -2280,7 +2567,7 @@
       }
 
       container.innerHTML = state.cart.map((item, idx) => `
-        <div class="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)]">
+        <div class="flex items-center justify-between p-2 rounded-xl bg-[var(--bg-subtle)] border border-[var(--border-color)] animated-row" style="animation-delay: ${Math.min(idx * 0.03, 0.25)}s">
           <div class="flex-1 pr-2">
             <div class="font-bold text-xs truncate">${escapeHTML(item.product.name)}</div>
             <div class="text-[10px] text-[var(--text-muted)] font-mono">${c(item.price)} × ${n(item.qty)}</div>
@@ -2519,7 +2806,20 @@
     }
 
     function closeInvoiceModal() {
+      const container = document.getElementById('printable-area');
+      if (container) container.classList.remove('print-active');
       document.getElementById('modal-invoice-preview').classList.add('hidden');
+    }
+
+    function printThermalReceipt() {
+      const statementEl = document.getElementById('printable-statement');
+      const thermalEl = document.getElementById('printable-area');
+      if (statementEl) statementEl.classList.remove('print-active');
+      if (thermalEl) thermalEl.classList.add('print-active');
+      window.print();
+      if (activePreviewSale) {
+        logDownload(`Invoice #${activePreviewSale.invoiceNo} (Print)`, 'POS Receipt', 'Print', (activePreviewSale.items || []).length);
+      }
     }
 
     function downloadReceiptPDF() {
@@ -2568,13 +2868,13 @@
         return;
       }
 
-      tbody.innerHTML = filtered.map(prod => {
+      tbody.innerHTML = filtered.map((prod, idx) => {
         const isLow = Number(prod.stock) <= Number(prod.minStock || 5);
         const isOut = Number(prod.stock) <= 0;
         const totalVal = Number(prod.stock) * Number(prod.costPrice || prod.buyPrice || 0);
 
         return `
-          <tr class="hover:bg-[var(--bg-subtle)] transition">
+          <tr class="hover:bg-[var(--bg-subtle)] transition animated-row" style="animation-delay: ${Math.min(idx * 0.03, 0.35)}s">
             <td class="p-3.5">
               <div class="font-bold text-slate-800 dark:text-slate-100">${highlightMatch(prod.name, search)}</div>
               <div class="text-[10px] text-slate-400 font-mono">SKU: ${highlightMatch(prod.sku || '-', search)}</div>
@@ -2719,14 +3019,14 @@
         return;
       }
 
-      tbody.innerHTML = filtered.slice().reverse().map(tx => {
+      tbody.innerHTML = filtered.slice().reverse().map((tx, idx) => {
         const isIncome = tx.type === 'income' || tx.type === 'sale';
         const typeBadge = isIncome
           ? `<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">${tx.type === 'sale' ? 'সেলস' : 'আয়'}</span>`
           : `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 font-bold text-[10px]">ব্যয়</span>`;
 
         return `
-          <tr class="hover:bg-[var(--bg-subtle)] transition">
+          <tr class="hover:bg-[var(--bg-subtle)] transition animated-row" style="animation-delay: ${Math.min(idx * 0.03, 0.35)}s">
             <td class="p-3.5 font-mono text-slate-500">${new Date(tx.date).toLocaleDateString()}</td>
             <td class="p-3.5">${typeBadge}</td>
             <td class="p-3.5 font-medium">${highlightMatch(tx.category || '-', search)}</td>
@@ -2839,12 +3139,12 @@
         return;
       }
 
-      tbody.innerHTML = filtered.map(party => {
+      tbody.innerHTML = filtered.map((party, idx) => {
         const isReceivable = party.balance > 0;
         const isSettled = party.balance === 0;
 
         return `
-          <tr class="hover:bg-[var(--bg-subtle)] transition">
+          <tr class="hover:bg-[var(--bg-subtle)] transition animated-row" style="animation-delay: ${Math.min(idx * 0.03, 0.35)}s">
             <td class="p-3.5 font-bold">${highlightMatch(party.name, search)}</td>
             <td class="p-3.5">
               <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${party.type === 'customer' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}">
@@ -3031,14 +3331,311 @@
       netEl.className = netProfit >= 0 ? 'font-mono text-base font-bold text-emerald-600' : 'font-mono text-base font-bold text-rose-600';
     }
 
+    let activeStatementData = null;
+
     function exportComprehensiveReportPDF() {
+      const fromStr = document.getElementById('rep-from-date').value;
+      const toStr = document.getElementById('rep-to-date').value;
+      const fromDate = fromStr ? new Date(fromStr) : new Date(0);
+      const toDate = toStr ? new Date(toStr + 'T23:59:59') : new Date();
+
+      const filteredSales = state.sales.filter(s => {
+        const d = new Date(s.date);
+        return d >= fromDate && d <= toDate;
+      });
+
+      const totalSales = filteredSales.reduce((a, b) => a + (Number(b.total) || 0), 0);
+      const totalPaidSales = filteredSales.reduce((a, b) => a + (Number(b.paidAmount) || 0), 0);
+      const totalDueSales = filteredSales.reduce((a, b) => a + (Number(b.dueAmount) || 0), 0);
+      const totalDiscount = filteredSales.reduce((a, b) => a + (Number(b.discount) || 0), 0);
+
+      const totalCOGS = filteredSales.reduce((acc, s) => {
+        return acc + (s.items || []).reduce((sum, i) => sum + (Number(i.buyPrice || i.costPrice || 0) * Number(i.qty || 1)), 0);
+      }, 0);
+      const grossProfit = totalSales - totalCOGS;
+      const grossMarginPct = totalSales > 0 ? ((grossProfit / totalSales) * 100).toFixed(1) : '0';
+
+      const filteredTx = state.transactions.filter(t => {
+        const d = new Date(t.date);
+        return d >= fromDate && d <= toDate;
+      });
+
+      const operatingExpenses = filteredTx.filter(t => t.type === 'expense').reduce((a, b) => a + (Number(b.amount) || 0), 0);
+      const otherIncome = filteredTx.filter(t => t.type === 'income').reduce((a, b) => a + (Number(b.amount) || 0), 0);
+      const netProfit = (grossProfit + otherIncome) - operatingExpenses;
+      const netMarginPct = totalSales > 0 ? ((netProfit / totalSales) * 100).toFixed(1) : '0';
+
+      // Group operating expenses by category for audit breakdown
+      const expenseCatMap = {};
+      filteredTx.filter(t => t.type === 'expense').forEach(t => {
+        const cat = t.category || 'সাধারণ খরচ (General)';
+        expenseCatMap[cat] = (expenseCatMap[cat] || 0) + (Number(t.amount) || 0);
+      });
+
+      // Overall Party Receivables and Payables
+      const totalReceivableDue = state.parties.filter(p => p.balance > 0).reduce((a, b) => a + b.balance, 0);
+      const totalPayableDue = state.parties.filter(p => p.balance < 0).reduce((a, b) => a + Math.abs(b.balance), 0);
+
+      activeStatementData = {
+        fromStr: fromStr || (state.lang === 'bn' ? 'প্রারম্ভিক' : 'Beginning'),
+        toStr: toStr || (state.lang === 'bn' ? 'আজ পর্যন্ত' : 'Today'),
+        totalSales,
+        totalPaidSales,
+        totalDueSales,
+        totalDiscount,
+        totalCOGS,
+        grossProfit,
+        grossMarginPct,
+        operatingExpenses,
+        expenseCatMap,
+        otherIncome,
+        netProfit,
+        netMarginPct,
+        totalReceivableDue,
+        totalPayableDue,
+        salesCount: filteredSales.length,
+        txCount: filteredTx.length
+      };
+
+      const statementContainer = document.getElementById('printable-statement');
+      if (!statementContainer) return;
+
+      const shopName = escapeHTML(state.store.shopName || state.store.name || 'Pavel Hossain-এর দোকান');
+      const proprietor = escapeHTML(state.store.proprietor || 'Pavel Hossain');
+      const phone = escapeHTML(state.store.phone || '01700-000000');
+      const address = escapeHTML(state.store.address || 'ঢাকা, বাংলাদেশ');
+
+      statementContainer.innerHTML = `
+        <div class="space-y-6 text-slate-900 font-sans leading-relaxed">
+          <!-- Statement Header -->
+          <div class="text-center pb-4 border-b-2 border-slate-900/80">
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900 uppercase">${shopName}</h1>
+            <p class="text-xs text-slate-600 mt-1 font-medium">স্বত্বাধিকারী: <span class="font-bold text-slate-800">${proprietor}</span> | মোবাইল: ${phone}</p>
+            <p class="text-xs text-slate-500">${address}</p>
+            <div class="inline-block mt-3 px-4 py-1 rounded-full bg-slate-900 text-white text-xs font-bold uppercase tracking-wider">
+              ${state.lang === 'bn' ? 'আর্থিক লাভ-ক্ষতি ও আয়-ব্যয় বিবরণী' : 'COMPREHENSIVE STATEMENT OF PROFIT & LOSS'}
+            </div>
+            <div class="flex justify-between items-center text-[11px] text-slate-600 mt-3 pt-2 border-t border-dashed border-slate-300">
+              <div><strong>${state.lang === 'bn' ? 'তারিখ সীমা:' : 'Period:'}</strong> ${activeStatementData.fromStr} হতে ${activeStatementData.toStr}</div>
+              <div><strong>${state.lang === 'bn' ? 'প্রিন্ট সময়:' : 'Generated on:'}</strong> ${new Date().toLocaleString()}</div>
+            </div>
+          </div>
+
+          <!-- Highlight KPI Summary Boxes (4 Columns) -->
+          <div class="grid grid-cols-4 gap-3 text-center">
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
+              <div class="text-[10px] font-bold uppercase text-slate-500">${state.lang === 'bn' ? 'মোট বিক্রয় টার্নওভার' : 'Sales Turnover'}</div>
+              <div class="text-base font-bold font-mono text-emerald-700 mt-0.5">${c(totalSales)}</div>
+              <div class="text-[10px] text-slate-500 font-mono">${n(filteredSales.length)} ${state.lang === 'bn' ? 'টি মেমো' : 'invoices'}</div>
+            </div>
+            <div class="p-3 bg-emerald-50/60 border border-emerald-200 rounded-xl">
+              <div class="text-[10px] font-bold uppercase text-emerald-800">${state.lang === 'bn' ? 'মোট লাভ (GP)' : 'Gross Profit'}</div>
+              <div class="text-base font-bold font-mono text-emerald-700 mt-0.5">${c(grossProfit)}</div>
+              <div class="text-[10px] text-emerald-700 font-mono font-semibold">${n(grossMarginPct)}% ${state.lang === 'bn' ? 'মার্জিন' : 'margin'}</div>
+            </div>
+            <div class="p-3 bg-rose-50/60 border border-rose-200 rounded-xl">
+              <div class="text-[10px] font-bold uppercase text-rose-800">${state.lang === 'bn' ? 'পরিচালন ব্যয়' : 'Operating Expenses'}</div>
+              <div class="text-base font-bold font-mono text-rose-600 mt-0.5">${c(operatingExpenses)}</div>
+              <div class="text-[10px] text-rose-600 font-mono">${n(Object.keys(expenseCatMap).length)} ${state.lang === 'bn' ? 'টি খাত' : 'categories'}</div>
+            </div>
+            <div class="p-3 ${netProfit >= 0 ? 'bg-emerald-100/70 border-emerald-300' : 'bg-rose-100/70 border-rose-300'} border rounded-xl">
+              <div class="text-[10px] font-bold uppercase ${netProfit >= 0 ? 'text-emerald-900' : 'text-rose-900'}">${state.lang === 'bn' ? 'নীট লাভ / লোকসান' : 'Net Profit / Loss'}</div>
+              <div class="text-base font-bold font-mono ${netProfit >= 0 ? 'text-emerald-800' : 'text-rose-800'} mt-0.5">${c(netProfit)}</div>
+              <div class="text-[10px] ${netProfit >= 0 ? 'text-emerald-800 font-bold' : 'text-rose-800 font-bold'} font-mono">${n(netMarginPct)}% ${state.lang === 'bn' ? 'নীট মার্জিন' : 'net margin'}</div>
+            </div>
+          </div>
+
+          <!-- Formal Accounting Breakdown Table -->
+          <div class="border border-slate-300 rounded-xl overflow-hidden">
+            <table class="w-full text-xs">
+              <thead>
+                <tr class="bg-slate-100 border-b border-slate-300 text-slate-700 text-left">
+                  <th class="p-2.5 font-bold">${state.lang === 'bn' ? 'আর্থিক বিবরণী খাত ও হিসাব নিরীক্ষা' : 'Financial Statement Account Line'}</th>
+                  <th class="p-2.5 font-bold text-center w-28">${state.lang === 'bn' ? 'প্রকৃতি' : 'Type'}</th>
+                  <th class="p-2.5 font-bold text-right w-36">${state.lang === 'bn' ? 'পরিমাণ (BDT)' : 'Amount (BDT)'}</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200">
+                <!-- 1. Sales Revenue -->
+                <tr class="bg-emerald-50/30">
+                  <td class="p-2.5 font-bold text-slate-800">১. মোট পণ্য বিক্রয় টার্নওভার (Gross Sales Revenue)</td>
+                  <td class="p-2.5 text-center font-mono text-[11px] text-emerald-700 font-semibold">ইনফ্লো</td>
+                  <td class="p-2.5 text-right font-mono font-bold text-slate-800">${c(totalSales)}</td>
+                </tr>
+                <tr class="text-slate-600">
+                  <td class="p-2 pl-6">• প্রাপ্ত নগদ ও ডিজিটাল পেমেন্ট কালেকশন (Cash & MFS Inflow)</td>
+                  <td class="p-2 text-center text-[10px] text-slate-500 font-mono">নগদ</td>
+                  <td class="p-2 text-right font-mono text-emerald-600">${c(totalPaidSales)}</td>
+                </tr>
+                <tr class="text-slate-600">
+                  <td class="p-2 pl-6">• বাকিতে বিক্রয় (New Credit / Customer Receivables)</td>
+                  <td class="p-2 text-center text-[10px] text-slate-500 font-mono">বাকি</td>
+                  <td class="p-2 text-right font-mono text-amber-600">${c(totalDueSales)}</td>
+                </tr>
+                ${totalDiscount > 0 ? `
+                  <tr class="text-slate-600">
+                    <td class="p-2 pl-6 text-rose-600">• বাদ: মোট প্রদত্ত ছাড় / ডিসকাউন্ট (Customer Discount Given)</td>
+                    <td class="p-2 text-center text-[10px] text-rose-500 font-mono">ছাড়</td>
+                    <td class="p-2 text-right font-mono text-rose-600">(-) ${c(totalDiscount)}</td>
+                  </tr>
+                ` : ''}
+
+                <!-- 2. COGS -->
+                <tr class="bg-rose-50/30">
+                  <td class="p-2.5 font-bold text-slate-800">২. বিক্রিত পণ্যের মূল ক্রয়মূল্য (Cost of Goods Sold - COGS)</td>
+                  <td class="p-2.5 text-center font-mono text-[11px] text-rose-700 font-semibold">খরচ</td>
+                  <td class="p-2.5 text-right font-mono font-bold text-rose-600">(-) ${c(totalCOGS)}</td>
+                </tr>
+
+                <!-- 3. Gross Profit -->
+                <tr class="bg-slate-100 font-bold border-y-2 border-slate-300">
+                  <td class="p-2.5 text-slate-900">৩. সর্বমোট গ্রস প্রফিট / মোট লাভ (Gross Profit = ১ - ২)</td>
+                  <td class="p-2.5 text-center font-mono text-emerald-700">${n(grossMarginPct)}% GP</td>
+                  <td class="p-2.5 text-right font-mono text-emerald-700 font-bold text-sm">${c(grossProfit)}</td>
+                </tr>
+
+                <!-- 4. Operating Expenses -->
+                <tr class="bg-slate-50 font-semibold">
+                  <td class="p-2.5 text-slate-800" colspan="2">৪. পরিচালনা ও দোকান খরচ (Operating Expenses - OPEX):</td>
+                  <td class="p-2.5 text-right font-mono text-rose-600 font-bold">(-) ${c(operatingExpenses)}</td>
+                </tr>
+                ${Object.keys(expenseCatMap).length === 0 ? `
+                  <tr class="text-slate-500 italic"><td colspan="3" class="p-2 pl-6 text-[11px]">${state.lang === 'bn' ? 'কোনো পরিচালন খরচ পাওয়া যায়নি।' : 'No operating expenses logged in this range.'}</td></tr>
+                ` : Object.entries(expenseCatMap).map(([cat, amt]) => `
+                  <tr class="text-slate-600">
+                    <td class="p-2 pl-6">• ${escapeHTML(cat)}</td>
+                    <td class="p-2 text-center text-[10px] text-slate-400 font-mono">${((amt / (operatingExpenses || 1)) * 100).toFixed(0)}%</td>
+                    <td class="p-2 text-right font-mono text-rose-500">(-) ${c(amt)}</td>
+                  </tr>
+                `).join('')}
+
+                <!-- 5. Other Income -->
+                <tr class="bg-teal-50/30">
+                  <td class="p-2.5 font-bold text-slate-800">৫. অন্যান্য সাধারণ ও সেবা আয় (Other Non-Sales Operating Income)</td>
+                  <td class="p-2.5 text-center font-mono text-[11px] text-teal-700 font-semibold">আয়</td>
+                  <td class="p-2.5 text-right font-mono font-bold text-teal-600">(+) ${c(otherIncome)}</td>
+                </tr>
+
+                <!-- 6. Net Profit / Loss -->
+                <tr class="${netProfit >= 0 ? 'bg-emerald-100/90' : 'bg-rose-100/90'} font-bold border-t-2 border-slate-900">
+                  <td class="p-3 text-slate-900 text-sm">৬. সর্বমোট নীট ব্যবসায়িক লাভ / লোকসান (Net Operating Profit / Loss)</td>
+                  <td class="p-3 text-center font-mono ${netProfit >= 0 ? 'text-emerald-800' : 'text-rose-800'} text-xs">${n(netMarginPct)}% NP</td>
+                  <td class="p-3 text-right font-mono font-bold text-base ${netProfit >= 0 ? 'text-emerald-800' : 'text-rose-800'}">${c(netProfit)}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Receivables & Dues Health Box -->
+          <div class="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs flex justify-between items-center flex-wrap gap-2">
+            <div>
+              <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                <span>${state.lang === 'bn' ? 'দেনা-পাওনা খাতার বর্তমান লাইভ স্থিতি (Receivables Snapshot)' : 'Live Contact Receivables Snapshot'}</span>
+              </div>
+              <p class="text-[10px] text-slate-500 mt-0.5">${state.lang === 'bn' ? 'দোকানের সকল কাস্টমার ও সাপ্লায়ারের মোট পাওনা ও দেনা হিসাব' : 'Total market dues and payable obligations'}</p>
+            </div>
+            <div class="flex items-center gap-4 text-right">
+              <div>
+                <div class="text-[10px] text-slate-500 uppercase font-semibold">${state.lang === 'bn' ? 'মোট বাকি পাওনা' : 'Receivable'}</div>
+                <div class="font-mono font-bold text-amber-600">${c(totalReceivableDue)}</div>
+              </div>
+              <div>
+                <div class="text-[10px] text-slate-500 uppercase font-semibold">${state.lang === 'bn' ? 'মোট দেনা' : 'Payable'}</div>
+                <div class="font-mono font-bold text-rose-600">${c(totalPayableDue)}</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Official Authorization & Signatures Block -->
+          <div class="pt-8 grid grid-cols-3 gap-6 text-center text-xs">
+            <div>
+              <div class="border-t border-slate-400 pt-1.5 font-bold text-slate-700">${state.lang === 'bn' ? 'হিসাব প্রস্তুতকারী' : 'Prepared By'}</div>
+              <div class="text-[10px] text-slate-400 font-mono">Digital Talikhata System</div>
+            </div>
+            <div>
+              <div class="border-t border-slate-400 pt-1.5 font-bold text-slate-700">${state.lang === 'bn' ? 'হিসাব নিরীক্ষক / ক্যাশিয়ার' : 'Checked By / Cashier'}</div>
+              <div class="text-[10px] text-slate-400 font-mono">Audit & Verification</div>
+            </div>
+            <div>
+              <div class="border-t border-slate-900 pt-1.5 font-bold text-slate-900">${state.lang === 'bn' ? 'স্বত্বাধিকারী / মালিকের স্বাক্ষর' : 'Proprietor Signature & Seal'}</div>
+              <div class="text-[10px] text-slate-500">${proprietor}</div>
+            </div>
+          </div>
+
+          <!-- Statement Footer -->
+          <div class="text-center pt-2 text-[9px] text-slate-400 border-t border-dashed border-slate-200">
+            * এটি ডিজিটাল টালি খাতা ক্লাউড ইআরপি সিস্টেম দ্বারা সংরক্ষিত তথ্যের ভিত্তিতে স্বয়ংক্রিয়ভাবে প্রস্তুতকৃত আর্থিক বিবরণী।
+          </div>
+        </div>
+      `;
+
+      document.getElementById('modal-statement-preview').classList.remove('hidden');
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function closeStatementModal() {
+      const statementEl = document.getElementById('printable-statement');
+      if (statementEl) statementEl.classList.remove('print-active');
+      document.getElementById('modal-statement-preview').classList.add('hidden');
+    }
+
+    function printStatementDoc() {
+      const statementEl = document.getElementById('printable-statement');
+      const thermalEl = document.getElementById('printable-area');
+      if (thermalEl) thermalEl.classList.remove('print-active');
+      if (statementEl) statementEl.classList.add('print-active');
       window.print();
-      logDownload('Profit & Loss Statement', 'Reports', 'PDF', state.sales.length + state.transactions.length);
+      logDownload('Profit & Loss Statement (Print)', 'Reports', 'Print', (activeStatementData?.salesCount || 0) + (activeStatementData?.txCount || 0));
+    }
+
+    function downloadStatementPDF() {
+      const element = document.getElementById('printable-statement');
+      if (!element) return;
+      const opt = {
+        margin: [8, 10, 8, 10],
+        filename: `Statement_${(state.store.shopName || 'Store').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+      html2pdf().set(opt).from(element).save();
+      logDownload('Profit & Loss Statement (PDF)', 'Reports', 'PDF', (activeStatementData?.salesCount || 0) + (activeStatementData?.txCount || 0));
+    }
+
+    function exportStatementExcel() {
+      if (!activeStatementData) return;
+      const data = [
+        ['দোকানের নাম / Store:', state.store.shopName || state.store.name || 'Store'],
+        ['স্বত্বাধিকারী / Proprietor:', state.store.proprietor || 'Proprietor'],
+        ['তারিখ সীমা / Period:', `${activeStatementData.fromStr} to ${activeStatementData.toStr}`],
+        ['প্রস্তুতের সময় / Date:', new Date().toLocaleString()],
+        [],
+        ['খাত / Account Line', 'প্রকৃতি / Type', 'পরিমাণ / Amount (৳)'],
+        ['১. মোট পণ্য বিক্রয় টার্নওভার (Gross Sales)', 'Inflow', activeStatementData.totalSales],
+        ['- নগদ ও ডিজিটাল বিক্রয় (Cash & MFS Sales)', 'Cash Inflow', activeStatementData.totalPaidSales],
+        ['- বাকিতে বিক্রয় (Due Sales)', 'Receivable', activeStatementData.totalDueSales],
+        ['- মোট প্রদত্ত ছাড় (Discount)', 'Discount', -activeStatementData.totalDiscount],
+        ['২. বিক্রিত পণ্যের ক্রয়মূল্য (COGS)', 'Expense', -activeStatementData.totalCOGS],
+        ['৩. গ্রস প্রফিট / মোট লাভ (Gross Profit)', 'Gross Profit', activeStatementData.grossProfit],
+        ['৪. পরিচালনা ও দোকান খরচ (Operating Expenses)', 'OPEX', -activeStatementData.operatingExpenses],
+        ['৫. অন্যান্য সাধারণ আয় (Other Non-Sales Income)', 'Income', activeStatementData.otherIncome],
+        ['৬. সর্বমোট নীট ব্যবসায়িক লাভ / ক্ষতি (Net Profit / Loss)', 'Net Profit', activeStatementData.netProfit],
+        [],
+        ['৭. দেনা-পাওনা স্থিতি (Receivables Snapshot):'],
+        ['মোট বাকি পাওনা (Customer Receivables)', 'Asset', activeStatementData.totalReceivableDue],
+        ['মোট দেনা (Supplier Payables)', 'Liability', activeStatementData.totalPayableDue]
+      ];
+
+      const ws = XLSX.utils.aoa_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "Statement_PnL");
+      XLSX.writeFile(wb, `Financial_Statement_${new Date().toISOString().split('T')[0]}.xlsx`);
+      logDownload('Profit & Loss Statement (Excel)', 'Reports', 'Excel', data.length);
     }
 
     function exportDashboardSummaryPDF() {
-      window.print();
-      logDownload('Dashboard Summary', 'Dashboard', 'PDF', state.sales.length);
+      exportComprehensiveReportPDF();
     }
 
     function logDownload(title, section, format, rows) {
@@ -3060,8 +3657,8 @@
       if (state.downloadHistory.length === 0) {
         container.innerHTML = `<div class="p-8 text-center text-slate-400 text-xs">${state.lang === 'bn' ? 'কোনো ডাউনলোড হিস্টরি পাওয়া যায়নি।' : 'No download history records.'}</div>`;
       } else {
-        container.innerHTML = state.downloadHistory.map(dl => `
-          <div class="p-3 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)] flex items-center justify-between text-xs">
+        container.innerHTML = state.downloadHistory.map((dl, idx) => `
+          <div class="p-3 rounded-2xl bg-[var(--bg-subtle)] border border-[var(--border-color)] flex items-center justify-between text-xs animated-row" style="animation-delay: ${Math.min(idx * 0.03, 0.3)}s">
             <div>
               <div class="font-bold text-slate-800 dark:text-slate-100">${escapeHTML(dl.title)}</div>
               <div class="text-[10px] text-[var(--text-muted)]">${dl.section} • ${dl.date}</div>
