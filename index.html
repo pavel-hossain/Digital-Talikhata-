@@ -6,6 +6,10 @@
   <title>Digital Talikhata SaaS - ডিজিটাল টালি খাতা ক্লাউড</title>
   <meta name="description" content="Multi-Tenant Cloud ERP & Digital Talikhata platform with Real-time Firestore sync, bilingual POS, and inventory management." />
 
+  <!-- Custom Brand Favicon -->
+  <link rel="icon" type="image/jpeg" href="/assets/aistudio/Gemini_Generated_Image_r2oz1dr2oz1dr2oz_dd661435.jpeg" />
+  <link rel="apple-touch-icon" href="/assets/aistudio/Gemini_Generated_Image_r2oz1dr2oz1dr2oz_dd661435.jpeg" />
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -220,6 +224,11 @@
         size: auto;
       }
     }
+    /* Ghost Backdrop & Inactivity Protection */
+    .hidden, [hidden] {
+      display: none !important;
+      pointer-events: none !important;
+    }
   </style>
 </head>
 <body class="h-screen overflow-hidden antialiased select-none bg-[var(--bg-canvas)] text-[var(--text-main)]">
@@ -228,8 +237,8 @@
   <div id="auth-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl space-y-6">
       <div class="text-center space-y-2">
-        <div class="w-14 h-14 bg-emerald-600 text-white rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-emerald-600/30">
-          <i data-lucide="cloud" class="w-7 h-7"></i>
+        <div class="w-16 h-16 bg-white/95 dark:bg-slate-900 border border-[var(--border-color)] rounded-2xl flex items-center justify-center mx-auto shadow-lg shadow-emerald-950/20 p-1.5 overflow-hidden">
+          <img src="/assets/aistudio/Gemini_Generated_Image_r2oz1dr2oz1dr2oz_dd661435.jpeg" alt="Digital Talikhata Logo" class="w-full h-full object-contain" />
         </div>
         <h2 class="text-xl font-bold tracking-tight text-[var(--text-main)]" data-i18n="authTitle">ডিজিটাল টালি খাতা ক্লাউড</h2>
         <p class="text-xs text-[var(--text-muted)]" data-i18n="authSubtitle">নিরাপদ মাল্টি-টেন্যান্ট ক্লাউড লেজার ও ইনভেন্টরি প্ল্যাটফর্ম</p>
@@ -307,7 +316,7 @@
   <div class="flex h-screen w-screen overflow-hidden">
 
     <!-- Mobile Sidebar Backdrop Overlay -->
-    <div id="sidebar-backdrop" onclick="closeMobileSidebar()" class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-xs transition-opacity duration-300 hidden lg:hidden"></div>
+    <div id="sidebar-backdrop" onclick="closeMobileSidebar()" class="fixed inset-0 z-40 bg-slate-950/60 backdrop-blur-xs transition-opacity duration-300 hidden lg:hidden pointer-events-none"></div>
 
     <!-- ================= 1. VERTICAL LEFT SIDEBAR ================= -->
     <aside id="app-sidebar" class="fixed lg:static inset-y-0 left-0 z-50 w-64 sm:w-72 bg-[var(--bg-surface)] border-r border-[var(--border-color)] flex flex-col justify-between transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 shadow-2xl lg:shadow-none shrink-0 h-full overflow-hidden select-none">
@@ -316,8 +325,8 @@
       <div class="p-4 sm:p-5 border-b border-[var(--border-color)] shrink-0">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3 min-w-0">
-            <div class="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-600/30 shrink-0">
-              <i data-lucide="cloud-check" class="w-5 h-5"></i>
+            <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/95 dark:bg-slate-900 border border-[var(--border-color)] p-1 shrink-0 shadow-md shadow-emerald-950/20 flex items-center justify-center overflow-hidden">
+              <img src="/assets/aistudio/Gemini_Generated_Image_r2oz1dr2oz1dr2oz_dd661435.jpeg" alt="Digital Talikhata Logo" class="w-full h-full object-contain" />
             </div>
             <div class="min-w-0 flex-1">
               <h1 id="sidebar-shop-name" class="text-sm sm:text-base font-bold tracking-tight truncate leading-tight text-[var(--text-main)]">Pavel Hossain-এর দোকান</h1>
@@ -438,13 +447,16 @@
       <!-- Top Header Bar (Fully Responsive on Mobile, Tablet & Desktop) -->
       <header class="sticky top-0 z-30 bg-[var(--bg-surface)] border-b border-[var(--border-color)] px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between shrink-0 shadow-2xs gap-2">
         
-        <!-- Left: Mobile Menu Toggle Button & Dynamic Page Title -->
+        <!-- Left: Mobile Menu Toggle Button, Brand Logo & Dynamic Page Title -->
         <div class="flex items-center gap-2 sm:gap-3 min-w-0">
           <button onclick="openMobileSidebar()" aria-label="Toggle Navigation Menu" class="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] hover:bg-[var(--bg-surface)] text-slate-600 dark:text-slate-200 transition active:scale-95 shrink-0 touch-manipulation">
             <i data-lucide="menu" class="w-5 h-5"></i>
           </button>
+          <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl overflow-hidden bg-white/95 dark:bg-slate-900 border border-[var(--border-color)] p-0.5 shrink-0 shadow-2xs flex items-center justify-center">
+            <img src="/assets/aistudio/Gemini_Generated_Image_r2oz1dr2oz1dr2oz_dd661435.jpeg" alt="Digital Talikhata" class="w-full h-full object-contain" />
+          </div>
           <div class="min-w-0">
-            <h2 id="top-bar-title" class="text-sm sm:text-base font-bold leading-tight tracking-tight text-[var(--text-main)] truncate max-w-[90px] xs:max-w-[130px] sm:max-w-none">ড্যাশবোর্ড সামারি</h2>
+            <h2 id="top-bar-title" class="text-sm sm:text-base font-bold leading-tight tracking-tight text-[var(--text-main)] truncate max-w-[80px] xs:max-w-[120px] sm:max-w-none">ড্যাশবোর্ড সামারি</h2>
             <p id="top-bar-subtitle" class="text-[11px] text-[var(--text-muted)] hidden md:block truncate">ক্লাউড রিয়েল-টাইম ক্যাশফ্লো, সেলস ও স্টক</p>
           </div>
         </div>
@@ -2683,14 +2695,22 @@
       const sidebar = document.getElementById('app-sidebar');
       const backdrop = document.getElementById('sidebar-backdrop');
       if (sidebar) sidebar.classList.remove('-translate-x-full');
-      if (backdrop) backdrop.classList.remove('hidden');
+      if (backdrop) {
+        backdrop.classList.remove('hidden');
+        backdrop.classList.remove('pointer-events-none');
+        backdrop.classList.add('pointer-events-auto');
+      }
     }
 
     function closeMobileSidebar() {
       const sidebar = document.getElementById('app-sidebar');
       const backdrop = document.getElementById('sidebar-backdrop');
       if (sidebar) sidebar.classList.add('-translate-x-full');
-      if (backdrop) backdrop.classList.remove('hidden');
+      if (backdrop) {
+        backdrop.classList.add('hidden');
+        backdrop.classList.add('pointer-events-none');
+        backdrop.classList.remove('pointer-events-auto');
+      }
     }
 
     function updateTenantUI() {
@@ -3032,12 +3052,14 @@
       }
     });
 
-    // Close dropdown on outside click
-    document.addEventListener('click', (e) => {
-      const container = document.getElementById('global-search-container');
-      if (container && !container.contains(e.target)) {
-        closeGlobalSearchDropdown();
-      }
+    // Close dropdown on outside click or touch
+    ['click', 'touchstart'].forEach(eventType => {
+      document.addEventListener(eventType, (e) => {
+        const container = document.getElementById('global-search-container');
+        if (container && !container.contains(e.target)) {
+          closeGlobalSearchDropdown();
+        }
+      }, { passive: true });
     });
     function highlightMatch(text, query) {
       if (!text) return '';
