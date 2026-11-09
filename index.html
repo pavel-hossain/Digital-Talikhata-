@@ -919,29 +919,56 @@
         </div>
       </div>
 
-      <!-- Filters & Search Toolbar -->
-      <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-4 rounded-2xl flex flex-wrap gap-3 items-center justify-between shadow-2xs">
-        <div class="flex items-center gap-2 flex-1 min-w-[240px]">
-          <div class="relative flex-1">
-            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3"></i>
-            <input type="text" id="cs-search" oninput="renderCustomSalesTable()" placeholder="পণ্য/সার্ভিস বা কাস্টমারের নাম দিয়ে খুঁজুন..." class="w-full text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] pl-8 pr-8 py-2 text-[var(--text-main)] placeholder-[var(--text-muted)]">
-            <button id="cs-search-clear" onclick="clearCustomSalesSearch()" class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs">✕</button>
+      <!-- Filters & Search Toolbar with Daily Quick Selectors -->
+      <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] p-3.5 sm:p-4 rounded-2xl space-y-3 shadow-2xs">
+        <div class="flex flex-wrap gap-2.5 items-center justify-between">
+          <!-- Search & Payment Method -->
+          <div class="flex items-center gap-2 flex-1 min-w-[240px]">
+            <div class="relative flex-1">
+              <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3"></i>
+              <input type="text" id="cs-search" oninput="renderCustomSalesTable()" placeholder="পণ্য/সার্ভিস বা কাস্টমারের নাম দিয়ে খুঁজুন..." class="w-full text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] pl-8 pr-8 py-2 text-[var(--text-main)] placeholder-[var(--text-muted)] focus:outline-none focus:border-emerald-500">
+              <button id="cs-search-clear" onclick="clearCustomSalesSearch()" class="hidden absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs">✕</button>
+            </div>
+            <select id="cs-method-filter" onchange="renderCustomSalesTable()" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-2.5 sm:px-3 py-2 text-[var(--text-main)] font-semibold shrink-0 focus:outline-none focus:border-emerald-500">
+              <option value="all" data-i18n="allMethods">সকল পেমেন্ট মাধ্যম</option>
+              <option value="Cash">নগদ (Cash)</option>
+              <option value="bKash">বিকাশ (bKash)</option>
+              <option value="Nagad">নগদ (Nagad)</option>
+              <option value="Bank">ব্যাংক (Bank)</option>
+              <option value="Due">বকেয়া / বাকি (Due)</option>
+            </select>
+          </div>
+
+          <!-- Quick Date Filter Presets -->
+          <div class="flex items-center gap-1 p-1 bg-[var(--bg-subtle)] rounded-xl border border-[var(--border-color)] text-xs font-semibold shrink-0">
+            <button type="button" id="cs-preset-today" onclick="setCustomSalesDatePreset('today')" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] transition text-xs font-bold" data-i18n="btnToday">আজ</button>
+            <button type="button" id="cs-preset-yesterday" onclick="setCustomSalesDatePreset('yesterday')" class="px-2.5 sm:px-3 py-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] transition text-xs font-bold" data-i18n="btnYesterday">গতকাল</button>
+            <button type="button" id="cs-preset-all" onclick="setCustomSalesDatePreset('all')" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow-2xs transition text-xs font-bold" data-i18n="btnAllDays">সব দিন</button>
           </div>
         </div>
 
-        <div class="flex items-center gap-2 flex-wrap">
-          <select id="cs-method-filter" onchange="renderCustomSalesTable()" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-3 py-2 text-[var(--text-main)] font-semibold">
-            <option value="all" data-i18n="allMethods">সকল পেমেন্ট মাধ্যম</option>
-            <option value="Cash">নগদ (Cash)</option>
-            <option value="bKash">বিকাশ (bKash)</option>
-            <option value="Nagad">নগদ (Nagad)</option>
-            <option value="Bank">ব্যাংক (Bank)</option>
-            <option value="Due">বকেয়া / বাকি (Due)</option>
-          </select>
+        <!-- Date Range & Specific Date Selector Row -->
+        <div class="flex flex-wrap items-center justify-between gap-2.5 pt-2.5 border-t border-[var(--border-color)] text-xs">
+          <!-- Single Specific Date Picker -->
+          <div class="flex items-center gap-2">
+            <label for="cs-single-date" class="text-[11px] font-bold text-[var(--text-muted)] flex items-center gap-1">
+              <i data-lucide="calendar" class="w-3.5 h-3.5 text-emerald-600"></i>
+              <span data-i18n="specificDateLabel">নির্দিষ্ট দিন:</span>
+            </label>
+            <input type="date" id="cs-single-date" onchange="setCustomSalesSpecificDate(this.value)" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-2.5 py-1.5 font-mono text-[var(--text-main)] focus:outline-none focus:border-emerald-500">
+          </div>
 
-          <input type="date" id="cs-from-date" onchange="renderCustomSalesTable()" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-2.5 py-2 font-mono text-[var(--text-main)]">
-          <span class="text-xs text-[var(--text-muted)]">to</span>
-          <input type="date" id="cs-to-date" onchange="renderCustomSalesTable()" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-2.5 py-2 font-mono text-[var(--text-main)]">
+          <!-- Date Range Pickers -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <span class="text-[11px] font-bold text-[var(--text-muted)]" data-i18n="dateRangeLabel">বা সময়সীমা:</span>
+            <input type="date" id="cs-from-date" onchange="onCustomDateRangeChange()" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-2.5 py-1.5 font-mono text-[var(--text-main)] focus:outline-none focus:border-emerald-500">
+            <span class="text-xs text-[var(--text-muted)]">to</span>
+            <input type="date" id="cs-to-date" onchange="onCustomDateRangeChange()" class="text-xs rounded-xl border border-[var(--border-color)] bg-[var(--bg-subtle)] px-2.5 py-1.5 font-mono text-[var(--text-main)] focus:outline-none focus:border-emerald-500">
+            <button onclick="resetCustomSalesFilters()" class="text-[11px] text-slate-400 hover:text-rose-500 font-bold px-2 py-1 rounded-lg hover:bg-[var(--bg-subtle)] transition flex items-center gap-1">
+              <i data-lucide="rotate-ccw" class="w-3 h-3"></i>
+              <span data-i18n="resetFilter">রিসেট</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -2037,6 +2064,25 @@
         noteLabel: "নোট / মেমো",
         customStatementTitle: "কাস্টম সেলস স্টেটমেন্ট ও অডিট রিপোর্ট",
         customStatementSubtitle: "A4 সাইজে প্রিন্ট ও PDF ডাউনলোডের জন্য প্রস্তুতকৃত আনুষ্ঠানিক বিবরণী",
+        dailyClosingReportTitle: "দৈনিক বিক্রয় ও ক্লোজিং রিপোর্ট",
+        printDayStatement: "এই দিনের রিপোর্ট",
+        btnToday: "আজ",
+        btnYesterday: "গতকাল",
+        btnAllDays: "সব দিন",
+        specificDateLabel: "নির্দিষ্ট দিন:",
+        dateRangeLabel: "বা সময়সীমা:",
+        resetFilter: "রিসেট",
+        dailySummary: "দৈনিক সারসংক্ষেপ",
+        dailyRevenue: "দৈনিক বিক্রয়",
+        dailyCost: "দৈনিক খরচ",
+        dailyProfit: "দৈনিক লাভ",
+        paymentBreakdown: "পেমেন্ট মাধ্যমভিত্তিক আদায়",
+        cashInflow: "নগদ আদায়",
+        bkashInflow: "বিকাশ আদায়",
+        nagadInflow: "নগদ ওয়ালেট",
+        bankInflow: "ব্যাংক জমা",
+        dueCredit: "আজকের বকেয়া",
+        totalCashCollected: "মোট সংগৃহীত নগদ/ডিজিটাল",
         downloadCustomStatementPDF: "PDF ডাউনলোড",
         printCustomStatementBtn: "স্টেটমেন্ট প্রিন্ট (A4)",
         searchPlaceholder: "সার্চ করুন...",
@@ -2246,6 +2292,25 @@
         noteLabel: "Note / Memo",
         customStatementTitle: "Custom Sales Statement & Audit Report",
         customStatementSubtitle: "Official audit statement formatted for A4 printing and PDF export",
+        dailyClosingReportTitle: "Daily Sales Closing Statement",
+        printDayStatement: "Day Statement",
+        btnToday: "Today",
+        btnYesterday: "Yesterday",
+        btnAllDays: "All Days",
+        specificDateLabel: "Specific Date:",
+        dateRangeLabel: "Or Date Range:",
+        resetFilter: "Reset",
+        dailySummary: "Daily Summary",
+        dailyRevenue: "Daily Sales",
+        dailyCost: "Daily Cost",
+        dailyProfit: "Daily Profit",
+        paymentBreakdown: "Payment Method Breakdown",
+        cashInflow: "Cash Inflow",
+        bkashInflow: "bKash Inflow",
+        nagadInflow: "Nagad Inflow",
+        bankInflow: "Bank Deposit",
+        dueCredit: "Today's Due (Credit)",
+        totalCashCollected: "Total Collected (Cash/Digital)",
         downloadCustomStatementPDF: "Download PDF",
         printCustomStatementBtn: "Print Statement (A4)",
         searchPlaceholder: "Search records, products, parties...",
@@ -2561,6 +2626,82 @@
             unit: 'Pcs',
             minStock: 6,
             image: 'https://images.unsplash.com/photo-1581441363689-1f3c3c414635?auto=format&fit=crop&w=400&q=80'
+          }
+        ];
+      }
+
+      if (!state.customSales || state.customSales.length === 0) {
+        const now = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const twoDaysAgo = new Date();
+        twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+
+        state.customSales = [
+          {
+            id: 'cs-demo-1',
+            date: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 14, 30).toISOString(),
+            customer: 'করিম সাহেব',
+            itemDesc: 'এসি ও ফ্যান মেরামত সার্ভিসিং চার্জ',
+            qty: 1,
+            rate: 1500,
+            cost: 300,
+            total: 1500,
+            profit: 1200,
+            method: 'Cash',
+            note: 'অন-সাইট হোম সার্ভিস বিল'
+          },
+          {
+            id: 'cs-demo-2',
+            date: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 15).toISOString(),
+            customer: 'সালাম ট্রেডার্স',
+            itemDesc: 'বিশেষ প্যাকেজিং বক্স ও কার্টুন (১০০ পিস)',
+            qty: 100,
+            rate: 25,
+            cost: 18,
+            total: 2500,
+            profit: 700,
+            method: 'bKash',
+            note: 'পাইকারি কাস্টম ডেলিভারি'
+          },
+          {
+            id: 'cs-demo-3',
+            date: new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 16, 45).toISOString(),
+            customer: 'মাসুদ রানা',
+            itemDesc: 'জরুরি ইলেকট্রিক ওয়্যারিং কেবল ও লেবার ফি',
+            qty: 1,
+            rate: 3200,
+            cost: 2100,
+            total: 3200,
+            profit: 1100,
+            method: 'Nagad',
+            note: 'দোকান মেরামত'
+          },
+          {
+            id: 'cs-demo-4',
+            date: new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate(), 10, 0).toISOString(),
+            customer: 'আনোয়ার হোসেন',
+            itemDesc: 'কাটিং ও টেইলারিং অল্টারেশন ফি',
+            qty: 3,
+            rate: 350,
+            cost: 100,
+            total: 1050,
+            profit: 750,
+            method: 'Due',
+            note: 'বাকি রাখা হয়েছে'
+          },
+          {
+            id: 'cs-demo-5',
+            date: new Date(twoDaysAgo.getFullYear(), twoDaysAgo.getMonth(), twoDaysAgo.getDate(), 17, 20).toISOString(),
+            customer: 'রফিক এন্টারপ্রাইজ',
+            itemDesc: 'জরুরি মালামাল পরিবহন ও লোডিং ভাড়া',
+            qty: 1,
+            rate: 1800,
+            cost: 1200,
+            total: 1800,
+            profit: 600,
+            method: 'Cash',
+            note: 'পিকআপ ডেলিভারি'
           }
         ];
       }
@@ -3061,23 +3202,6 @@
         }
       }, { passive: true });
     });
-    function highlightMatch(text, query) {
-      if (!text) return '';
-      if (!query || !query.trim()) return escapeHTML(text);
-      const safeText = escapeHTML(text);
-      const q = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`(${q})`, 'gi');
-      return safeText.replace(regex, '<mark class="search-highlight">$1</mark>');
-    }
-
-    function escapeHTML(str) {
-      return String(str || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
 
     /* -------------------------------------------------------------
        8. DASHBOARD & CHARTS
@@ -4227,6 +4351,125 @@
       }
     }
 
+    /* -------------------------------------------------------------
+       CUSTOM / DIRECT SALES HELPERS & DATE PRESETS
+       ------------------------------------------------------------- */
+    function getCustomSaleDayKey(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return '';
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    }
+
+    function setCustomSalesDatePreset(preset) {
+      const today = new Date();
+      const formatYMD = (d) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      };
+
+      const fromInput = document.getElementById('cs-from-date');
+      const toInput = document.getElementById('cs-to-date');
+      const singleInput = document.getElementById('cs-single-date');
+
+      const btnToday = document.getElementById('cs-preset-today');
+      const btnYesterday = document.getElementById('cs-preset-yesterday');
+      const btnAll = document.getElementById('cs-preset-all');
+
+      [btnToday, btnYesterday, btnAll].forEach(b => {
+        if (b) {
+          b.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] transition text-xs font-bold';
+        }
+      });
+
+      if (preset === 'today') {
+        const todayStr = formatYMD(today);
+        if (fromInput) fromInput.value = todayStr;
+        if (toInput) toInput.value = todayStr;
+        if (singleInput) singleInput.value = todayStr;
+        if (btnToday) btnToday.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow-2xs transition text-xs font-bold';
+      } else if (preset === 'yesterday') {
+        const yDay = new Date();
+        yDay.setDate(yDay.getDate() - 1);
+        const yDayStr = formatYMD(yDay);
+        if (fromInput) fromInput.value = yDayStr;
+        if (toInput) toInput.value = yDayStr;
+        if (singleInput) singleInput.value = yDayStr;
+        if (btnYesterday) btnYesterday.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow-2xs transition text-xs font-bold';
+      } else {
+        if (fromInput) fromInput.value = '';
+        if (toInput) toInput.value = '';
+        if (singleInput) singleInput.value = '';
+        if (btnAll) btnAll.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow-2xs transition text-xs font-bold';
+      }
+
+      renderCustomSalesTable();
+    }
+
+    function setCustomSalesSpecificDate(val) {
+      if (!val) {
+        setCustomSalesDatePreset('all');
+        return;
+      }
+      const fromInput = document.getElementById('cs-from-date');
+      const toInput = document.getElementById('cs-to-date');
+      if (fromInput) fromInput.value = val;
+      if (toInput) toInput.value = val;
+
+      const btnToday = document.getElementById('cs-preset-today');
+      const btnYesterday = document.getElementById('cs-preset-yesterday');
+      const btnAll = document.getElementById('cs-preset-all');
+      [btnToday, btnYesterday, btnAll].forEach(b => {
+        if (b) b.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] transition text-xs font-bold';
+      });
+
+      const todayStr = new Date().toISOString().split('T')[0];
+      const yDay = new Date();
+      yDay.setDate(yDay.getDate() - 1);
+      const yDayStr = yDay.toISOString().split('T')[0];
+
+      if (val === todayStr && btnToday) {
+        btnToday.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow-2xs transition text-xs font-bold';
+      } else if (val === yDayStr && btnYesterday) {
+        btnYesterday.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg bg-emerald-600 text-white shadow-2xs transition text-xs font-bold';
+      }
+
+      renderCustomSalesTable();
+    }
+
+    function onCustomDateRangeChange() {
+      const fromStr = document.getElementById('cs-from-date')?.value || '';
+      const toStr = document.getElementById('cs-to-date')?.value || '';
+      const singleInput = document.getElementById('cs-single-date');
+      if (fromStr && toStr && fromStr === toStr) {
+        if (singleInput) singleInput.value = fromStr;
+      } else {
+        if (singleInput) singleInput.value = '';
+      }
+
+      const btnToday = document.getElementById('cs-preset-today');
+      const btnYesterday = document.getElementById('cs-preset-yesterday');
+      const btnAll = document.getElementById('cs-preset-all');
+      [btnToday, btnYesterday, btnAll].forEach(b => {
+        if (b) b.className = 'px-2.5 sm:px-3 py-1.5 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-main)] transition text-xs font-bold';
+      });
+
+      renderCustomSalesTable();
+    }
+
+    function resetCustomSalesFilters() {
+      const searchInput = document.getElementById('cs-search');
+      if (searchInput) searchInput.value = '';
+      const methodFilter = document.getElementById('cs-method-filter');
+      if (methodFilter) methodFilter.value = 'all';
+      setCustomSalesDatePreset('all');
+    }
+
     function clearCustomSalesSearch() {
       const searchInput = document.getElementById('cs-search') || document.getElementById('cs-search-input');
       if (searchInput) searchInput.value = '';
@@ -4239,15 +4482,15 @@
       const searchInput = document.getElementById('cs-search') || document.getElementById('cs-search-input');
       const search = (searchInput?.value || '').toLowerCase().trim();
       const methodFilter = document.getElementById('cs-method-filter')?.value || 'all';
-      const fromStr = document.getElementById('cs-from-date')?.value || document.getElementById('cs-date-from')?.value;
-      const toStr = document.getElementById('cs-to-date')?.value || document.getElementById('cs-date-to')?.value;
+      const fromStr = document.getElementById('cs-from-date')?.value;
+      const toStr = document.getElementById('cs-to-date')?.value;
 
       const clearBtn = document.getElementById('cs-search-clear');
       if (clearBtn) {
         clearBtn.classList.toggle('hidden', !search);
       }
 
-      const fromDate = fromStr ? new Date(fromStr) : null;
+      const fromDate = fromStr ? new Date(fromStr + 'T00:00:00') : null;
       const toDate = toStr ? new Date(toStr + 'T23:59:59') : null;
 
       const filtered = (state.customSales || []).filter(cs => {
@@ -4261,26 +4504,31 @@
         return matchDate && matchMethod && matchSearch;
       });
 
-      // KPI summary metrics
+      // KPI summary metrics for active filter
       const totalRevenue = filtered.reduce((acc, s) => acc + (Number(s.total) || 0), 0);
       const totalCost = filtered.reduce((acc, s) => acc + (Number(s.cost || 0) * Number(s.qty || 1)), 0);
       const netProfit = totalRevenue - totalCost;
       const totalDue = filtered.filter(s => s.method === 'Due').reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+      const marginPct = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) : '0';
 
       const revEl = document.getElementById('cs-kpi-revenue');
       const costEl = document.getElementById('cs-kpi-cost');
       const profitEl = document.getElementById('cs-kpi-profit');
       const dueEl = document.getElementById('cs-kpi-due');
+      const countEl = document.getElementById('cs-kpi-count');
+      const marginEl = document.getElementById('cs-kpi-margin');
 
       if (revEl) revEl.textContent = c(totalRevenue);
       if (costEl) costEl.textContent = c(totalCost);
       if (profitEl) {
         profitEl.textContent = c(netProfit);
         profitEl.className = netProfit >= 0
-          ? 'text-lg sm:text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400 mt-0.5'
-          : 'text-lg sm:text-2xl font-bold font-mono text-rose-600 dark:text-rose-400 mt-0.5';
+          ? 'text-lg lg:text-xl font-bold font-mono text-teal-600 dark:text-teal-400 mt-0.5'
+          : 'text-lg lg:text-xl font-bold font-mono text-rose-600 dark:text-rose-400 mt-0.5';
       }
       if (dueEl) dueEl.textContent = c(totalDue);
+      if (countEl) countEl.textContent = `${n(filtered.length)} ${state.lang === 'bn' ? 'টি বিক্রয়' : 'sales'}`;
+      if (marginEl) marginEl.textContent = `${n(marginPct)}% ${state.lang === 'bn' ? 'লাভ মার্জিন' : 'margin'}`;
 
       const tbody = document.getElementById('custom-sales-table-body');
       if (!tbody) return;
@@ -4298,82 +4546,192 @@
         return;
       }
 
-      tbody.innerHTML = filtered.slice().reverse().map((cs, idx) => {
-        const itemProfit = (Number(cs.total) || 0) - (Number(cs.cost || 0) * Number(cs.qty || 1));
-        const methodColors = {
-          Cash: 'bg-emerald-500/15 text-emerald-600 border border-emerald-500/30',
-          bKash: 'bg-pink-500/15 text-pink-600 border border-pink-500/30',
-          Nagad: 'bg-orange-500/15 text-orange-600 border border-orange-500/30',
-          Due: 'bg-amber-500/15 text-amber-600 border border-amber-500/30 font-bold',
-          Bank: 'bg-blue-500/15 text-blue-600 border border-blue-500/30'
-        };
+      // Group by local Date (YYYY-MM-DD)
+      const groupsMap = new Map();
+      filtered.forEach(cs => {
+        const dayKey = getCustomSaleDayKey(cs.date) || 'unknown';
+        if (!groupsMap.has(dayKey)) {
+          groupsMap.set(dayKey, []);
+        }
+        groupsMap.get(dayKey).push(cs);
+      });
 
-        return `
-          <tr class="hover:bg-[var(--bg-subtle)] transition animated-row" style="animation-delay: ${Math.min(idx * 0.03, 0.35)}s">
-            <td class="p-3.5 font-mono text-slate-500 text-[11px] whitespace-nowrap">
-              ${formatDate(cs.date, 'standard')}
-            </td>
-            <td class="p-3.5">
-              <div class="font-bold text-[var(--text-main)]">${highlightMatch(cs.itemDesc, search)}</div>
-              ${cs.note ? `<div class="text-[10px] text-[var(--text-muted)] truncate max-w-xs">${highlightMatch(cs.note, search)}</div>` : ''}
-            </td>
-            <td class="p-3.5 text-slate-600 dark:text-slate-300">
-              <span class="inline-flex items-center gap-1 font-medium">
-                <i data-lucide="user" class="w-3 h-3 text-slate-400"></i>
-                ${highlightMatch(cs.customer || (state.lang === 'bn' ? 'সাধারণ ক্রেতা' : 'Walk-in'), search)}
-              </span>
-            </td>
-            <td class="p-3.5 text-right font-mono">
-              <span class="font-bold">${n(cs.qty)}</span> <span class="text-[10px] text-slate-400">×</span> <span class="text-slate-500">${c(cs.rate)}</span>
-            </td>
-            <td class="p-3.5 text-right font-mono text-slate-500 text-[11px]">
-              ${cs.cost > 0 ? c(cs.cost * cs.qty) : '-'}
-            </td>
-            <td class="p-3.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">
-              ${c(cs.total)}
-            </td>
-            <td class="p-3.5 text-right font-mono text-[11px] font-semibold ${itemProfit >= 0 ? 'text-cyan-600 dark:text-cyan-400' : 'text-rose-600'}">
-              ${itemProfit !== 0 ? ((itemProfit >= 0 ? '+' : '') + c(itemProfit)) : '-'}
-            </td>
-            <td class="p-3.5 text-center">
-              <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${methodColors[cs.method] || 'bg-slate-100 text-slate-700'}">
-                ${cs.method || 'Cash'}
-              </span>
-            </td>
-            <td class="p-3.5 text-center whitespace-nowrap">
-              <div class="flex items-center justify-center gap-1.5">
-                <button onclick="editCustomSale('${cs.id}')" class="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 hover:text-emerald-600 transition hover:scale-[1.05] active:scale-[0.95]" title="Edit">
-                  <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                </button>
-                <button onclick="deleteCustomSale('${cs.id}')" class="p-1 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-950 text-slate-400 hover:text-rose-600 transition hover:scale-[1.05] active:scale-[0.95]" title="Delete">
-                  <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                </button>
+      const sortedDayKeys = Array.from(groupsMap.keys()).sort((a, b) => b.localeCompare(a));
+      const todayKey = getCustomSaleDayKey(new Date());
+      const yDay = new Date();
+      yDay.setDate(yDay.getDate() - 1);
+      const yDayKey = getCustomSaleDayKey(yDay);
+
+      const methodColors = {
+        Cash: 'bg-emerald-500/15 text-emerald-600 border border-emerald-500/30',
+        bKash: 'bg-pink-500/15 text-pink-600 border border-pink-500/30',
+        Nagad: 'bg-orange-500/15 text-orange-600 border border-orange-500/30',
+        Due: 'bg-amber-500/15 text-amber-600 border border-amber-500/30 font-bold',
+        Bank: 'bg-blue-500/15 text-blue-600 border border-blue-500/30'
+      };
+
+      let rowsHtml = '';
+      let globalRowIdx = 0;
+
+      sortedDayKeys.forEach((dayKey) => {
+        const items = groupsMap.get(dayKey);
+        items.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+        const dayRevenue = items.reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+        const dayCost = items.reduce((acc, s) => acc + (Number(s.cost || 0) * Number(s.qty || 1)), 0);
+        const dayProfit = dayRevenue - dayCost;
+        const dayDue = items.filter(s => s.method === 'Due').reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+        const dayCount = items.length;
+
+        const isToday = dayKey === todayKey;
+        const isYesterday = dayKey === yDayKey;
+        const dayBadgeText = isToday ? (state.lang === 'bn' ? 'আজ' : 'Today') : (isYesterday ? (state.lang === 'bn' ? 'গতকাল' : 'Yesterday') : '');
+
+        // 1. Group Header Row with Inline Daily Statement Print Button
+        rowsHtml += `
+          <tr class="bg-slate-100/90 dark:bg-slate-800/90 border-y-2 border-emerald-500/30 text-xs">
+            <td colspan="9" class="p-3 sm:px-4 sm:py-2.5">
+              <div class="flex flex-wrap items-center justify-between gap-2.5">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span class="font-bold text-xs sm:text-sm text-[var(--text-main)] font-mono flex items-center gap-1.5">
+                    <i data-lucide="calendar" class="w-4 h-4 text-emerald-600 dark:text-emerald-400"></i>
+                    ${formatDate(dayKey, 'standard')}
+                  </span>
+                  ${dayBadgeText ? `
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isToday ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30' : 'bg-blue-500/20 text-blue-700 dark:text-blue-300 border border-blue-500/30'}">
+                      ${dayBadgeText}
+                    </span>
+                  ` : ''}
+                  <span class="text-[11px] text-[var(--text-muted)] font-mono font-medium">(${n(dayCount)} ${state.lang === 'bn' ? 'টি এন্ট্রি' : 'sales'})</span>
+                </div>
+
+                <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+                  <!-- Day Metrics Badges -->
+                  <div class="flex items-center gap-1.5 text-[11px] font-mono">
+                    <span class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 font-bold" title="${state.lang === 'bn' ? 'দৈনিক মোট বিক্রি' : 'Daily Revenue'}">
+                      ${state.lang === 'bn' ? 'বিক্রি:' : 'Sales:'} ${c(dayRevenue)}
+                    </span>
+                    <span class="px-2 py-0.5 rounded-md bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/20" title="${state.lang === 'bn' ? 'দৈনিক মোট খরচ' : 'Daily Cost'}">
+                      ${state.lang === 'bn' ? 'খরচ:' : 'Cost:'} ${c(dayCost)}
+                    </span>
+                    <span class="px-2 py-0.5 rounded-md font-bold ${dayProfit >= 0 ? 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border border-teal-500/20' : 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border border-rose-500/20'}" title="${state.lang === 'bn' ? 'দৈনিক নিট লাভ' : 'Daily Profit'}">
+                      ${state.lang === 'bn' ? 'লাভ:' : 'Profit:'} ${c(dayProfit)}
+                    </span>
+                    ${dayDue > 0 ? `
+                      <span class="px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 font-semibold" title="${state.lang === 'bn' ? 'দৈনিক বাকি' : 'Daily Due'}">
+                        ${state.lang === 'bn' ? 'বাকি:' : 'Due:'} ${c(dayDue)}
+                      </span>
+                    ` : ''}
+                  </div>
+
+                  <!-- Dedicated Print Day Statement Button -->
+                  <button onclick="openCustomStatementModal('${dayKey}')" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition hover:scale-[1.02] active:scale-[0.98] shrink-0" title="${state.lang === 'bn' ? 'এই নির্দিষ্ট দিনের ক্লোজিং রিপোর্ট ও স্টেটমেন্ট প্রিন্ট করুন' : 'Print daily closing statement for this date'}">
+                    <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                    <span>${state.lang === 'bn' ? 'এই দিনের রিপোর্ট' : 'Day Statement'}</span>
+                  </button>
+                </div>
               </div>
             </td>
           </tr>
         `;
-      }).join('');
 
+        // 2. Item Rows for this date
+        items.forEach((cs) => {
+          globalRowIdx++;
+          const itemProfit = (Number(cs.total) || 0) - (Number(cs.cost || 0) * Number(cs.qty || 1));
+          rowsHtml += `
+            <tr class="hover:bg-[var(--bg-subtle)] transition animated-row" style="animation-delay: ${Math.min(globalRowIdx * 0.02, 0.35)}s">
+              <td class="p-3.5 font-mono text-slate-500 text-[11px] whitespace-nowrap">
+                ${formatDate(cs.date, 'datetime')}
+              </td>
+              <td class="p-3.5">
+                <div class="font-bold text-[var(--text-main)]">${highlightMatch(cs.itemDesc, search)}</div>
+                ${cs.note ? `<div class="text-[10px] text-[var(--text-muted)] truncate max-w-xs">${highlightMatch(cs.note, search)}</div>` : ''}
+              </td>
+              <td class="p-3.5 text-slate-600 dark:text-slate-300">
+                <span class="inline-flex items-center gap-1 font-medium">
+                  <i data-lucide="user" class="w-3 h-3 text-slate-400"></i>
+                  ${highlightMatch(cs.customer || (state.lang === 'bn' ? 'সাধারণ ক্রেতা' : 'Walk-in'), search)}
+                </span>
+              </td>
+              <td class="p-3.5 text-right font-mono">
+                <span class="font-bold">${n(cs.qty)}</span> <span class="text-[10px] text-slate-400">×</span> <span class="text-slate-500">${c(cs.rate)}</span>
+              </td>
+              <td class="p-3.5 text-right font-mono text-slate-500 text-[11px]">
+                ${cs.cost > 0 ? c(cs.cost * cs.qty) : '-'}
+              </td>
+              <td class="p-3.5 text-right font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                ${c(cs.total)}
+              </td>
+              <td class="p-3.5 text-right font-mono text-[11px] font-semibold ${itemProfit >= 0 ? 'text-cyan-600 dark:text-cyan-400' : 'text-rose-600'}">
+                ${itemProfit !== 0 ? ((itemProfit >= 0 ? '+' : '') + c(itemProfit)) : '-'}
+              </td>
+              <td class="p-3.5 text-center">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold ${methodColors[cs.method] || 'bg-slate-100 text-slate-700'}">
+                  ${cs.method || 'Cash'}
+                </span>
+              </td>
+              <td class="p-3.5 text-center whitespace-nowrap">
+                <div class="flex items-center justify-center gap-1.5">
+                  <button onclick="editCustomSale('${cs.id}')" class="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 hover:text-emerald-600 transition hover:scale-[1.05] active:scale-[0.95]" title="Edit">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                  </button>
+                  <button onclick="deleteCustomSale('${cs.id}')" class="p-1 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-950 text-slate-400 hover:text-rose-600 transition hover:scale-[1.05] active:scale-[0.95]" title="Delete">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          `;
+        });
+      });
+
+      tbody.innerHTML = rowsHtml;
       if (window.lucide) lucide.createIcons({ root: tbody });
     }
 
     /* -------------------------------------------------------------
-       CUSTOM SALES STATEMENT & PDF / EXCEL REPORTING
+       CUSTOM SALES STATEMENT & DAILY CLOSING PDF / PRINT REPORTING
        ------------------------------------------------------------- */
-    function openCustomStatementModal() {
-      const fromStr = document.getElementById('cs-date-from')?.value;
-      const toStr = document.getElementById('cs-date-to')?.value;
+    function openCustomStatementModal(targetDateKey = null) {
+      const fromInput = document.getElementById('cs-from-date');
+      const toInput = document.getElementById('cs-to-date');
       const methodFilter = document.getElementById('cs-method-filter')?.value || 'all';
 
-      const fromDate = fromStr ? new Date(fromStr) : new Date(0);
-      const toDate = toStr ? new Date(toStr + 'T23:59:59') : new Date();
+      let filtered = [];
+      let isDailyClosing = false;
+      let effectiveTargetDate = targetDateKey;
 
-      const filtered = (state.customSales || []).filter(cs => {
-        const d = new Date(cs.date);
-        const matchDate = d >= fromDate && d <= toDate;
-        const matchMethod = methodFilter === 'all' || cs.method === methodFilter;
-        return matchDate && matchMethod;
-      });
+      if (effectiveTargetDate) {
+        // Specific single date triggered via Day Header button
+        isDailyClosing = true;
+        filtered = (state.customSales || []).filter(cs => {
+          const matchDay = getCustomSaleDayKey(cs.date) === effectiveTargetDate;
+          const matchMethod = methodFilter === 'all' || cs.method === methodFilter;
+          return matchDay && matchMethod;
+        });
+      } else {
+        const fromStr = fromInput?.value;
+        const toStr = toInput?.value;
+        const fromDate = fromStr ? new Date(fromStr + 'T00:00:00') : new Date(0);
+        const toDate = toStr ? new Date(toStr + 'T23:59:59') : new Date();
+
+        if (fromStr && toStr && fromStr === toStr) {
+          isDailyClosing = true;
+          effectiveTargetDate = fromStr;
+        }
+
+        filtered = (state.customSales || []).filter(cs => {
+          const d = new Date(cs.date);
+          const matchDate = d >= fromDate && d <= toDate;
+          const matchMethod = methodFilter === 'all' || cs.method === methodFilter;
+          return matchDate && matchMethod;
+        });
+      }
+
+      // Sort chronological descending
+      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
 
       const totalRevenue = filtered.reduce((acc, s) => acc + (Number(s.total) || 0), 0);
       const totalCost = filtered.reduce((acc, s) => acc + (Number(s.cost || 0) * Number(s.qty || 1)), 0);
@@ -4382,96 +4740,158 @@
       const totalPaid = totalRevenue - totalDue;
       const marginPct = totalRevenue > 0 ? ((netProfit / totalRevenue) * 100).toFixed(1) : '0';
 
+      // Payment Method Inflow Breakdown
+      const cashInflow = filtered.filter(s => s.method === 'Cash').reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+      const bkashInflow = filtered.filter(s => s.method === 'bKash').reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+      const nagadInflow = filtered.filter(s => s.method === 'Nagad').reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+      const bankInflow = filtered.filter(s => s.method === 'Bank').reduce((acc, s) => acc + (Number(s.total) || 0), 0);
+      const totalCollected = cashInflow + bkashInflow + nagadInflow + bankInflow;
+
       activeCustomStatementData = {
-        fromStr: fromStr || (state.lang === 'bn' ? 'প্রারম্ভিক' : 'Beginning'),
-        toStr: toStr || (state.lang === 'bn' ? 'আজ পর্যন্ত' : 'Today'),
+        isDailyClosing,
+        targetDateKey: effectiveTargetDate,
+        fromStr: fromInput?.value || (state.lang === 'bn' ? 'প্রারম্ভিক' : 'Beginning'),
+        toStr: toInput?.value || (state.lang === 'bn' ? 'আজ পর্যন্ত' : 'Today'),
         records: filtered,
         totalRevenue,
         totalCost,
         netProfit,
         totalDue,
         totalPaid,
-        marginPct
+        marginPct,
+        cashInflow,
+        bkashInflow,
+        nagadInflow,
+        bankInflow,
+        totalCollected
       };
 
       const printable = document.getElementById('printable-custom-statement');
       if (printable) {
         printable.innerHTML = `
-          <!-- Header Branding -->
-          <div class="border-b-2 border-slate-900 pb-4 mb-5 flex justify-between items-start">
+          <!-- Official Store Branding & Header -->
+          <div class="border-b-2 border-slate-900 pb-4 mb-4 flex justify-between items-start">
             <div>
-              <div class="text-xl font-black text-slate-900 uppercase tracking-tight">${escapeHTML(state.store.shopName || state.store.name || 'Digital Store')}</div>
-              <div class="text-xs text-slate-600 mt-0.5">${escapeHTML(state.store.proprietor || '')} • ${escapeHTML(state.store.category || 'Retail')}</div>
-              <div class="text-[11px] text-slate-500">${escapeHTML(state.store.phone || '')} | ${escapeHTML(state.store.address || '')}</div>
+              <div class="text-xl sm:text-2xl font-black text-slate-900 uppercase tracking-tight">${escapeHTML(state.store.shopName || state.store.name || 'Digital Store')}</div>
+              <div class="text-xs text-slate-700 font-semibold mt-0.5">${escapeHTML(state.store.proprietor || '')} • ${escapeHTML(state.store.category || 'Retail Business')}</div>
+              <div class="text-[11px] text-slate-500 mt-0.5">${escapeHTML(state.store.phone || '')} | ${escapeHTML(state.store.address || '')}</div>
             </div>
             <div class="text-right">
-              <span class="inline-block px-3 py-1 rounded-md bg-slate-900 text-white font-mono text-[10px] font-bold tracking-wider uppercase">
-                ${state.lang === 'bn' ? 'কাস্টম সেলস স্টেটমেন্ট' : 'CUSTOM SALES STATEMENT'}
+              <span class="inline-block px-3 py-1.5 rounded-md bg-slate-900 text-white font-mono text-[11px] font-black tracking-wider uppercase shadow-xs">
+                ${isDailyClosing
+                  ? (state.lang === 'bn' ? 'দৈনিক বিক্রয় ও ক্লোজিং রিপোর্ট' : 'DAILY SALES CLOSING STATEMENT')
+                  : (state.lang === 'bn' ? 'কাস্টম সেলস স্টেটমেন্ট ও অডিট রিপোর্ট' : 'CUSTOM SALES AUDIT STATEMENT')}
               </span>
+              <div class="mt-2 text-[11px] text-slate-800 font-bold">
+                ${isDailyClosing
+                  ? `<span class="bg-amber-100 text-amber-900 px-2.5 py-0.5 rounded-md border border-amber-300 font-mono text-xs">${state.lang === 'bn' ? 'ক্লোজিং তারিখ:' : 'Closing Date:'} ${formatDate(effectiveTargetDate, 'standard')}</span>`
+                  : `<span>${state.lang === 'bn' ? 'সময়কাল:' : 'Period:'} ${activeCustomStatementData.fromStr ? formatDate(activeCustomStatementData.fromStr) : '-'} ${state.lang === 'bn' ? 'হতে' : 'to'} ${activeCustomStatementData.toStr ? formatDate(activeCustomStatementData.toStr) : '-'}</span>`}
+              </div>
               <div class="text-[10px] text-slate-500 font-mono mt-1">${state.lang === 'bn' ? 'প্রস্তুতের সময়:' : 'Generated:'} ${formatDate(new Date(), 'datetime')}</div>
-              <div class="text-[10px] text-slate-700 font-bold mt-0.5">${state.lang === 'bn' ? 'সময়কাল:' : 'Period:'} ${activeCustomStatementData.fromStr ? formatDate(activeCustomStatementData.fromStr) : '-'} ${state.lang === 'bn' ? 'হতে' : 'to'} ${activeCustomStatementData.toStr ? formatDate(activeCustomStatementData.toStr) : '-'}</div>
             </div>
           </div>
 
-          <!-- KPI Summary Grid -->
-          <div class="grid grid-cols-4 gap-3 mb-5">
-            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
-              <div class="text-[10px] uppercase font-bold text-slate-500">${state.lang === 'bn' ? 'মোট বিক্রয় আয়' : 'Total Revenue'}</div>
-              <div class="text-base font-black font-mono text-slate-900 mt-0.5">${c(totalRevenue)}</div>
-              <div class="text-[10px] text-slate-400 font-mono">${n(filtered.length)} ${state.lang === 'bn' ? 'টি এন্ট্রি' : 'records'}</div>
+          <!-- Executive Day Summary Grid (5 Cards) -->
+          <div class="grid grid-cols-5 gap-2.5 mb-4 text-center">
+            <div class="p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+              <div class="text-[10px] uppercase font-bold text-slate-500">${state.lang === 'bn' ? 'মোট লেনদেন' : 'Total Orders'}</div>
+              <div class="text-base font-black font-mono text-slate-900 mt-0.5">${n(filtered.length)}</div>
+              <div class="text-[9px] text-slate-400 font-mono">${state.lang === 'bn' ? 'টি বিক্রয় এন্ট্রি' : 'items'}</div>
             </div>
-            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl">
-              <div class="text-[10px] uppercase font-bold text-slate-500">${state.lang === 'bn' ? 'মোট ক্রয় খরচ' : 'Total Cost'}</div>
+            <div class="p-2.5 bg-emerald-50 border border-emerald-300 rounded-xl">
+              <div class="text-[10px] uppercase font-bold text-emerald-800">${state.lang === 'bn' ? 'মোট বিক্রয় (Gross)' : 'Gross Sales'}</div>
+              <div class="text-base font-black font-mono text-emerald-700 mt-0.5">${c(totalRevenue)}</div>
+              <div class="text-[9px] text-emerald-600 font-mono">${state.lang === 'bn' ? 'মোট বিল' : 'Billed'}</div>
+            </div>
+            <div class="p-2.5 bg-rose-50 border border-rose-200 rounded-xl">
+              <div class="text-[10px] uppercase font-bold text-rose-800">${state.lang === 'bn' ? 'ক্রয়মূল্য / খরচ' : 'Cost of Goods'}</div>
               <div class="text-base font-black font-mono text-rose-700 mt-0.5">${c(totalCost)}</div>
-              <div class="text-[10px] text-slate-400 font-mono">${state.lang === 'bn' ? 'প্রাক্কলিত খরচ' : 'Cost of sales'}</div>
+              <div class="text-[9px] text-rose-500 font-mono">${state.lang === 'bn' ? 'প্রাক্কলিত খরচ' : 'COGS'}</div>
             </div>
-            <div class="p-3 ${netProfit >= 0 ? 'bg-emerald-50 border-emerald-300' : 'bg-rose-50 border-rose-300'} border rounded-xl">
-              <div class="text-[10px] uppercase font-bold ${netProfit >= 0 ? 'text-emerald-800' : 'text-rose-800'}">${state.lang === 'bn' ? 'মোট লাভ (GP)' : 'Gross Profit'}</div>
-              <div class="text-base font-black font-mono ${netProfit >= 0 ? 'text-emerald-700' : 'text-rose-700'} mt-0.5">${c(netProfit)}</div>
-              <div class="text-[10px] ${netProfit >= 0 ? 'text-emerald-600' : 'text-rose-600'} font-mono font-bold">${n(marginPct)}% ${state.lang === 'bn' ? 'মার্জিন' : 'margin'}</div>
+            <div class="p-2.5 ${netProfit >= 0 ? 'bg-teal-50 border-teal-300' : 'bg-rose-50 border-rose-300'} border rounded-xl">
+              <div class="text-[10px] uppercase font-bold ${netProfit >= 0 ? 'text-teal-800' : 'text-rose-800'}">${state.lang === 'bn' ? 'দৈনিক নিট লাভ' : 'Net Gross Profit'}</div>
+              <div class="text-base font-black font-mono ${netProfit >= 0 ? 'text-teal-700' : 'text-rose-700'} mt-0.5">${c(netProfit)}</div>
+              <div class="text-[9px] ${netProfit >= 0 ? 'text-teal-600' : 'text-rose-600'} font-mono font-bold">${n(marginPct)}% ${state.lang === 'bn' ? 'মার্জিন' : 'margin'}</div>
             </div>
-            <div class="p-3 bg-amber-50 border border-amber-300 rounded-xl">
-              <div class="text-[10px] uppercase font-bold text-amber-800">${state.lang === 'bn' ? 'বকেয়া বাকি' : 'Unsettled Due'}</div>
+            <div class="p-2.5 bg-amber-50 border border-amber-300 rounded-xl">
+              <div class="text-[10px] uppercase font-bold text-amber-800">${state.lang === 'bn' ? 'আজকের বকেয়া' : "Today's Due"}</div>
               <div class="text-base font-black font-mono text-amber-700 mt-0.5">${c(totalDue)}</div>
-              <div class="text-[10px] text-amber-600 font-mono">${state.lang === 'bn' ? 'আদায়যোগ্য' : 'Receivable'}</div>
+              <div class="text-[9px] text-amber-600 font-mono">${state.lang === 'bn' ? 'বাকি পাওনা' : 'Receivable'}</div>
+            </div>
+          </div>
+
+          <!-- Payment Method Split / Collection Inflow Analysis Box -->
+          <div class="mb-4 bg-slate-50 border border-slate-300 rounded-xl p-3">
+            <div class="text-xs font-bold text-slate-800 mb-2 flex items-center justify-between">
+              <span>${state.lang === 'bn' ? 'পেমেন্ট মাধ্যমভিত্তিক ক্যাশ ও ডিজিটাল আদায় (Payment Breakdown)' : 'Payment Collection Breakdown'}</span>
+              <span class="text-[11px] font-mono text-slate-600 font-bold">${state.lang === 'bn' ? 'প্রকৃত সংগৃহীত তহবিল:' : 'Actual Collected Inflow:'} <span class="text-emerald-700 text-sm font-black">${c(totalCollected)}</span></span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+              <div class="bg-white p-2 rounded-lg border border-slate-200">
+                <div class="text-[10px] text-slate-500 font-semibold">${state.lang === 'bn' ? 'নগদ আদায় (Cash)' : 'Cash Inflow'}</div>
+                <div class="text-sm font-black font-mono text-emerald-700 mt-0.5">${c(cashInflow)}</div>
+              </div>
+              <div class="bg-white p-2 rounded-lg border border-slate-200">
+                <div class="text-[10px] text-slate-500 font-semibold">${state.lang === 'bn' ? 'বিকাশ জমা (bKash)' : 'bKash Inflow'}</div>
+                <div class="text-sm font-black font-mono text-pink-700 mt-0.5">${c(bkashInflow)}</div>
+              </div>
+              <div class="bg-white p-2 rounded-lg border border-slate-200">
+                <div class="text-[10px] text-slate-500 font-semibold">${state.lang === 'bn' ? 'নগদ ওয়ালেট (Nagad)' : 'Nagad Inflow'}</div>
+                <div class="text-sm font-black font-mono text-orange-700 mt-0.5">${c(nagadInflow)}</div>
+              </div>
+              <div class="bg-white p-2 rounded-lg border border-slate-200">
+                <div class="text-[10px] text-slate-500 font-semibold">${state.lang === 'bn' ? 'ব্যাংক ট্রান্সফার (Bank)' : 'Bank Deposit'}</div>
+                <div class="text-sm font-black font-mono text-blue-700 mt-0.5">${c(bankInflow)}</div>
+              </div>
+              <div class="bg-amber-50 p-2 rounded-lg border border-amber-300">
+                <div class="text-[10px] text-amber-800 font-semibold">${state.lang === 'bn' ? 'অপরিশোধিত বাকি (Due)' : 'Unpaid Due'}</div>
+                <div class="text-sm font-black font-mono text-amber-700 mt-0.5">${c(totalDue)}</div>
+              </div>
             </div>
           </div>
 
           <!-- Detailed Itemized Table -->
-          <div class="border border-slate-300 rounded-xl overflow-hidden mb-6">
+          <div class="border border-slate-300 rounded-xl overflow-hidden mb-5">
             <table class="w-full text-left text-xs">
               <thead class="bg-slate-100 border-b border-slate-300 text-slate-700 font-bold">
                 <tr>
-                  <th class="p-2.5">${state.lang === 'bn' ? 'তারিখ' : 'Date'}</th>
-                  <th class="p-2.5">${state.lang === 'bn' ? 'আইটেম / সার্ভিসের বিবরণ' : 'Description'}</th>
-                  <th class="p-2.5">${state.lang === 'bn' ? 'কাস্টমার' : 'Customer'}</th>
-                  <th class="p-2.5 text-right">${state.lang === 'bn' ? 'পরিমাণ ও দর' : 'Qty & Rate'}</th>
-                  <th class="p-2.5 text-right">${state.lang === 'bn' ? 'মোট মূল্য' : 'Total (৳)'}</th>
-                  <th class="p-2.5 text-right">${state.lang === 'bn' ? 'লাভ' : 'Profit (৳)'}</th>
-                  <th class="p-2.5 text-center">${state.lang === 'bn' ? 'পেমেন্ট' : 'Method'}</th>
+                  <th class="p-2 text-center w-8">#</th>
+                  <th class="p-2">${state.lang === 'bn' ? 'তারিখ ও সময়' : 'Time'}</th>
+                  <th class="p-2">${state.lang === 'bn' ? 'আইটেম / সার্ভিসের বিবরণ' : 'Description'}</th>
+                  <th class="p-2">${state.lang === 'bn' ? 'কাস্টমার' : 'Customer'}</th>
+                  <th class="p-2 text-right">${state.lang === 'bn' ? 'পরিমাণ ও দর' : 'Qty & Rate'}</th>
+                  <th class="p-2 text-right">${state.lang === 'bn' ? 'ক্রয়মূল্য' : 'Cost (৳)'}</th>
+                  <th class="p-2 text-right">${state.lang === 'bn' ? 'মোট বিক্রয়' : 'Total (৳)'}</th>
+                  <th class="p-2 text-right">${state.lang === 'bn' ? 'লাভ' : 'Profit (৳)'}</th>
+                  <th class="p-2 text-center">${state.lang === 'bn' ? 'পেমেন্ট' : 'Method'}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-200">
                 ${filtered.length === 0 ? `
-                  <tr><td colspan="7" class="p-6 text-center text-slate-400 text-xs">${state.lang === 'bn' ? 'এই সময়সীমার মধ্যে কোনো সেলস নেই।' : 'No custom sales recorded in this timeframe.'}</td></tr>
-                ` : filtered.map((s) => {
+                  <tr><td colspan="9" class="p-6 text-center text-slate-400 text-xs">${state.lang === 'bn' ? 'এই সময়সীমার মধ্যে কোনো সেলস নেই।' : 'No custom sales recorded in this timeframe.'}</td></tr>
+                ` : filtered.map((s, idx) => {
                   const p = (Number(s.total) || 0) - (Number(s.cost || 0) * Number(s.qty || 1));
                   return `
                     <tr class="text-slate-800">
-                      <td class="p-2 font-mono text-[11px] text-slate-500">${formatDate(s.date, 'standard')}</td>
+                      <td class="p-2 text-center font-mono text-[10px] text-slate-400">${idx + 1}</td>
+                      <td class="p-2 font-mono text-[11px] text-slate-500 whitespace-nowrap">${formatDate(s.date, 'datetime')}</td>
                       <td class="p-2 font-bold">${escapeHTML(s.itemDesc)}</td>
                       <td class="p-2 text-slate-600">${escapeHTML(s.customer || '-')}</td>
                       <td class="p-2 text-right font-mono">${n(s.qty)} × ${c(s.rate)}</td>
+                      <td class="p-2 text-right font-mono text-slate-500">${s.cost > 0 ? c(s.cost * s.qty) : '-'}</td>
                       <td class="p-2 text-right font-mono font-bold text-slate-900">${c(s.total)}</td>
-                      <td class="p-2 text-right font-mono ${p >= 0 ? 'text-emerald-700' : 'text-rose-700'}">${p !== 0 ? c(p) : '-'}</td>
-                      <td class="p-2 text-center font-mono text-[10px]">${s.method}</td>
+                      <td class="p-2 text-right font-mono font-semibold ${p >= 0 ? 'text-emerald-700' : 'text-rose-700'}">${p !== 0 ? ((p >= 0 ? '+' : '') + c(p)) : '-'}</td>
+                      <td class="p-2 text-center font-mono text-[10px]">
+                        <span class="px-1.5 py-0.5 rounded ${s.method === 'Due' ? 'bg-amber-100 text-amber-800 font-bold' : 'bg-slate-100 text-slate-800'}">${s.method}</span>
+                      </td>
                     </tr>
                   `;
                 }).join('')}
               </tbody>
               <tfoot class="bg-slate-100 border-t-2 border-slate-300 font-bold">
                 <tr>
-                  <td colspan="4" class="p-2.5 text-slate-800 text-right uppercase tracking-wider text-[11px]">${state.lang === 'bn' ? 'সর্বমোট স্থিতি (Total):' : 'Grand Total:'}</td>
+                  <td colspan="5" class="p-2.5 text-slate-800 text-right uppercase tracking-wider text-[11px]">${state.lang === 'bn' ? 'সর্বমোট স্থিতি (Total):' : 'Grand Total:'}</td>
+                  <td class="p-2.5 text-right font-mono text-rose-700 font-black">${c(totalCost)}</td>
                   <td class="p-2.5 text-right font-mono text-slate-900 font-black">${c(totalRevenue)}</td>
                   <td class="p-2.5 text-right font-mono text-emerald-800 font-black">${c(netProfit)}</td>
                   <td class="p-2.5 text-center text-[10px] font-mono text-slate-500">${n(filtered.length)} pcs</td>
@@ -4480,25 +4900,44 @@
             </table>
           </div>
 
-          <!-- Official Authorization Footer -->
+          <!-- Official Verification & Signatures Block -->
           <div class="mt-8 pt-6 border-t border-slate-200 flex justify-between items-end text-xs text-slate-500">
             <div>
-              <div class="w-36 border-b border-slate-400 mb-1"></div>
-              <div>${state.lang === 'bn' ? 'প্রস্তুতকারীর স্বাক্ষর' : 'Prepared By'}</div>
+              <div class="w-32 border-b border-slate-400 mb-1"></div>
+              <div>${state.lang === 'bn' ? 'হিসাবরক্ষক (Prepared By)' : 'Prepared By'}</div>
+            </div>
+            <div class="text-center">
+              <div class="w-32 border-b border-slate-400 mb-1 mx-auto"></div>
+              <div>${state.lang === 'bn' ? 'যাচাইকারী (Verified By)' : 'Verified By'}</div>
             </div>
             <div class="text-right">
-              <div class="w-44 border-b border-slate-400 mb-1 ml-auto"></div>
-              <div class="font-bold text-slate-800">${escapeHTML(state.store.proprietor || 'Proprietor')}</div>
-              <div class="text-[10px] text-slate-400">${state.lang === 'bn' ? 'স্বত্বাধিকারী / অনুমোদিত স্বাক্ষর' : 'Proprietor / Authorized Signature'}</div>
+              <div class="w-40 border-b border-slate-400 mb-1 ml-auto"></div>
+              <div class="font-bold text-slate-800">${escapeHTML(state.store.proprietor || 'Store Proprietor')}</div>
+              <div class="text-[10px] text-slate-400">${state.lang === 'bn' ? 'স্বত্বাধিকারীর স্বাক্ষর ও সিল' : 'Proprietor Signature & Seal'}</div>
             </div>
           </div>
         `;
+      }
+
+      const modalTitle = document.querySelector('#modal-custom-statement-preview h3');
+      const modalSub = document.querySelector('#modal-custom-statement-preview p');
+      if (modalTitle) {
+        modalTitle.textContent = isDailyClosing
+          ? (state.lang === 'bn' ? 'দৈনিক বিক্রয় ও ক্লোজিং রিপোর্ট' : 'Daily Sales Closing Statement')
+          : (state.lang === 'bn' ? 'কাস্টম সেলস স্টেটমেন্ট ও রিপোর্ট' : 'Custom Sales Statement & Audit Report');
+      }
+      if (modalSub) {
+        modalSub.textContent = isDailyClosing
+          ? `${state.lang === 'bn' ? 'তারিখ:' : 'Date:'} ${formatDate(effectiveTargetDate, 'standard')} • A4 সাইজে প্রিন্ট ও PDF`
+          : (state.lang === 'bn' ? 'A4 সাইজে প্রিন্ট ও PDF ডাউনলোডের জন্য প্রস্তুতকৃত বিবরণী' : 'Official audit statement formatted for A4 printing and PDF export');
       }
 
       document.getElementById('modal-custom-statement-preview').classList.remove('hidden');
     }
 
     function closeCustomStatementModal() {
+      const container = document.getElementById('printable-custom-statement');
+      if (container) container.classList.remove('print-active');
       document.getElementById('modal-custom-statement-preview').classList.add('hidden');
     }
 
@@ -4507,39 +4946,62 @@
     }
 
     function printCustomStatementDoc() {
+      const container = document.getElementById('printable-custom-statement');
+      document.querySelectorAll('.print-active').forEach(el => el.classList.remove('print-active'));
+      if (container) container.classList.add('print-active');
       window.print();
+      logDownload('Custom Sales Statement (Print)', 'Custom Sales', 'Print', activeCustomStatementData?.records?.length || 0);
     }
 
     function downloadCustomStatementPDF() {
       const element = document.getElementById('printable-custom-statement');
       if (!element) return;
+      const isDaily = activeCustomStatementData?.isDailyClosing;
+      const targetDate = activeCustomStatementData?.targetDateKey || new Date().toISOString().split('T')[0];
       const opt = {
         margin: [8, 8, 8, 8],
-        filename: `Custom_Sales_Statement_${new Date().toISOString().split('T')[0]}.pdf`,
+        filename: isDaily ? `Daily_Sales_Closing_${targetDate}.pdf` : `Custom_Sales_Statement_${targetDate}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
       html2pdf().set(opt).from(element).save();
-      logDownload('Custom Sales Statement (PDF)', 'Custom Sales', 'PDF', activeCustomStatementData?.records?.length || 0);
+      logDownload(isDaily ? `Daily Closing (${targetDate})` : 'Custom Sales Statement (PDF)', 'Custom Sales', 'PDF', activeCustomStatementData?.records?.length || 0);
       showToast(state.lang === 'bn' ? 'স্টেটমেন্ট PDF ডাউনলোড শুরু হয়েছে' : 'Statement PDF download started', 'success');
     }
 
     function exportCustomSalesExcel() {
       const records = activeCustomStatementData?.records || state.customSales || [];
+      const isDaily = activeCustomStatementData?.isDailyClosing;
+      const targetDate = activeCustomStatementData?.targetDateKey || new Date().toISOString().split('T')[0];
+
       const data = [
         ['দোকানের নাম / Store:', state.store.shopName || state.store.name || 'Store'],
         ['স্বত্বাধিকারী / Proprietor:', state.store.proprietor || 'Proprietor'],
-        ['বিবরণ / Report:', 'Custom / Direct Sales Statement'],
+        ['বিবরণ / Report:', isDaily ? `Daily Sales Closing Statement (${targetDate})` : 'Custom / Direct Sales Statement'],
         ['তারিখ / Generated:', formatDate(new Date(), 'datetime')],
-        [],
-        ['তারিখ / Date', 'বিবরণ / Description', 'কাস্টমার / Customer', 'পরিমাণ / Qty', 'দর / Rate (৳)', 'ক্রয়মূল্য / Cost (৳)', 'মোট বিক্রয় / Total (৳)', 'লাভ / Profit (৳)', 'মাধ্যম / Method', 'নোট / Note']
+        []
       ];
+
+      if (isDaily && activeCustomStatementData) {
+        data.push(['--- DAILY SUMMARY & PAYMENT BREAKDOWN ---']);
+        data.push(['Gross Sales / মোট বিক্রি (৳):', activeCustomStatementData.totalRevenue]);
+        data.push(['Cost of Goods / মোট খরচ (৳):', activeCustomStatementData.totalCost]);
+        data.push(['Net Profit / নিট লাভ (৳):', activeCustomStatementData.netProfit]);
+        data.push(['Cash Inflow / নগদ আদায় (৳):', activeCustomStatementData.cashInflow]);
+        data.push(['bKash Inflow / বিকাশ জমা (৳):', activeCustomStatementData.bkashInflow]);
+        data.push(['Nagad Inflow / নগদ জমা (৳):', activeCustomStatementData.nagadInflow]);
+        data.push(['Bank Deposit / ব্যাংক জমা (৳):', activeCustomStatementData.bankInflow]);
+        data.push(['Unpaid Due / আজকের বাকি (৳):', activeCustomStatementData.totalDue]);
+        data.push([]);
+      }
+
+      data.push(['তারিখ / Date', 'বিবরণ / Description', 'কাস্টমার / Customer', 'পরিমাণ / Qty', 'দর / Rate (৳)', 'ক্রয়মূল্য / Cost (৳)', 'মোট বিক্রয় / Total (৳)', 'লাভ / Profit (৳)', 'মাধ্যম / Method', 'নোট / Note']);
 
       records.forEach(r => {
         const itemProfit = (Number(r.total) || 0) - (Number(r.cost || 0) * Number(r.qty || 1));
         data.push([
-          formatDate(r.date, 'standard'),
+          formatDate(r.date, 'datetime'),
           r.itemDesc,
           r.customer || '',
           r.qty,
@@ -4554,9 +5016,10 @@
 
       const ws = XLSX.utils.aoa_to_sheet(data);
       const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "CustomSales");
-      XLSX.writeFile(wb, `Custom_Sales_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
-      logDownload('Custom Sales Report (Excel)', 'Custom Sales', 'Excel', records.length);
+      XLSX.utils.book_append_sheet(wb, ws, isDaily ? "DailyClosing" : "CustomSales");
+      const filename = isDaily ? `Daily_Sales_Closing_${targetDate}.xlsx` : `Custom_Sales_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+      XLSX.writeFile(wb, filename);
+      logDownload(isDaily ? `Daily Closing Excel (${targetDate})` : 'Custom Sales Report (Excel)', 'Custom Sales', 'Excel', records.length);
       showToast(state.lang === 'bn' ? 'এক্সেল রিপোর্ট ডাউনলোড সম্পন্ন' : 'Excel report downloaded', 'success');
     }
 
